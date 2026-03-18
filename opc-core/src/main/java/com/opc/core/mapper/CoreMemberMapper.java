@@ -1,0 +1,25 @@
+package com.opc.core.mapper;
+
+import java.util.List;
+import com.opc.core.domain.CoreMember;
+
+public interface CoreMemberMapper
+{
+    public List<CoreMember> selectMemberList(CoreMember member);
+
+    public CoreMember selectMemberById(Long memberId);
+
+    public int deleteMemberById(Long memberId);
+
+    public int deleteMemberByIds(Long[] memberIds);
+
+    public int updateMember(CoreMember member);
+
+    public int insertMember(CoreMember member);
+
+    public CoreMember checkMemberNameUnique(String username);
+
+    public CoreMember checkPhoneUnique(String phoneNumber);
+
+    public CoreMember checkEmailUnique(String email);
+}

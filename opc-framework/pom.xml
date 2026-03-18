@@ -59,6 +59,12 @@
             <artifactId>opc-system</artifactId>
         </dependency>
 
+        <!-- 核心业务模块-->
+        <dependency>
+            <groupId>com.opc</groupId>
+            <artifactId>opc-core</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
