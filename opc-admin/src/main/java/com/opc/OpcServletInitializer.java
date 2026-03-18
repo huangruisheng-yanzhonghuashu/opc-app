@@ -8,7 +8,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * 
  * @author ruoyi
  */
-public class RuoYiServletInitializer extends SpringBootServletInitializer
+public class OpcServletInitializer extends SpringBootServletInitializer
 {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
