@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
+import com.alibaba.fastjson2.JSON;
 
 /**
  * spring redis 工具类
@@ -106,6 +107,35 @@ public class RedisCache
     {
         ValueOperations<String, T> operation = redisTemplate.opsForValue();
         return operation.get(key);
+    }
+
+    /**
+     * 获得缓存的基本对象（支持JSON类型转换）
+     *
+     * @param key 缓存键值
+     * @param clazz 目标类型
+     * @return 缓存键值对应的数据
+     */
+    public <T> T getCacheObject(final String key, Class<T> clazz)
+    {
+        ValueOperations<String, Object> operation = redisTemplate.opsForValue();
+        Object value = operation.get(key);
+        if (value == null)
+        {
+            return null;
+        }
+        // 如果返回的是JSONObject，转换为指定类型
+        if (value instanceof com.alibaba.fastjson2.JSONObject)
+        {
+            return ((com.alibaba.fastjson2.JSONObject) value).to(clazz);
+        }
+        // 如果返回的是字符串，尝试解析JSON
+        if (value instanceof String)
+        {
+            return JSON.parseObject((String) value, clazz);
+        }
+        // 否则直接转换
+        return clazz.cast(value);
     }
 
     /**
