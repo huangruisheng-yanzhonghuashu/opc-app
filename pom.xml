@@ -8,12 +8,12 @@
     <artifactId>opc.com</artifactId>
     <version>3.9.1</version>
 
-    <name>ruoyi</name>
+    <name>opc</name>
     <url>http://www.ruoyi.vip</url>
     <description>OPC</description>
     
     <properties>
-        <ruoyi.version>3.9.1</ruoyi.version>
+        <opc.version>3.9.1</opc.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
@@ -139,35 +139,42 @@
             <dependency>
                 <groupId>com.opc</groupId>
                 <artifactId>opc-quartz</artifactId>
-                <version>${ruoyi.version}</version>
+                <version>${opc.version}</version>
             </dependency>
 
             <!-- 代码生成-->
             <dependency>
                 <groupId>com.opc</groupId>
                 <artifactId>opc-generator</artifactId>
-                <version>${ruoyi.version}</version>
+                <version>${opc.version}</version>
             </dependency>
 
             <!-- 核心模块-->
             <dependency>
                 <groupId>com.opc</groupId>
                 <artifactId>opc-framework</artifactId>
-                <version>${ruoyi.version}</version>
+                <version>${opc.version}</version>
             </dependency>
 
             <!-- 系统模块-->
             <dependency>
                 <groupId>com.opc</groupId>
                 <artifactId>opc-system</artifactId>
-                <version>${ruoyi.version}</version>
+                <version>${opc.version}</version>
+            </dependency>
+
+            <!-- 核心模块-->
+            <dependency>
+                <groupId>com.opc</groupId>
+                <artifactId>opc-core</artifactId>
+                <version>${opc.version}</version>
             </dependency>
 
             <!-- 通用工具-->
             <dependency>
                 <groupId>com.opc</groupId>
                 <artifactId>opc-common</artifactId>
-                <version>${ruoyi.version}</version>
+                <version>${opc.version}</version>
             </dependency>
 
         </dependencies>
@@ -175,6 +182,7 @@
 
     <modules>
         <module>opc-common</module>
+        <module>opc-core</module>
         <module>opc-system</module>
         <module>opc-framework</module>
         <module>opc-quartz</module>
