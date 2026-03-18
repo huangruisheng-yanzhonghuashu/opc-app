@@ -65,6 +65,44 @@ spring:
     restart:
       # 热部署开关
       enabled: true
+  # 邮件配置
+  # 注意：如果不需要邮件功能，可以注释掉host配置
+  mail:
+    # 默认编码
+    default-encoding: UTF-8
+    # SMTP服务器地址（请根据实际情况修改，如不使用邮件功能可留空或注释掉）
+    # 常见邮箱SMTP地址：
+    # - QQ邮箱: smtp.qq.com (端口465 SSL / 587 TLS)
+    # - 163邮箱: smtp.163.com (端口465 SSL / 994 SSL)
+    # - Gmail: smtp.gmail.com (端口465 SSL / 587 TLS)
+    # - Outlook: smtp-mail.outlook.com (端口587)
+    host:
+    # SMTP服务器端口（465或587）
+    port: 587
+    # 发件人邮箱
+    username:
+    # 发件人密码或授权码（注意：QQ邮箱、163邮箱等需要使用授权码，不是登录密码）
+    password:
+    # 协议
+    protocol: smtp
+    # 默认发件人
+    from:
+    properties:
+      mail:
+        smtp:
+          # 认证
+          auth: true
+          # STARTTLS加密
+          starttls:
+            enable: true
+            required: true
+          # SSL加密（如果使用465端口，启用SSL）
+          ssl:
+            enable: false
+          # 超时设置
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
   data:
     # redis 配置
     redis:
