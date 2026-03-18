@@ -3,14 +3,14 @@
 -- ----------------------------
 
 -- ----------------------------
--- 一级菜单：会员管理（与系统管理同级）
+-- 一级菜单：运营管理（与系统管理同级）
 -- ----------------------------
-insert into sys_menu values('5', '会员管理', '0', '4', '', null, '', '', 1, 0, 'M', '0', '0', '', 'user', 'admin', sysdate(), '', null, '会员管理目录');
+insert into sys_menu values('5', '运营管理', '0', '4', '', null, '', '', 1, 0, 'M', '0', '0', '', 'user', 'admin', sysdate(), '', null, '运营管理目录');
 
 -- ----------------------------
--- 二级菜单：会员列表
+-- 二级菜单：会员管理
 -- ----------------------------
-insert into sys_menu values('200', '会员列表', '5', '1', 'member', 'core/member/index', '', '', 1, 0, 'C', '0', '0', 'core:member:list', 'peoples', 'admin', sysdate(), '', null, '会员列表菜单');
+insert into sys_menu values('200', '会员管理', '5', '1', 'member', 'core/member/index', '', '', 1, 0, 'C', '0', '0', 'core:member:list', 'peoples', 'admin', sysdate(), '', null, '会员管理菜单');
 
 -- ----------------------------
 -- 按钮权限
