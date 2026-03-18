@@ -6,7 +6,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * 定时任务调度测试
  * 
- * @author ruoyi
+ * @author opc
  */
 @Component("ryTask")
 public class RyTask

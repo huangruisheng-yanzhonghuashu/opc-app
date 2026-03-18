@@ -15,7 +15,7 @@ import com.opc.common.utils.html.EscapeUtil;
 /**
  * XSS过滤处理
  * 
- * @author ruoyi
+ * @author opc
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper
 {

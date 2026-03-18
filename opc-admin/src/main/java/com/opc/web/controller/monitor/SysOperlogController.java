@@ -22,7 +22,7 @@ import com.opc.system.service.ISysOperLogService;
 /**
  * 操作日志记录
  * 
- * @author ruoyi
+ * @author opc
  */
 @RestController
 @RequestMapping("/monitor/operlog")

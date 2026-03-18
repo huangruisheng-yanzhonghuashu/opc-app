@@ -5,7 +5,7 @@ import com.opc.common.utils.DateUtils;
 import com.opc.common.utils.StringUtils;
 
 /**
- * @author ruoyi 序列生成类
+ * @author opc 序列生成类
  */
 public class Seq
 {

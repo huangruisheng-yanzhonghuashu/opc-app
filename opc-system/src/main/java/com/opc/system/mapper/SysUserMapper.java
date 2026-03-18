@@ -8,7 +8,7 @@ import com.opc.common.core.domain.entity.SysUser;
 /**
  * 用户表 数据层
  * 
- * @author ruoyi
+ * @author opc
  */
 public interface SysUserMapper
 {

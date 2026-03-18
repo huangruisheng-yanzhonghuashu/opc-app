@@ -3,7 +3,7 @@ package com.opc.common.utils.uuid;
 /**
  * ID生成器工具类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class IdUtils
 {

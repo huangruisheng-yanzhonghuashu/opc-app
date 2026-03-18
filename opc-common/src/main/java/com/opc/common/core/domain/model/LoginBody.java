@@ -3,7 +3,7 @@ package com.opc.common.core.domain.model;
 /**
  * 用户登录对象
  * 
- * @author ruoyi
+ * @author opc
  */
 public class LoginBody
 {

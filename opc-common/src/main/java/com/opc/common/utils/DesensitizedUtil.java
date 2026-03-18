@@ -3,7 +3,7 @@ package com.opc.common.utils;
 /**
  * 脱敏工具类
  *
- * @author ruoyi
+ * @author opc
  */
 public class DesensitizedUtil
 {

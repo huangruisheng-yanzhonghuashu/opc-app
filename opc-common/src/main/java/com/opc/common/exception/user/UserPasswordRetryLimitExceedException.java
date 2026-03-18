@@ -3,7 +3,7 @@ package com.opc.common.exception.user;
 /**
  * 用户错误最大次数异常类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class UserPasswordRetryLimitExceedException extends UserException
 {

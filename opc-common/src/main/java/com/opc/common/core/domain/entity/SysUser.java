@@ -17,7 +17,7 @@ import com.opc.common.xss.Xss;
 /**
  * 用户对象 sys_user
  * 
- * @author ruoyi
+ * @author opc
  */
 public class SysUser extends BaseEntity
 {

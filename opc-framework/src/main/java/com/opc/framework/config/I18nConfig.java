@@ -12,7 +12,7 @@ import com.opc.common.constant.Constants;
 /**
  * 资源文件配置加载
  * 
- * @author ruoyi
+ * @author opc
  */
 @Configuration
 public class I18nConfig implements WebMvcConfigurer

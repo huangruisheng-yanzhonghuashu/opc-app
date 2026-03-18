@@ -7,7 +7,7 @@ import com.opc.common.utils.ServletUtils;
 /**
  * 服务相关配置
  * 
- * @author ruoyi
+ * @author opc
  */
 @Component
 public class ServerConfig

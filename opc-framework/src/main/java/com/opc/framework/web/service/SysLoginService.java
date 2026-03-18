@@ -31,7 +31,7 @@ import com.opc.system.service.ISysUserService;
 /**
  * 登录校验方法
  * 
- * @author ruoyi
+ * @author opc
  */
 @Component
 public class SysLoginService

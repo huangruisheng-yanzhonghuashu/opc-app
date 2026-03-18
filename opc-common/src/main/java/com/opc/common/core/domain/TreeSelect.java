@@ -12,7 +12,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * Treeselect树结构实体类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class TreeSelect implements Serializable
 {

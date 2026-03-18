@@ -18,7 +18,7 @@ import com.opc.system.service.ISysUserService;
 /**
  * 用户验证处理
  *
- * @author ruoyi
+ * @author opc
  */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService

@@ -28,7 +28,7 @@ import com.opc.system.service.ISysDictTypeService;
 /**
  * 数据字典信息
  * 
- * @author ruoyi
+ * @author opc
  */
 @RestController
 @RequestMapping("/system/dict/data")

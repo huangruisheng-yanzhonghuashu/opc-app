@@ -3,7 +3,7 @@ package com.opc.common.constant;
 /**
  * 返回状态码
  * 
- * @author ruoyi
+ * @author opc
  */
 public class HttpStatus
 {

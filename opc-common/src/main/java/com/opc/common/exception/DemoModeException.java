@@ -3,7 +3,7 @@ package com.opc.common.exception;
 /**
  * 演示模式异常
  * 
- * @author ruoyi
+ * @author opc
  */
 public class DemoModeException extends RuntimeException
 {

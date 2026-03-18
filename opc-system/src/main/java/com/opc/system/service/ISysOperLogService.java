@@ -6,7 +6,7 @@ import com.opc.system.domain.SysOperLog;
 /**
  * 操作日志 服务层
  * 
- * @author ruoyi
+ * @author opc
  */
 public interface ISysOperLogService
 {

@@ -29,7 +29,7 @@ import com.opc.system.service.ISysMenuService;
 /**
  * 菜单 业务层处理
  * 
- * @author ruoyi
+ * @author opc
  */
 @Service
 public class SysMenuServiceImpl implements ISysMenuService

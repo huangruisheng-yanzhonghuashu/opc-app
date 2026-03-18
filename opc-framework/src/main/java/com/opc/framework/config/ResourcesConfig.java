@@ -18,7 +18,7 @@ import com.opc.framework.interceptor.RepeatSubmitInterceptor;
 /**
  * 通用配置
  * 
- * @author ruoyi
+ * @author opc
  */
 @Configuration
 public class ResourcesConfig implements WebMvcConfigurer

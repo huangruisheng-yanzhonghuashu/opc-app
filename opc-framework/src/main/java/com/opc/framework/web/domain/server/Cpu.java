@@ -5,7 +5,7 @@ import com.opc.common.utils.Arith;
 /**
  * CPU相关信息
  * 
- * @author ruoyi
+ * @author opc
  */
 public class Cpu
 {

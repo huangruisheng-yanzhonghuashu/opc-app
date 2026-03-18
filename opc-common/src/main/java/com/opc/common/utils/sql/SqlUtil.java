@@ -6,7 +6,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * sql操作工具类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class SqlUtil
 {

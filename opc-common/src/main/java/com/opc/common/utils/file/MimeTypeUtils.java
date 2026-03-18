@@ -3,7 +3,7 @@ package com.opc.common.utils.file;
 /**
  * 媒体类型工具类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class MimeTypeUtils
 {

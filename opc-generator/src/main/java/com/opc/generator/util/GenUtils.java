@@ -11,7 +11,7 @@ import com.opc.generator.domain.GenTableColumn;
 /**
  * 代码生成器 工具类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class GenUtils
 {

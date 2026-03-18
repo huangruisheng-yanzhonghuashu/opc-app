@@ -11,7 +11,7 @@ import com.opc.common.enums.OperatorType;
 /**
  * 自定义操作日志记录注解
  * 
- * @author ruoyi
+ * @author opc
  *
  */
 @Target({ ElementType.PARAMETER, ElementType.METHOD })

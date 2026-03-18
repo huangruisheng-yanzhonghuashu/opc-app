@@ -11,7 +11,7 @@ import com.opc.common.core.domain.BaseEntity;
 /**
  * 参数配置表 sys_config
  * 
- * @author ruoyi
+ * @author opc
  */
 public class SysConfig extends BaseEntity
 {

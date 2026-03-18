@@ -14,7 +14,7 @@ import com.opc.system.service.ISysConfigService;
 /**
  * 注册验证
  * 
- * @author ruoyi
+ * @author opc
  */
 @RestController
 public class SysRegisterController extends BaseController

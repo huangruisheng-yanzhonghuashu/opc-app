@@ -6,7 +6,7 @@ import com.opc.system.domain.SysNotice;
 /**
  * 公告 服务层
  * 
- * @author ruoyi
+ * @author opc
  */
 public interface ISysNoticeService
 {

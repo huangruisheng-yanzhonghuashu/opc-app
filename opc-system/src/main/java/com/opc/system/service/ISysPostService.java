@@ -6,7 +6,7 @@ import com.opc.system.domain.SysPost;
 /**
  * 岗位信息 服务层
  * 
- * @author ruoyi
+ * @author opc
  */
 public interface ISysPostService
 {

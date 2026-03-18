@@ -3,7 +3,7 @@ package com.opc.common.utils.sign;
 /**
  * Base64工具类
  * 
- * @author ruoyi
+ * @author opc
  */
 public final class Base64
 {

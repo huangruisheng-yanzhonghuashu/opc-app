@@ -29,7 +29,7 @@ import com.opc.system.service.ISysUserService;
 /**
  * 个人信息 业务处理
  * 
- * @author ruoyi
+ * @author opc
  */
 @RestController
 @RequestMapping("/system/user/profile")

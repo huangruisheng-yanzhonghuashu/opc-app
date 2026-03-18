@@ -22,7 +22,7 @@ import com.opc.framework.security.handle.LogoutSuccessHandlerImpl;
 /**
  * spring security配置
  * 
- * @author ruoyi
+ * @author opc
  */
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Configuration

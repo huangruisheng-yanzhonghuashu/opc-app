@@ -10,7 +10,7 @@ import com.opc.framework.web.domain.Server;
 /**
  * 服务器监控
  * 
- * @author ruoyi
+ * @author opc
  */
 @RestController
 @RequestMapping("/monitor/server")

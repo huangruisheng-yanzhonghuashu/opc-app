@@ -23,7 +23,7 @@ import com.opc.framework.config.ServerConfig;
 /**
  * 通用请求处理
  * 
- * @author ruoyi
+ * @author opc
  */
 @RestController
 @RequestMapping("/common")

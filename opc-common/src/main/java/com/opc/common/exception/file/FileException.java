@@ -5,7 +5,7 @@ import com.opc.common.exception.base.BaseException;
 /**
  * 文件信息异常类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class FileException extends BaseException
 {

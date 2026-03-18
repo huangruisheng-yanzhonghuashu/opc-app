@@ -36,7 +36,7 @@ import com.opc.system.domain.SysOperLog;
 /**
  * 操作日志记录处理
  * 
- * @author ruoyi
+ * @author opc
  */
 @Aspect
 @Component

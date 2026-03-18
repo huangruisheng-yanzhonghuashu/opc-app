@@ -17,7 +17,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * Filter配置
  *
- * @author ruoyi
+ * @author opc
  */
 @Configuration
 public class FilterConfig

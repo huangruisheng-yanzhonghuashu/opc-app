@@ -3,7 +3,7 @@ package com.opc.common.enums;
 /**
  * 限流类型
  *
- * @author ruoyi
+ * @author opc
  */
 
 public enum LimitType

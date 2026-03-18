@@ -9,7 +9,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * 获取IP方法
  * 
- * @author ruoyi
+ * @author opc
  */
 public class IpUtils
 {

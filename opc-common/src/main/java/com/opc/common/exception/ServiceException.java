@@ -3,7 +3,7 @@ package com.opc.common.exception;
 /**
  * 业务异常
  * 
- * @author ruoyi
+ * @author opc
  */
 public final class ServiceException extends RuntimeException
 {

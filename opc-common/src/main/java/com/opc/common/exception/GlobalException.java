@@ -3,7 +3,7 @@ package com.opc.common.exception;
 /**
  * 全局异常
  * 
- * @author ruoyi
+ * @author opc
  */
 public class GlobalException extends RuntimeException
 {

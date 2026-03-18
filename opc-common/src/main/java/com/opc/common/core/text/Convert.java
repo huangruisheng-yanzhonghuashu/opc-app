@@ -12,7 +12,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * 类型转换器
  *
- * @author ruoyi
+ * @author opc
  */
 public class Convert
 {

@@ -11,7 +11,7 @@ import com.opc.common.enums.LimitType;
 /**
  * 限流注解
  * 
- * @author ruoyi
+ * @author opc
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

@@ -5,7 +5,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * 分页数据
  * 
- * @author ruoyi
+ * @author opc
  */
 public class PageDomain
 {

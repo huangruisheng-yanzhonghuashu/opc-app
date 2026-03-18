@@ -6,7 +6,7 @@ import com.opc.common.utils.DesensitizedUtil;
 /**
  * 脱敏类型
  *
- * @author ruoyi
+ * @author opc
  */
 public enum DesensitizedType
 {

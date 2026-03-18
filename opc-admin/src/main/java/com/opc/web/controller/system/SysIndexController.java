@@ -9,7 +9,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * 首页
  *
- * @author ruoyi
+ * @author opc
  */
 @RestController
 public class SysIndexController

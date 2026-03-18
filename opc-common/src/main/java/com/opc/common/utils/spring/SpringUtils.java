@@ -14,7 +14,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * spring工具类 方便在非spring管理环境中获取bean
  * 
- * @author ruoyi
+ * @author opc
  */
 @Component
 public final class SpringUtils implements BeanFactoryPostProcessor, ApplicationContextAware 

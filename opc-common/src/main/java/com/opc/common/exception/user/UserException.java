@@ -5,7 +5,7 @@ import com.opc.common.exception.base.BaseException;
 /**
  * 用户信息异常类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class UserException extends BaseException
 {

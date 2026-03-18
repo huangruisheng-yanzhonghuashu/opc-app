@@ -22,7 +22,7 @@ import com.opc.framework.web.service.TokenService;
 /**
  * 自定义退出处理类 返回成功
  * 
- * @author ruoyi
+ * @author opc
  */
 @Configuration
 public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler

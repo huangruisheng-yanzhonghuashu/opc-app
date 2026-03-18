@@ -21,7 +21,7 @@ import com.opc.quartz.domain.SysJob;
 /**
  * 定时任务工具类
  * 
- * @author ruoyi
+ * @author opc
  *
  */
 public class ScheduleUtils

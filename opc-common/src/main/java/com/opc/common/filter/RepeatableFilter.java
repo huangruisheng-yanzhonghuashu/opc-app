@@ -14,7 +14,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * Repeatable 过滤器
  * 
- * @author ruoyi
+ * @author opc
  */
 public class RepeatableFilter implements Filter
 {

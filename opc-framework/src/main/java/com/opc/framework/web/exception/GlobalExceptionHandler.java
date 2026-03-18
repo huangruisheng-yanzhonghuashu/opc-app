@@ -22,7 +22,7 @@ import com.opc.common.utils.html.EscapeUtil;
 /**
  * 全局异常处理器
  * 
- * @author ruoyi
+ * @author opc
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler

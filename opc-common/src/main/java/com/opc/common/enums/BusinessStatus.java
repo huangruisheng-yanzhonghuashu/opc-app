@@ -3,7 +3,7 @@ package com.opc.common.enums;
 /**
  * 操作状态
  * 
- * @author ruoyi
+ * @author opc
  *
  */
 public enum BusinessStatus

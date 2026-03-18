@@ -13,7 +13,7 @@ import com.opc.common.utils.spring.SpringUtils;
 /**
  * 字典工具类
  * 
- * @author ruoyi
+ * @author opc
  */
 public class DictUtils
 {

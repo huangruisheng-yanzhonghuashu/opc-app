@@ -17,7 +17,7 @@ import com.opc.system.service.ISysRoleService;
 /**
  * 用户权限处理
  * 
- * @author ruoyi
+ * @author opc
  */
 @Component
 public class SysPermissionService

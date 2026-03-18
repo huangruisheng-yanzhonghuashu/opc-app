@@ -5,7 +5,7 @@ import com.opc.common.utils.StringUtils;
 /**
  * 缓存信息
  * 
- * @author ruoyi
+ * @author opc
  */
 public class SysCache
 {

@@ -3,7 +3,7 @@ package com.opc.common.enums;
 /**
  * 用户状态
  * 
- * @author ruoyi
+ * @author opc
  */
 public enum UserStatus
 {

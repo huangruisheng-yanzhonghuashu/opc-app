@@ -7,7 +7,7 @@ import com.opc.common.core.domain.entity.SysUser;
 /**
  * 用户 业务层
  * 
- * @author ruoyi
+ * @author opc
  */
 public interface ISysUserService
 {
