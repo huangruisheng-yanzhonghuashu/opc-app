@@ -29,6 +29,24 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "原链接")
     private String originalUrl;
 
+    @Excel(name = "原ID")
+    private String originalId;
+
+    @Excel(name = "回复数", cellType = ColumnType.NUMERIC)
+    private Long replyCount;
+
+    @Excel(name = "点赞数", cellType = ColumnType.NUMERIC)
+    private Long likeCount;
+
+    @Excel(name = "查看数", cellType = ColumnType.NUMERIC)
+    private Long viewCount;
+
+    @Excel(name = "转发数", cellType = ColumnType.NUMERIC)
+    private Long shareCount;
+
+    @Excel(name = "评论数", cellType = ColumnType.NUMERIC)
+    private Long commentCount;
+
     @Excel(name = "发布时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Instant publishTime;
 
@@ -111,6 +129,66 @@ public class CoreMaterial extends BaseEntity
     public void setOriginalUrl(String originalUrl)
     {
         this.originalUrl = originalUrl;
+    }
+
+    public String getOriginalId()
+    {
+        return originalId;
+    }
+
+    public void setOriginalId(String originalId)
+    {
+        this.originalId = originalId;
+    }
+
+    public Long getReplyCount()
+    {
+        return replyCount;
+    }
+
+    public void setReplyCount(Long replyCount)
+    {
+        this.replyCount = replyCount;
+    }
+
+    public Long getLikeCount()
+    {
+        return likeCount;
+    }
+
+    public void setLikeCount(Long likeCount)
+    {
+        this.likeCount = likeCount;
+    }
+
+    public Long getViewCount()
+    {
+        return viewCount;
+    }
+
+    public void setViewCount(Long viewCount)
+    {
+        this.viewCount = viewCount;
+    }
+
+    public Long getShareCount()
+    {
+        return shareCount;
+    }
+
+    public void setShareCount(Long shareCount)
+    {
+        this.shareCount = shareCount;
+    }
+
+    public Long getCommentCount()
+    {
+        return commentCount;
+    }
+
+    public void setCommentCount(Long commentCount)
+    {
+        this.commentCount = commentCount;
     }
 
     public Instant getPublishTime()
@@ -202,6 +280,12 @@ public class CoreMaterial extends BaseEntity
             .append("summary", getSummary())
             .append("content", getContent())
             .append("originalUrl", getOriginalUrl())
+            .append("originalId", getOriginalId())
+            .append("replyCount", getReplyCount())
+            .append("likeCount", getLikeCount())
+            .append("viewCount", getViewCount())
+            .append("shareCount", getShareCount())
+            .append("commentCount", getCommentCount())
             .append("publishTime", getPublishTime())
             .append("viewPermission", getViewPermission())
             .append("contentType", getContentType())

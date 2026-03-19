@@ -11,6 +11,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="summary"            column="summary"             />
 		<result property="content"           column="content"             />
 		<result property="originalUrl"       column="original_url"        />
+		<result property="originalId"        column="original_id"         />
+		<result property="replyCount"        column="reply_count"         />
+		<result property="likeCount"         column="like_count"          />
+		<result property="viewCount"         column="view_count"          />
+		<result property="shareCount"         column="share_count"         />
+		<result property="commentCount"       column="comment_count"       />
 		<result property="publishTime"       column="publish_time"        />
 		<result property="viewPermission"     column="view_permission"    />
 		<result property="contentType"        column="content_type"        />
@@ -27,7 +33,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="selectMaterialVo">
-        select id, title, author, summary, content, original_url, publish_time,
+        select id, title, author, summary, content, original_url, original_id, reply_count,
+               like_count, view_count, share_count, comment_count, publish_time,
                view_permission, content_type, cover_image, category, status, is_top, source,
                create_by, create_time, update_by, update_time, remark
 		from core_material
@@ -71,7 +78,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="summary != null">summary = #{summary},</if>
  			<if test="content != null">content = #{content},</if>
  			<if test="originalUrl != null">original_url = #{originalUrl},</if>
- 			<if test="publishTime != null">publish_time = #{publishTime},</if>
+ 			<if test="originalId != null">original_id = #{originalId},</if>
+ 			<if test="replyCount != null">reply_count = #{replyCount},</if>
+ 			<if test="likeCount != null">like_count = #{likeCount},</if>
+ 			<if test="viewCount != null">view_count = #{viewCount},</if>
+ 			<if test="shareCount != null">share_count = #{shareCount},</if>
+ 			<if test="commentCount != null">comment_count = #{commentCount},</if>
+ 			<if test="publishTime != null"> publish_time = #{publishTime},</if>
  			<if test="viewPermission != null">view_permission = #{viewPermission},</if>
  			<if test="contentType != null">content_type = #{contentType},</if>
  			<if test="coverImage != null">cover_image = #{coverImage},</if>
@@ -94,6 +107,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="summary != null">summary,</if>
  			<if test="content != null">content,</if>
  			<if test="originalUrl != null">original_url,</if>
+ 			<if test="originalId != null">original_id,</if>
+ 			<if test="replyCount != null">reply_count,</if>
+ 			<if test="likeCount != null">like_count,</if>
+ 			<if test="viewCount != null">view_count,</if>
+ 			<if test="shareCount != null">share_count,</if>
+ 			<if test="commentCount != null">comment_count,</if>
  			<if test="publishTime != null">publish_time,</if>
  			<if test="viewPermission != null">view_permission,</if>
  			<if test="contentType != null">content_type,</if>
@@ -112,6 +131,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="summary != null">#{summary},</if>
  			<if test="content != null">#{content},</if>
  			<if test="originalUrl != null">#{originalUrl},</if>
+ 			<if test="originalId != null">#{originalId},</if>
+ 			<if test="replyCount != null">#{replyCount},</if>
+ 			<if test="likeCount != null">#{likeCount},</if>
+ 			<if test="viewCount != null">#{viewCount},</if>
+ 			<if test="shareCount != null">#{shareCount},</if>
+ 			<if test="commentCount != null">#{commentCount},</if>
  			<if test="publishTime != null">#{publishTime},</if>
  			<if test="viewPermission != null">#{viewPermission},</if>
  			<if test="contentType != null">#{contentType},</if>

@@ -70,11 +70,16 @@
                <span>{{ getCategoryLabel(scope.row.category) }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="来源" align="center" prop="source" width="100">
+         <el-table-column label="来源" align="center" prop="source" width="80">
             <template #default="scope">
                <span>{{ scope.row.source === 'crawler' ? '爬取' : '手动' }}</span>
             </template>
          </el-table-column>
+         <el-table-column label="回复数" align="center" prop="replyCount" width="80" />
+         <el-table-column label="点赞数" align="center" prop="likeCount" width="80" />
+         <el-table-column label="查看数" align="center" prop="viewCount" width="80" />
+         <el-table-column label="转发数" align="center" prop="shareCount" width="80" />
+         <el-table-column label="评论数" align="center" prop="commentCount" width="80" />
          <el-table-column label="发布时间" align="center" prop="publishTime" width="160">
             <template #default="scope">
                <span>{{ parseTime(scope.row.publishTime) }}</span>
@@ -201,6 +206,38 @@
             <el-form-item label="原链接" prop="originalUrl">
                <el-input v-model="form.originalUrl" placeholder="请输入原链接" />
             </el-form-item>
+            <el-form-item label="原ID" prop="originalId">
+               <el-input v-model="form.originalId" placeholder="请输入原ID" />
+            </el-form-item>
+            <el-row>
+               <el-col :span="8">
+                  <el-form-item label="回复数" prop="replyCount">
+                     <el-input-number v-model="form.replyCount" :min="0" placeholder="请输入回复数" style="width: 100%" />
+                  </el-form-item>
+               </el-col>
+               <el-col :span="8">
+                  <el-form-item label="点赞数" prop="likeCount">
+                     <el-input-number v-model="form.likeCount" :min="0" placeholder="请输入点赞数" style="width: 100%" />
+                  </el-form-item>
+               </el-col>
+               <el-col :span="8">
+                  <el-form-item label="查看数" prop="viewCount">
+                     <el-input-number v-model="form.viewCount" :min="0" placeholder="请输入查看数" style="width: 100%" />
+                  </el-form-item>
+               </el-col>
+            </el-row>
+            <el-row>
+               <el-col :span="12">
+                  <el-form-item label="转发数" prop="shareCount">
+                     <el-input-number v-model="form.shareCount" :min="0" placeholder="请输入转发数" style="width: 100%" />
+                  </el-form-item>
+               </el-col>
+               <el-col :span="12">
+                  <el-form-item label="评论数" prop="commentCount">
+                     <el-input-number v-model="form.commentCount" :min="0" placeholder="请输入评论数" style="width: 100%" />
+                  </el-form-item>
+               </el-col>
+            </el-row>
             <el-form-item label="会员展示图片" prop="coverImage">
                <el-input v-model="form.coverImage" placeholder="请输入会员展示图片URL" />
             </el-form-item>
@@ -230,6 +267,12 @@
             <el-descriptions-item label="来源" :span="1">
                <span>{{ detailData.source === 'crawler' ? '爬取' : '手动' }}</span>
             </el-descriptions-item>
+            <el-descriptions-item label="原ID" :span="1">{{ detailData.originalId || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="回复数" :span="1">{{ detailData.replyCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="点赞数" :span="1">{{ detailData.likeCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="查看数" :span="1">{{ detailData.viewCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="转发数" :span="1">{{ detailData.shareCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="评论数" :span="1">{{ detailData.commentCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="分类" :span="1">{{ getCategoryLabel(detailData.category) }}</el-descriptions-item>
             <el-descriptions-item label="查看权限" :span="1">
                <el-tag type="success">{{ detailData.viewPermission }}级套餐</el-tag>
@@ -341,6 +384,12 @@ function reset() {
     summary: undefined,
     content: undefined,
     originalUrl: undefined,
+    originalId: undefined,
+    replyCount: 0,
+    likeCount: 0,
+    viewCount: 0,
+    shareCount: 0,
+    commentCount: 0,
     publishTime: undefined,
     viewPermission: parseInt(activeTab.value),
     contentType: 'text',
