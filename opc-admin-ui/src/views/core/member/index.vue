@@ -170,6 +170,13 @@
                   </el-form-item>
                </el-col>
                <el-col :span="12">
+                  <el-form-item label="密码" prop="password">
+                     <el-input v-model="form.password" type="password" placeholder="留空使用默认密码" />
+                  </el-form-item>
+               </el-col>
+            </el-row>
+            <el-row>
+               <el-col :span="12">
                   <el-form-item label="会员昵称" prop="nickname">
                      <el-input v-model="form.nickname" placeholder="请输入会员昵称" />
                   </el-form-item>
@@ -215,11 +222,21 @@
                      </el-select>
                   </el-form-item>
                </el-col>
-            </el-row>
-            <el-row>
                <el-col :span="12">
                   <el-form-item label="来源ID" prop="sourceId">
                      <el-input v-model="form.sourceId" placeholder="请输入来源ID" />
+                  </el-form-item>
+               </el-col>
+            </el-row>
+            <el-row>
+               <el-col :span="12">
+                  <el-form-item label="注册时间" prop="registerTime">
+                     <el-date-picker
+                        v-model="form.registerTime"
+                        type="datetime"
+                        placeholder="选择注册时间"
+                        style="width: 100%"
+                     />
                   </el-form-item>
                </el-col>
                <el-col :span="12">
@@ -379,6 +396,7 @@ function reset() {
   form.value = {
     id: undefined,
     username: undefined,
+    password: undefined,
     nickname: undefined,
     phoneNumber: undefined,
     email: undefined,
@@ -387,6 +405,7 @@ function reset() {
     source: undefined,
     sourceId: undefined,
     token: undefined,
+    registerTime: undefined,
     lastActiveTime: undefined,
     status: "0",
     remark: undefined

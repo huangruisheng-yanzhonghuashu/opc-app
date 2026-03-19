@@ -46,4 +46,9 @@ public class CacheConstants
      * 邮箱验证码 redis key
      */
     public static final String EMAIL_CODE_KEY = "email_code:";
+
+    /**
+     * 会员登录用户 redis key
+     */
+    public static final String MEMBER_LOGIN_TOKEN_KEY = "member_login_tokens:";
 }

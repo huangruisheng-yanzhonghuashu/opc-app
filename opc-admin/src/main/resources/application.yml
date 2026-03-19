@@ -76,29 +76,27 @@ spring:
     # - 163邮箱: smtp.163.com (端口465 SSL / 994 SSL)
     # - Gmail: smtp.gmail.com (端口465 SSL / 587 TLS)
     # - Outlook: smtp-mail.outlook.com (端口587)
-    host:
+    host: smtp.qq.com
     # SMTP服务器端口（465或587）
-    port: 587
+    port: 465
     # 发件人邮箱
-    username:
+    username: ruishengle@qq.com
     # 发件人密码或授权码（注意：QQ邮箱、163邮箱等需要使用授权码，不是登录密码）
-    password:
+    # QQ邮箱授权码获取方式：QQ邮箱 -> 设置 -> 账户 -> 开启SMTP服务 -> 获取授权码
+    password: nnrjhormkzhnciee
     # 协议
     protocol: smtp
     # 默认发件人
-    from:
+    from: ruishengle@qq.com
     properties:
       mail:
         smtp:
           # 认证
           auth: true
-          # STARTTLS加密
-          starttls:
+          # SSL加密（QQ邮箱必须使用465端口+SSL）
+          ssl:
             enable: true
             required: true
-          # SSL加密（如果使用465端口，启用SSL）
-          ssl:
-            enable: false
           # 超时设置
           connectiontimeout: 10000
           timeout: 10000
@@ -135,6 +133,16 @@ token:
   secret: abcdefghijklmnopqrstuvwxyz
   # 令牌有效期（默认30分钟）
   expireTime: 30
+
+# 会员token配置
+member:
+  token:
+    # 会员令牌自定义标识
+    header: Member-Authorization
+    # 会员令牌密钥（与系统用户密钥隔离）
+    secret: memberSecretKeyForJwtTokenGeneration2024
+    # 会员令牌有效期（默认30分钟）
+    expireTime: 30
 
 # MyBatis配置
 mybatis:

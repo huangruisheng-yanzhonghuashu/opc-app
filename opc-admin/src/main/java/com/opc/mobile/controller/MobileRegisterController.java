@@ -4,16 +4,16 @@ import com.opc.common.constant.CacheConstants;
 import com.opc.common.constant.Constants;
 import com.opc.common.constant.UserConstants;
 import com.opc.common.core.domain.AjaxResult;
-import com.opc.common.core.domain.entity.SysUser;
 import com.opc.common.core.redis.RedisCache;
 import com.opc.common.utils.DateUtils;
 import com.opc.common.utils.MessageUtils;
 import com.opc.common.utils.SecurityUtils;
 import com.opc.common.utils.StringUtils;
+import com.opc.core.domain.CoreMember;
+import com.opc.core.service.ICoreMemberService;
 import com.opc.framework.manager.AsyncManager;
 import com.opc.framework.manager.factory.AsyncFactory;
 import com.opc.system.service.ISysConfigService;
-import com.opc.system.service.ISysUserService;
 import com.opc.mobile.dto.EmailCodeRequestDTO;
 import com.opc.mobile.dto.MobileRegisterDTO;
 import com.opc.web.dto.EmailDTO;
@@ -45,7 +45,7 @@ public class MobileRegisterController extends MobileBaseController {
     private static final Logger log = LoggerFactory.getLogger(MobileRegisterController.class);
 
     @Autowired
-    private ISysUserService userService;
+    private ICoreMemberService memberService;
 
     @Autowired
     private ISysConfigService configService;
@@ -84,16 +84,16 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("邮箱格式不正确");
         }
 
-        // 检查用户名是否已存在
-        SysUser user = new SysUser();
-        user.setUserName(username);
-        if (!userService.checkUserNameUnique(user)) {
+        // 检查用户名是否已存在（从会员表判断）
+        CoreMember member = new CoreMember();
+        member.setUsername(username);
+        if (!memberService.checkMemberNameUnique(member)) {
             return AjaxResult.error("用户名已存在");
         }
 
-        // 检查邮箱是否已存在
-        user.setEmail(email);
-        if (!userService.checkEmailUnique(user)) {
+        // 检查邮箱是否已存在（从会员表判断）
+        member.setEmail(email);
+        if (!memberService.checkEmailUnique(member)) {
             return AjaxResult.error("邮箱已被注册");
         }
 
@@ -131,11 +131,6 @@ public class MobileRegisterController extends MobileBaseController {
     @Operation(summary = "邮箱验证码注册", description = "使用邮箱验证码完成用户注册")
     @PostMapping("/registerByEmail")
     public AjaxResult registerByEmail(@Validated @RequestBody MobileRegisterDTO registerDTO) {
-        // 检查系统是否开启注册功能
-        if (!("true".equals(configService.selectConfigByKey("sys.account.registerUser")))) {
-            return AjaxResult.error("当前系统没有开启注册功能！");
-        }
-
         String username = registerDTO.getUsername();
         String password = registerDTO.getPassword();
         String email = registerDTO.getEmail();
@@ -182,26 +177,26 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("验证码错误");
         }
 
-        // 检查用户名是否已存在
-        SysUser sysUser = new SysUser();
-        sysUser.setUserName(username);
-        if (!userService.checkUserNameUnique(sysUser)) {
+        // 检查用户名是否已存在（从会员表判断）
+        CoreMember member = new CoreMember();
+        member.setUsername(username);
+        if (!memberService.checkMemberNameUnique(member)) {
             return AjaxResult.error("用户名已存在");
         }
 
-        // 检查邮箱是否已存在
-        sysUser.setEmail(email);
-        if (!userService.checkEmailUnique(sysUser)) {
+        // 检查邮箱是否已存在（从会员表判断）
+        member.setEmail(email);
+        if (!memberService.checkEmailUnique(member)) {
             return AjaxResult.error("邮箱已被注册");
         }
 
-        // 创建用户
-        sysUser.setNickName(username);
-        sysUser.setPwdUpdateDate(DateUtils.getNowDate());
-        sysUser.setPassword(SecurityUtils.encryptPassword(password));
-        sysUser.setEmail(email);
+        // 创建会员
+        member.setNickname(username);
+        member.setPassword(SecurityUtils.encryptPassword(password));
+        member.setEmail(email);
+        member.setSource("email");
 
-        boolean regFlag = userService.registerUser(sysUser);
+        boolean regFlag = memberService.insertMember(member) > 0;
         if (!regFlag) {
             return AjaxResult.error("注册失败，请联系系统管理人员");
         }
@@ -211,7 +206,7 @@ public class MobileRegisterController extends MobileBaseController {
 
         // 记录注册日志
         AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER,
-                MessageUtils.message("user.register.success")));
+                    MessageUtils.message("user.register.success")));
 
         log.info("用户注册成功：username={}, email={}", username, email);
         return AjaxResult.success("注册成功");

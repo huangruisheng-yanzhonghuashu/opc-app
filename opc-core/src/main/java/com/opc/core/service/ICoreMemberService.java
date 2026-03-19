@@ -9,6 +9,8 @@ public interface ICoreMemberService
 
     public CoreMember selectMemberById(Long id);
 
+    public CoreMember selectMemberByEmail(String email);
+
     public int insertMember(CoreMember member);
 
     public int updateMember(CoreMember member);
@@ -22,4 +24,6 @@ public interface ICoreMemberService
     public int blockMember(Long id);
 
     public int unblockMember(Long id);
+
+    public int updateLoginInfo(Long id, String ipaddr);
 }

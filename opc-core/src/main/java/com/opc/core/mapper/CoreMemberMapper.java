@@ -9,6 +9,8 @@ public interface CoreMemberMapper
 
     public CoreMember selectMemberById(Long id);
 
+    public CoreMember selectMemberByEmail(String email);
+
     public int updateMember(CoreMember member);
 
     public int insertMember(CoreMember member);
@@ -22,4 +24,6 @@ public interface CoreMemberMapper
     public int blockMember(Long id);
 
     public int unblockMember(Long id);
+
+    public int updateLoginInfo(Long id, String ipaddr);
 }

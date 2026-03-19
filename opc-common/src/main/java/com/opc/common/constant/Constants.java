@@ -136,6 +136,16 @@ public class Constants
     public static final String JWT_AUTHORITIES = "authorities";
 
     /**
+     * 会员登录标识
+     */
+    public static final String MEMBER_LOGIN_USER_KEY = "member_login_user_key";
+
+    /**
+     * 会员邮箱
+     */
+    public static final String JWT_EMAIL = "email";
+
+    /**
      * 资源映射路径 前缀
      */
     public static final String RESOURCE_PREFIX = "/profile";

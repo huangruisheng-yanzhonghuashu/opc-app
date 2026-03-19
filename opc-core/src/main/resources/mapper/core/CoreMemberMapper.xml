@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<resultMap type="CoreMember" id="CoreMemberResult">
 		<id     property="id"              column="id"                />
 		<result property="username"        column="username"          />
+		<result property="password"        column="password"          />
 		<result property="nickname"        column="nickname"          />
 		<result property="phoneNumber"     column="phone_number"      />
 		<result property="email"           column="email"             />
@@ -27,7 +28,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="selectMemberVo">
-        select id, username, nickname, phone_number, email, avatar, last_active_time,
+        select id, username, password, nickname, phone_number, email, avatar, last_active_time,
                current_package, current_package_level, source, source_id, token, status, register_time,
                create_by, create_time, update_by, update_time, remark
 		from core_member
@@ -81,6 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		update core_member
  		<set>
  			<if test="username != null and username != ''">username = #{username},</if>
+ 			<if test="password != null and password != ''">password = #{password},</if>
  			<if test="nickname != null">nickname = #{nickname},</if>
  			<if test="phoneNumber != null and phoneNumber != ''">phone_number = #{phoneNumber},</if>
  			<if test="email != null and email != ''">email = #{email},</if>
@@ -104,6 +106,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		insert into core_member(
  			<if test="id != null and id != 0">id,</if>
  			<if test="username != null and username != ''">username,</if>
+ 			<if test="password != null and password != ''">password,</if>
  			<if test="nickname != null">nickname,</if>
  			<if test="phoneNumber != null and phoneNumber != ''">phone_number,</if>
  			<if test="email != null and email != ''">email,</if>
@@ -122,6 +125,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		)values(
  			<if test="id != null and id != 0">#{id},</if>
  			<if test="username != null and username != ''">#{username},</if>
+ 			<if test="password != null and password != ''">#{password},</if>
  			<if test="nickname != null">#{nickname},</if>
  			<if test="phoneNumber != null and phoneNumber != ''">#{phoneNumber},</if>
  			<if test="email != null and email != ''">#{email},</if>
@@ -150,6 +154,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<update id="unblockMember" parameterType="Long">
 		update core_member
 		set status = '0',
+		    update_time = sysdate()
+		where id = #{id}
+	</update>
+
+	<select id="selectMemberByEmail" parameterType="String" resultMap="CoreMemberResult">
+		<include refid="selectMemberVo"/>
+		where email = #{email}
+	</select>
+
+	<update id="updateLoginInfo">
+		update core_member
+		set last_active_time = sysdate(),
 		    update_time = sysdate()
 		where id = #{id}
 	</update>

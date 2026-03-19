@@ -30,6 +30,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     @Override
     public int insertMember(CoreMember member)
     {
+        if (member.getPassword() == null || member.getPassword().isEmpty()) {
+            member.setPassword("123456@654321");
+        }
         convertPackageToLevel(member);
         return memberMapper.insertMember(member);
     }
@@ -100,5 +103,17 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     public int unblockMember(Long id)
     {
         return memberMapper.unblockMember(id);
+    }
+
+    @Override
+    public CoreMember selectMemberByEmail(String email)
+    {
+        return memberMapper.selectMemberByEmail(email);
+    }
+
+    @Override
+    public int updateLoginInfo(Long id, String ipaddr)
+    {
+        return memberMapper.updateLoginInfo(id, ipaddr);
     }
 }

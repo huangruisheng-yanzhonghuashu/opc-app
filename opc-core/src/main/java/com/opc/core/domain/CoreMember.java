@@ -22,6 +22,10 @@ public class CoreMember extends BaseEntity
     @Size(min = 0, max = 50, message = "会员名长度不能超过50个字符")
     private String username;
 
+    @Excel(name = "密码")
+    @Size(min = 0, max = 100, message = "密码长度不能超过100个字符")
+    private String password;
+
     @Excel(name = "会员昵称")
     @Size(min = 0, max = 50, message = "会员昵称长度不能超过50个字符")
     private String nickname;
@@ -81,6 +85,16 @@ public class CoreMember extends BaseEntity
     public void setUsername(String username)
     {
         this.username = username;
+    }
+
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 
     public String getNickname()
