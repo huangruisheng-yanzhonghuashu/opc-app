@@ -23,12 +23,15 @@ import com.opc.framework.web.service.SysPermissionService;
 import com.opc.framework.web.service.TokenService;
 import com.opc.system.service.ISysConfigService;
 import com.opc.system.service.ISysMenuService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 登录验证
  * 
  * @author opc
  */
+@Tag(name = "登录认证", description = "系统登录认证相关接口")
 @RestController
 public class SysLoginController
 {
@@ -53,6 +56,7 @@ public class SysLoginController
      * @param loginBody 登录信息
      * @return 结果
      */
+    @Operation(summary = "用户登录", description = "用户使用用户名密码登录系统")
     @PostMapping("/login")
     public AjaxResult login(@RequestBody LoginBody loginBody)
     {
@@ -69,6 +73,7 @@ public class SysLoginController
      * 
      * @return 用户信息
      */
+    @Operation(summary = "获取用户信息", description = "获取当前登录用户的详细信息")
     @GetMapping("getInfo")
     public AjaxResult getInfo()
     {
@@ -97,6 +102,7 @@ public class SysLoginController
      * 
      * @return 路由信息
      */
+    @Operation(summary = "获取路由信息", description = "获取当前用户的路由菜单信息")
     @GetMapping("getRouters")
     public AjaxResult getRouters()
     {

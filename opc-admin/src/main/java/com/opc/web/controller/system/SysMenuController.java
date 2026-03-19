@@ -20,12 +20,16 @@ import com.opc.common.core.domain.entity.SysMenu;
 import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.StringUtils;
 import com.opc.system.service.ISysMenuService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 菜单信息
  * 
  * @author opc
  */
+@Tag(name = "菜单管理", description = "系统菜单相关操作")
 @RestController
 @RequestMapping("/system/menu")
 public class SysMenuController extends BaseController
@@ -36,6 +40,7 @@ public class SysMenuController extends BaseController
     /**
      * 获取菜单列表
      */
+    @Operation(summary = "获取菜单列表", description = "查询系统菜单列表")
     @PreAuthorize("@ss.hasPermi('system:menu:list')")
     @GetMapping("/list")
     public AjaxResult list(SysMenu menu)
@@ -47,6 +52,8 @@ public class SysMenuController extends BaseController
     /**
      * 根据菜单编号获取详细信息
      */
+    @Operation(summary = "获取菜单详情", description = "根据菜单ID获取详细信息")
+    @Parameter(name = "menuId", description = "菜单ID", required = true)
     @PreAuthorize("@ss.hasPermi('system:menu:query')")
     @GetMapping(value = "/{menuId}")
     public AjaxResult getInfo(@PathVariable Long menuId)

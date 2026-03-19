@@ -20,7 +20,11 @@ import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.poi.ExcelUtil;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.service.ICoreMemberService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "会员管理", description = "核心会员相关操作")
 @RestController
 @RequestMapping("/core/member")
 public class CoreMemberController extends BaseController
@@ -28,6 +32,7 @@ public class CoreMemberController extends BaseController
     @Autowired
     private ICoreMemberService memberService;
 
+    @Operation(summary = "获取会员列表", description = "分页查询会员列表")
     @PreAuthorize("@ss.hasPermi('core:member:list')")
     @GetMapping("/list")
     public TableDataInfo list(CoreMember member)
@@ -47,6 +52,8 @@ public class CoreMemberController extends BaseController
         util.exportExcel(response, list, "会员数据");
     }
 
+    @Operation(summary = "获取会员详情", description = "根据会员ID获取详细信息")
+    @Parameter(name = "memberId", description = "会员ID", required = true)
     @PreAuthorize("@ss.hasPermi('core:member:query')")
     @GetMapping(value = "/{memberId}")
     public AjaxResult getInfo(@PathVariable Long memberId)
@@ -54,6 +61,7 @@ public class CoreMemberController extends BaseController
         return success(memberService.selectMemberById(memberId));
     }
 
+    @Operation(summary = "新增会员", description = "新增会员信息")
     @PreAuthorize("@ss.hasPermi('core:member:add')")
     @Log(title = "会员管理", businessType = BusinessType.INSERT)
     @PostMapping
@@ -75,6 +83,7 @@ public class CoreMemberController extends BaseController
         return toAjax(memberService.insertMember(member));
     }
 
+    @Operation(summary = "修改会员", description = "修改会员信息")
     @PreAuthorize("@ss.hasPermi('core:member:edit')")
     @Log(title = "会员管理", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -96,6 +105,8 @@ public class CoreMemberController extends BaseController
         return toAjax(memberService.updateMember(member));
     }
 
+    @Operation(summary = "删除会员", description = "根据会员ID数组删除会员")
+    @Parameter(name = "memberIds", description = "会员ID数组", required = true)
     @PreAuthorize("@ss.hasPermi('core:member:remove')")
     @Log(title = "会员管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{memberIds}")

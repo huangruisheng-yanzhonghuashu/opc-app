@@ -16,6 +16,9 @@ public class CoreMember extends BaseEntity
     @Excel(name = "会员ID", cellType = ColumnType.NUMERIC)
     private Long memberId;
 
+    @Excel(name = "会员名")
+    private String memberName;
+
     @Excel(name = "手机号")
     private String phoneNumber;
 

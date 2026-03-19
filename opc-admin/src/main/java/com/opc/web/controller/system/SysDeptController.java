@@ -21,12 +21,16 @@ import com.opc.common.core.domain.entity.SysDept;
 import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.StringUtils;
 import com.opc.system.service.ISysDeptService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 部门信息
  * 
  * @author opc
  */
+@Tag(name = "部门管理", description = "系统部门相关操作")
 @RestController
 @RequestMapping("/system/dept")
 public class SysDeptController extends BaseController
@@ -37,6 +41,7 @@ public class SysDeptController extends BaseController
     /**
      * 获取部门列表
      */
+    @Operation(summary = "获取部门列表", description = "查询系统部门列表")
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
     @GetMapping("/list")
     public AjaxResult list(SysDept dept)
@@ -60,6 +65,8 @@ public class SysDeptController extends BaseController
     /**
      * 根据部门编号获取详细信息
      */
+    @Operation(summary = "获取部门详情", description = "根据部门ID获取详细信息")
+    @Parameter(name = "deptId", description = "部门ID", required = true)
     @PreAuthorize("@ss.hasPermi('system:dept:query')")
     @GetMapping(value = "/{deptId}")
     public AjaxResult getInfo(@PathVariable Long deptId)

@@ -30,12 +30,16 @@ import com.opc.system.domain.SysUserRole;
 import com.opc.system.service.ISysDeptService;
 import com.opc.system.service.ISysRoleService;
 import com.opc.system.service.ISysUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 角色信息
  * 
  * @author opc
  */
+@Tag(name = "角色管理", description = "系统角色相关操作")
 @RestController
 @RequestMapping("/system/role")
 public class SysRoleController extends BaseController
@@ -55,6 +59,7 @@ public class SysRoleController extends BaseController
     @Autowired
     private ISysDeptService deptService;
 
+    @Operation(summary = "获取角色列表", description = "分页查询系统角色列表")
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysRole role)
@@ -64,6 +69,7 @@ public class SysRoleController extends BaseController
         return getDataTable(list);
     }
 
+    @Operation(summary = "导出角色数据", description = "导出角色数据到Excel")
     @Log(title = "角色管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:role:export')")
     @PostMapping("/export")
@@ -77,6 +83,8 @@ public class SysRoleController extends BaseController
     /**
      * 根据角色编号获取详细信息
      */
+    @Operation(summary = "获取角色详情", description = "根据角色ID获取详细信息")
+    @Parameter(name = "roleId", description = "角色ID", required = true)
     @PreAuthorize("@ss.hasPermi('system:role:query')")
     @GetMapping(value = "/{roleId}")
     public AjaxResult getInfo(@PathVariable Long roleId)
@@ -88,6 +96,7 @@ public class SysRoleController extends BaseController
     /**
      * 新增角色
      */
+    @Operation(summary = "新增角色", description = "新增系统角色")
     @PreAuthorize("@ss.hasPermi('system:role:add')")
     @Log(title = "角色管理", businessType = BusinessType.INSERT)
     @PostMapping
@@ -109,6 +118,7 @@ public class SysRoleController extends BaseController
     /**
      * 修改保存角色
      */
+    @Operation(summary = "修改角色", description = "修改系统角色信息")
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -144,6 +154,7 @@ public class SysRoleController extends BaseController
     /**
      * 修改保存数据权限
      */
+    @Operation(summary = "修改数据权限", description = "修改角色数据权限范围")
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/dataScope")
@@ -157,6 +168,7 @@ public class SysRoleController extends BaseController
     /**
      * 状态修改
      */
+    @Operation(summary = "修改角色状态", description = "修改角色启用/停用状态")
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
@@ -171,6 +183,8 @@ public class SysRoleController extends BaseController
     /**
      * 删除角色
      */
+    @Operation(summary = "删除角色", description = "根据角色ID数组删除角色")
+    @Parameter(name = "roleIds", description = "角色ID数组", required = true)
     @PreAuthorize("@ss.hasPermi('system:role:remove')")
     @Log(title = "角色管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{roleIds}")
@@ -182,6 +196,7 @@ public class SysRoleController extends BaseController
     /**
      * 获取角色选择框列表
      */
+    @Operation(summary = "获取角色选项", description = "获取角色下拉选择列表")
     @PreAuthorize("@ss.hasPermi('system:role:query')")
     @GetMapping("/optionselect")
     public AjaxResult optionselect()

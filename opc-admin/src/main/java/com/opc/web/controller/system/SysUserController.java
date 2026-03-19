@@ -31,12 +31,16 @@ import com.opc.system.service.ISysDeptService;
 import com.opc.system.service.ISysPostService;
 import com.opc.system.service.ISysRoleService;
 import com.opc.system.service.ISysUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 用户信息
  * 
  * @author opc
  */
+@Tag(name = "用户管理", description = "系统用户相关操作")
 @RestController
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController
@@ -56,6 +60,7 @@ public class SysUserController extends BaseController
     /**
      * 获取用户列表
      */
+    @Operation(summary = "获取用户列表", description = "分页查询系统用户列表")
     @PreAuthorize("@ss.hasPermi('system:user:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysUser user)
@@ -65,6 +70,7 @@ public class SysUserController extends BaseController
         return getDataTable(list);
     }
 
+    @Operation(summary = "导出用户数据", description = "导出用户数据到Excel")
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:user:export')")
     @PostMapping("/export")
@@ -97,6 +103,8 @@ public class SysUserController extends BaseController
     /**
      * 根据用户编号获取详细信息
      */
+    @Operation(summary = "获取用户详情", description = "根据用户ID获取用户详细信息")
+    @Parameter(name = "userId", description = "用户ID", required = false)
     @PreAuthorize("@ss.hasPermi('system:user:query')")
     @GetMapping(value = { "/", "/{userId}" })
     public AjaxResult getInfo(@PathVariable(value = "userId", required = false) Long userId)
@@ -119,6 +127,7 @@ public class SysUserController extends BaseController
     /**
      * 新增用户
      */
+    @Operation(summary = "新增用户", description = "新增系统用户")
     @PreAuthorize("@ss.hasPermi('system:user:add')")
     @Log(title = "用户管理", businessType = BusinessType.INSERT)
     @PostMapping
@@ -146,6 +155,7 @@ public class SysUserController extends BaseController
     /**
      * 修改用户
      */
+    @Operation(summary = "修改用户", description = "修改系统用户信息")
     @PreAuthorize("@ss.hasPermi('system:user:edit')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -174,6 +184,8 @@ public class SysUserController extends BaseController
     /**
      * 删除用户
      */
+    @Operation(summary = "删除用户", description = "根据用户ID数组删除用户")
+    @Parameter(name = "userIds", description = "用户ID数组", required = true)
     @PreAuthorize("@ss.hasPermi('system:user:remove')")
     @Log(title = "用户管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{userIds}")
@@ -189,6 +201,7 @@ public class SysUserController extends BaseController
     /**
      * 重置密码
      */
+    @Operation(summary = "重置密码", description = "重置用户密码")
     @PreAuthorize("@ss.hasPermi('system:user:resetPwd')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping("/resetPwd")
@@ -204,6 +217,7 @@ public class SysUserController extends BaseController
     /**
      * 状态修改
      */
+    @Operation(summary = "修改用户状态", description = "修改用户启用/停用状态")
     @PreAuthorize("@ss.hasPermi('system:user:edit')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
@@ -247,6 +261,7 @@ public class SysUserController extends BaseController
     /**
      * 获取部门树列表
      */
+    @Operation(summary = "获取部门树", description = "获取部门树形结构列表")
     @PreAuthorize("@ss.hasPermi('system:user:list')")
     @GetMapping("/deptTree")
     public AjaxResult deptTree(SysDept dept)

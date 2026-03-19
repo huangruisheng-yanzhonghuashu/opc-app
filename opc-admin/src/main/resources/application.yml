@@ -154,16 +154,20 @@ pagehelper:
 # Springdoc配置
 springdoc:
   api-docs:
+    enabled: true
     path: /v3/api-docs
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
     tags-sorter: alpha
-  group-configs:
-    - group: 'default'
-      display-name: '测试模块'
-      paths-to-match: '/**'
-      packages-to-scan: com.opc.web.controller.tool
+    operations-sorter: alpha
+    # 禁用默认的请求时长显示，减少问题
+    display-request-duration: false
+  packages-to-scan: com.opc.web.controller
+
+# Knife4j 增强配置
+knife4j:
+  enable: true
 
 # 防盗链配置
 referer:
