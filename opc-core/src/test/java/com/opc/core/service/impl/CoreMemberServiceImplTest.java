@@ -32,7 +32,7 @@ public class CoreMemberServiceImplTest
         member.setUsername("testuser");
 
         CoreMember resultMember = new CoreMember();
-        resultMember.setMemberId(1L);
+        resultMember.setId(1L);
         resultMember.setUsername("testuser");
 
         when(memberMapper.selectMemberList(any(CoreMember.class))).thenReturn(Arrays.asList(resultMember));
@@ -48,7 +48,7 @@ public class CoreMemberServiceImplTest
     public void testSelectMemberById()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setUsername("testuser");
 
         when(memberMapper.selectMemberById(1L)).thenReturn(member);
@@ -56,7 +56,7 @@ public class CoreMemberServiceImplTest
         CoreMember result = memberService.selectMemberById(1L);
 
         assertNotNull(result);
-        assertEquals(1L, result.getMemberId());
+        assertEquals(1L, result.getId());
         assertEquals("testuser", result.getUsername());
     }
 
@@ -78,7 +78,7 @@ public class CoreMemberServiceImplTest
     public void testUpdateMember()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setNickname("Updated Nickname");
 
         when(memberMapper.updateMember(any(CoreMember.class))).thenReturn(1);
@@ -89,35 +89,14 @@ public class CoreMemberServiceImplTest
     }
 
     @Test
-    public void testDeleteMemberById()
-    {
-        when(memberMapper.deleteMemberById(1L)).thenReturn(1);
-
-        int result = memberService.deleteMemberById(1L);
-
-        assertEquals(1, result);
-    }
-
-    @Test
-    public void testDeleteMemberByIds()
-    {
-        Long[] ids = {1L, 2L, 3L};
-        when(memberMapper.deleteMemberByIds(ids)).thenReturn(3);
-
-        int result = memberService.deleteMemberByIds(ids);
-
-        assertEquals(3, result);
-    }
-
-    @Test
     public void testCheckMemberNameUnique_WhenNameExists()
     {
         CoreMember existingMember = new CoreMember();
-        existingMember.setMemberId(1L);
+        existingMember.setId(1L);
         existingMember.setUsername("existinguser");
 
         CoreMember newMember = new CoreMember();
-        newMember.setMemberId(2L);
+        newMember.setId(2L);
         newMember.setUsername("existinguser");
 
         when(memberMapper.checkMemberNameUnique("existinguser")).thenReturn(existingMember);
@@ -131,7 +110,7 @@ public class CoreMemberServiceImplTest
     public void testCheckMemberNameUnique_WhenNameNotExists()
     {
         CoreMember newMember = new CoreMember();
-        newMember.setMemberId(2L);
+        newMember.setId(2L);
         newMember.setUsername("newuser");
 
         when(memberMapper.checkMemberNameUnique("newuser")).thenReturn(null);
@@ -145,7 +124,7 @@ public class CoreMemberServiceImplTest
     public void testCheckMemberNameUnique_SameId()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setUsername("testuser");
 
         when(memberMapper.checkMemberNameUnique("testuser")).thenReturn(member);
@@ -159,11 +138,11 @@ public class CoreMemberServiceImplTest
     public void testCheckPhoneUnique_WhenPhoneExists()
     {
         CoreMember existingMember = new CoreMember();
-        existingMember.setMemberId(1L);
+        existingMember.setId(1L);
         existingMember.setPhoneNumber("13800138000");
 
         CoreMember newMember = new CoreMember();
-        newMember.setMemberId(2L);
+        newMember.setId(2L);
         newMember.setPhoneNumber("13800138000");
 
         when(memberMapper.checkPhoneUnique("13800138000")).thenReturn(existingMember);
@@ -177,7 +156,7 @@ public class CoreMemberServiceImplTest
     public void testCheckPhoneUnique_WhenPhoneNotExists()
     {
         CoreMember newMember = new CoreMember();
-        newMember.setMemberId(2L);
+        newMember.setId(2L);
         newMember.setPhoneNumber("13900139000");
 
         when(memberMapper.checkPhoneUnique("13900139000")).thenReturn(null);
@@ -191,11 +170,11 @@ public class CoreMemberServiceImplTest
     public void testCheckEmailUnique_WhenEmailExists()
     {
         CoreMember existingMember = new CoreMember();
-        existingMember.setMemberId(1L);
+        existingMember.setId(1L);
         existingMember.setEmail("test@example.com");
 
         CoreMember newMember = new CoreMember();
-        newMember.setMemberId(2L);
+        newMember.setId(2L);
         newMember.setEmail("test@example.com");
 
         when(memberMapper.checkEmailUnique("test@example.com")).thenReturn(existingMember);
@@ -209,7 +188,7 @@ public class CoreMemberServiceImplTest
     public void testCheckEmailUnique_WhenEmailNotExists()
     {
         CoreMember newMember = new CoreMember();
-        newMember.setMemberId(2L);
+        newMember.setId(2L);
         newMember.setEmail("new@example.com");
 
         when(memberMapper.checkEmailUnique("new@example.com")).thenReturn(null);

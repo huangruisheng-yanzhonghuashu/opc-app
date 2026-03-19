@@ -4,6 +4,9 @@ import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.web.dto.EmailDTO;
 import com.opc.web.service.EmailService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +21,7 @@ import java.util.Map;
  *
  * @author opc
  */
+@Tag(name = "邮件管理", description = "邮件发送相关操作")
 @RestController
 @RequestMapping("/system/email")
 public class EmailController extends BaseController {
@@ -25,43 +29,27 @@ public class EmailController extends BaseController {
     @Autowired
     private EmailService emailService;
 
-    /**
-     * 发送纯文本邮件
-     *
-     * @param from 发件人邮箱
-     * @param to 收件人邮箱
-     * @param subject 邮件主题
-     * @param content 邮件内容
-     * @return 发送结果
-     */
+    @Operation(summary = "发送纯文本邮件", description = "发送简单的纯文本邮件")
     @PostMapping("/sendSimple")
-    public AjaxResult sendSimpleEmail(@RequestParam String from,
-                                      @RequestParam String to,
-                                      @RequestParam String subject,
-                                      @RequestParam String content) {
+    public AjaxResult sendSimpleEmail(
+            @Parameter(description = "发件人邮箱", required = true) @RequestParam String from,
+            @Parameter(description = "收件人邮箱", required = true) @RequestParam String to,
+            @Parameter(description = "邮件主题", required = true) @RequestParam String subject,
+            @Parameter(description = "邮件内容", required = true) @RequestParam String content) {
         EmailDTO emailDTO = new EmailDTO(from, to, subject, content);
         boolean result = emailService.sendSimpleEmail(emailDTO);
         return result ? success("邮件发送成功") : error("邮件发送失败");
     }
 
-    /**
-     * 发送纯文本邮件（带抄送）
-     *
-     * @param from 发件人邮箱
-     * @param to 收件人邮箱
-     * @param cc 抄送人邮箱（可选）
-     * @param bcc 密送人邮箱（可选）
-     * @param subject 邮件主题
-     * @param content 邮件内容
-     * @return 发送结果
-     */
+    @Operation(summary = "发送纯文本邮件（带抄送）", description = "发送带抄送和密送的纯文本邮件")
     @PostMapping("/sendSimpleWithCc")
-    public AjaxResult sendSimpleEmailWithCc(@RequestParam String from,
-                                            @RequestParam String to,
-                                            @RequestParam(required = false) String cc,
-                                            @RequestParam(required = false) String bcc,
-                                            @RequestParam String subject,
-                                            @RequestParam String content) {
+    public AjaxResult sendSimpleEmailWithCc(
+            @Parameter(description = "发件人邮箱", required = true) @RequestParam String from,
+            @Parameter(description = "收件人邮箱", required = true) @RequestParam String to,
+            @Parameter(description = "抄送人邮箱") @RequestParam(required = false) String cc,
+            @Parameter(description = "密送人邮箱") @RequestParam(required = false) String bcc,
+            @Parameter(description = "邮件主题", required = true) @RequestParam String subject,
+            @Parameter(description = "邮件内容", required = true) @RequestParam String content) {
         EmailDTO emailDTO = new EmailDTO(from, to, subject, content);
         emailDTO.setCc(cc);
         emailDTO.setBcc(bcc);
@@ -69,41 +57,26 @@ public class EmailController extends BaseController {
         return result ? success("邮件发送成功") : error("邮件发送失败");
     }
 
-    /**
-     * 发送HTML邮件
-     *
-     * @param from 发件人邮箱
-     * @param to 收件人邮箱
-     * @param subject 邮件主题
-     * @param htmlContent HTML内容
-     * @return 发送结果
-     */
+    @Operation(summary = "发送HTML邮件", description = "发送HTML格式的邮件")
     @PostMapping("/sendHtml")
-    public AjaxResult sendHtmlEmail(@RequestParam String from,
-                                     @RequestParam String to,
-                                     @RequestParam String subject,
-                                     @RequestParam String htmlContent) {
+    public AjaxResult sendHtmlEmail(
+            @Parameter(description = "发件人邮箱", required = true) @RequestParam String from,
+            @Parameter(description = "收件人邮箱", required = true) @RequestParam String to,
+            @Parameter(description = "邮件主题", required = true) @RequestParam String subject,
+            @Parameter(description = "HTML内容", required = true) @RequestParam String htmlContent) {
         EmailDTO emailDTO = new EmailDTO(from, to, subject, htmlContent, true);
         boolean result = emailService.sendHtmlEmail(emailDTO);
         return result ? success("邮件发送成功") : error("邮件发送失败");
     }
 
-    /**
-     * 发送带附件的邮件
-     *
-     * @param from 发件人邮箱
-     * @param to 收件人邮箱
-     * @param subject 邮件主题
-     * @param content 邮件内容
-     * @param filePaths 附件文件路径列表
-     * @return 发送结果
-     */
+    @Operation(summary = "发送带附件的邮件", description = "发送带附件的邮件")
     @PostMapping("/sendWithAttachment")
-    public AjaxResult sendEmailWithAttachment(@RequestParam String from,
-                                              @RequestParam String to,
-                                              @RequestParam String subject,
-                                              @RequestParam String content,
-                                              @RequestParam List<String> filePaths) {
+    public AjaxResult sendEmailWithAttachment(
+            @Parameter(description = "发件人邮箱", required = true) @RequestParam String from,
+            @Parameter(description = "收件人邮箱", required = true) @RequestParam String to,
+            @Parameter(description = "邮件主题", required = true) @RequestParam String subject,
+            @Parameter(description = "邮件内容", required = true) @RequestParam String content,
+            @Parameter(description = "附件文件路径列表", required = true) @RequestParam List<String> filePaths) {
         EmailDTO emailDTO = new EmailDTO(from, to, subject, content);
         List<File> files = new ArrayList<>();
         for (String filePath : filePaths) {
@@ -117,34 +90,20 @@ public class EmailController extends BaseController {
         return result ? success("邮件发送成功") : error("邮件发送失败");
     }
 
-    /**
-     * 使用自定义SMTP发送邮件
-     *
-     * @param smtpHost SMTP服务器地址
-     * @param smtpPort SMTP服务器端口
-     * @param username 用户名
-     * @param password 密码
-     * @param from 发件人邮箱
-     * @param to 收件人邮箱
-     * @param subject 邮件主题
-     * @param content 邮件内容
-     * @param isHtml 是否为HTML邮件
-     * @param useSSL 是否使用SSL
-     * @param useTLS 是否使用TLS
-     * @return 发送结果
-     */
+    @Operation(summary = "使用自定义SMTP发送邮件", description = "使用自定义SMTP服务器配置发送邮件")
     @PostMapping("/sendWithCustomSmtp")
-    public AjaxResult sendEmailWithCustomSmtp(@RequestParam String smtpHost,
-                                                @RequestParam int smtpPort,
-                                                @RequestParam String username,
-                                                @RequestParam String password,
-                                                @RequestParam String from,
-                                                @RequestParam String to,
-                                                @RequestParam String subject,
-                                                @RequestParam String content,
-                                                @RequestParam(defaultValue = "false") boolean isHtml,
-                                                @RequestParam(defaultValue = "false") boolean useSSL,
-                                                @RequestParam(defaultValue = "false") boolean useTLS) {
+    public AjaxResult sendEmailWithCustomSmtp(
+            @Parameter(description = "SMTP服务器地址", required = true) @RequestParam String smtpHost,
+            @Parameter(description = "SMTP服务器端口", required = true) @RequestParam int smtpPort,
+            @Parameter(description = "SMTP用户名", required = true) @RequestParam String username,
+            @Parameter(description = "SMTP密码", required = true) @RequestParam String password,
+            @Parameter(description = "发件人邮箱", required = true) @RequestParam String from,
+            @Parameter(description = "收件人邮箱", required = true) @RequestParam String to,
+            @Parameter(description = "邮件主题", required = true) @RequestParam String subject,
+            @Parameter(description = "邮件内容", required = true) @RequestParam String content,
+            @Parameter(description = "是否为HTML邮件") @RequestParam(defaultValue = "false") boolean isHtml,
+            @Parameter(description = "是否使用SSL") @RequestParam(defaultValue = "false") boolean useSSL,
+            @Parameter(description = "是否使用TLS") @RequestParam(defaultValue = "false") boolean useTLS) {
         EmailDTO emailDTO = new EmailDTO(from, to, subject, content, isHtml);
         EmailDTO.SmtpConfig smtpConfig = new EmailDTO.SmtpConfig(smtpHost, smtpPort, username, password, useSSL, useTLS);
         emailDTO.setSmtpConfig(smtpConfig);
@@ -152,22 +111,14 @@ public class EmailController extends BaseController {
         return result ? success("邮件发送成功") : error("邮件发送失败");
     }
 
-    /**
-     * 批量发送邮件
-     *
-     * @param from 发件人邮箱
-     * @param toList 收件人邮箱列表
-     * @param subject 邮件主题
-     * @param content 邮件内容
-     * @param isHtml 是否为HTML邮件
-     * @return 发送结果
-     */
+    @Operation(summary = "批量发送邮件", description = "批量发送邮件给多个收件人")
     @PostMapping("/sendBatch")
-    public AjaxResult sendBatchEmail(@RequestParam String from,
-                                      @RequestParam List<String> toList,
-                                      @RequestParam String subject,
-                                      @RequestParam String content,
-                                      @RequestParam(defaultValue = "false") boolean isHtml) {
+    public AjaxResult sendBatchEmail(
+            @Parameter(description = "发件人邮箱", required = true) @RequestParam String from,
+            @Parameter(description = "收件人邮箱列表", required = true) @RequestParam List<String> toList,
+            @Parameter(description = "邮件主题", required = true) @RequestParam String subject,
+            @Parameter(description = "邮件内容", required = true) @RequestParam String content,
+            @Parameter(description = "是否为HTML邮件") @RequestParam(defaultValue = "false") boolean isHtml) {
         int successCount = emailService.sendBatchEmail(from, toList, subject, content, isHtml);
         Map<String, Object> result = new HashMap<>();
         result.put("total", toList.size());

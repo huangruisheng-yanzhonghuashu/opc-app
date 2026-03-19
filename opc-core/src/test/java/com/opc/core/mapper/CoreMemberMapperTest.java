@@ -28,7 +28,7 @@ public class CoreMemberMapperTest
         member.setUsername("testuser");
 
         CoreMember resultMember = new CoreMember();
-        resultMember.setMemberId(1L);
+        resultMember.setId(1L);
         resultMember.setUsername("testuser");
 
         when(memberMapper.selectMemberList(any(CoreMember.class))).thenReturn(Arrays.asList(resultMember));
@@ -45,7 +45,7 @@ public class CoreMemberMapperTest
     public void testSelectMemberById()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setUsername("testuser");
 
         when(memberMapper.selectMemberById(1L)).thenReturn(member);
@@ -53,7 +53,7 @@ public class CoreMemberMapperTest
         CoreMember result = memberMapper.selectMemberById(1L);
 
         assertNotNull(result);
-        assertEquals(1L, result.getMemberId());
+        assertEquals(1L, result.getId());
         assertEquals("testuser", result.getUsername());
         verify(memberMapper, times(1)).selectMemberById(1L);
     }
@@ -77,7 +77,7 @@ public class CoreMemberMapperTest
     public void testUpdateMember()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setNickname("Updated Nickname");
 
         when(memberMapper.updateMember(any(CoreMember.class))).thenReturn(1);
@@ -89,33 +89,10 @@ public class CoreMemberMapperTest
     }
 
     @Test
-    public void testDeleteMemberById()
-    {
-        when(memberMapper.deleteMemberById(1L)).thenReturn(1);
-
-        int result = memberMapper.deleteMemberById(1L);
-
-        assertEquals(1, result);
-        verify(memberMapper, times(1)).deleteMemberById(1L);
-    }
-
-    @Test
-    public void testDeleteMemberByIds()
-    {
-        Long[] ids = {1L, 2L, 3L};
-        when(memberMapper.deleteMemberByIds(ids)).thenReturn(3);
-
-        int result = memberMapper.deleteMemberByIds(ids);
-
-        assertEquals(3, result);
-        verify(memberMapper, times(1)).deleteMemberByIds(ids);
-    }
-
-    @Test
     public void testCheckMemberNameUnique()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setUsername("existinguser");
 
         when(memberMapper.checkMemberNameUnique("existinguser")).thenReturn(member);
@@ -131,7 +108,7 @@ public class CoreMemberMapperTest
     public void testCheckPhoneUnique()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setPhoneNumber("13800138000");
 
         when(memberMapper.checkPhoneUnique("13800138000")).thenReturn(member);
@@ -147,7 +124,7 @@ public class CoreMemberMapperTest
     public void testCheckEmailUnique()
     {
         CoreMember member = new CoreMember();
-        member.setMemberId(1L);
+        member.setId(1L);
         member.setEmail("test@example.com");
 
         when(memberMapper.checkEmailUnique("test@example.com")).thenReturn(member);

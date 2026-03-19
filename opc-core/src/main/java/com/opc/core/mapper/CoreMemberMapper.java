@@ -7,11 +7,7 @@ public interface CoreMemberMapper
 {
     public List<CoreMember> selectMemberList(CoreMember member);
 
-    public CoreMember selectMemberById(Long memberId);
-
-    public int deleteMemberById(Long memberId);
-
-    public int deleteMemberByIds(Long[] memberIds);
+    public CoreMember selectMemberById(Long id);
 
     public int updateMember(CoreMember member);
 
@@ -22,4 +18,8 @@ public interface CoreMemberMapper
     public CoreMember checkPhoneUnique(String phoneNumber);
 
     public CoreMember checkEmailUnique(String email);
+
+    public int blockMember(Long id);
+
+    public int unblockMember(Long id);
 }

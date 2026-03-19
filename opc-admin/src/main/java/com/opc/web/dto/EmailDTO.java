@@ -1,5 +1,7 @@
 package com.opc.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -10,56 +12,37 @@ import java.util.Map;
  *
  * @author opc
  */
+@Schema(description = "邮件发送请求参数")
 public class EmailDTO {
 
-    /**
-     * 发件人邮箱
-     */
+    @Schema(description = "发件人邮箱", required = true, example = "sender@example.com")
     private String from;
 
-    /**
-     * 收件人邮箱
-     */
+    @Schema(description = "收件人邮箱", required = true, example = "receiver@example.com")
     private String to;
 
-    /**
-     * 抄送人邮箱（可选）
-     */
+    @Schema(description = "抄送人邮箱，多个用逗号分隔", example = "cc@example.com")
     private String cc;
 
-    /**
-     * 密送人邮箱（可选）
-     */
+    @Schema(description = "密送人邮箱，多个用逗号分隔", example = "bcc@example.com")
     private String bcc;
 
-    /**
-     * 邮件主题
-     */
+    @Schema(description = "邮件主题", required = true, example = "邮件主题")
     private String subject;
 
-    /**
-     * 邮件内容
-     */
+    @Schema(description = "邮件内容", required = true, example = "<p>邮件正文内容</p>")
     private String content;
 
-    /**
-     * 是否为HTML邮件
-     */
+    @Schema(description = "是否为HTML邮件", example = "true")
     private boolean isHtml = false;
 
-    /**
-     * 附件文件列表（可选）
-     */
+    @Schema(description = "附件文件列表")
     private List<File> attachmentFiles;
 
-    /**
-     * 内嵌图片（可选，Map<String, File> 格式：图片ID -> 图片文件）
-     */
+    @Schema(description = "内嵌图片，key为图片ID，value为图片文件")
     private Map<String, File> inlineImages;
 
-    /**
-     * 自定义SMTP服务器配置（可选）
-     */
+    @Schema(description = "自定义SMTP服务器配置")
     private SmtpConfig smtpConfig;
 
     public EmailDTO() {
@@ -160,38 +143,24 @@ public class EmailDTO {
         this.smtpConfig = smtpConfig;
     }
 
-    /**
-     * SMTP配置类
-     */
+    @Schema(description = "SMTP配置类")
     public static class SmtpConfig {
-        /**
-         * SMTP服务器地址
-         */
+        @Schema(description = "SMTP服务器地址", example = "smtp.example.com")
         private String host;
 
-        /**
-         * SMTP服务器端口
-         */
+        @Schema(description = "SMTP服务器端口", example = "587")
         private int port;
 
-        /**
-         * 用户名
-         */
+        @Schema(description = "SMTP用户名", example = "username")
         private String username;
 
-        /**
-         * 密码
-         */
+        @Schema(description = "SMTP密码", example = "password")
         private String password;
 
-        /**
-         * 是否使用SSL
-         */
+        @Schema(description = "是否使用SSL", example = "false")
         private boolean useSSL = false;
 
-        /**
-         * 是否使用TLS
-         */
+        @Schema(description = "是否使用TLS", example = "true")
         private boolean useTLS = false;
 
         public SmtpConfig() {

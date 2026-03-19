@@ -8,9 +8,9 @@ export function listMember(query) {
   })
 }
 
-export function getMember(memberId) {
+export function getMember(id) {
   return request({
-    url: '/core/member/' + memberId,
+    url: '/core/member/' + id,
     method: 'get'
   })
 }
@@ -31,9 +31,16 @@ export function updateMember(data) {
   })
 }
 
-export function delMember(memberId) {
+export function blockMember(id) {
   return request({
-    url: '/core/member/' + memberId,
-    method: 'delete'
+    url: '/core/member/block/' + id,
+    method: 'put'
+  })
+}
+
+export function unblockMember(id) {
+  return request({
+    url: '/core/member/unblock/' + id,
+    method: 'put'
   })
 }

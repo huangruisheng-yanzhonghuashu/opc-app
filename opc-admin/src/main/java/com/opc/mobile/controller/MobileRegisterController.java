@@ -18,10 +18,13 @@ import com.opc.mobile.dto.EmailCodeRequestDTO;
 import com.opc.mobile.dto.MobileRegisterDTO;
 import com.opc.web.dto.EmailDTO;
 import com.opc.web.service.EmailService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +37,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author opc
  */
+@Tag(name = "移动端注册", description = "移动端用户注册相关接口")
 @RestController
 @RequestMapping("/mobile/register")
 public class MobileRegisterController extends MobileBaseController {
@@ -55,14 +59,9 @@ public class MobileRegisterController extends MobileBaseController {
     @Value("${spring.mail.username:}")
     private String mailFrom;
 
-    /**
-     * 发送邮箱验证码
-     *
-     * @param requestDTO 请求参数
-     * @return 结果
-     */
+    @Operation(summary = "发送邮箱验证码", description = "向指定邮箱发送注册验证码，验证码有效期5分钟")
     @PostMapping("/sendEmailCode")
-    public AjaxResult sendEmailCode(@RequestBody EmailCodeRequestDTO requestDTO) {
+    public AjaxResult sendEmailCode(@Validated @RequestBody EmailCodeRequestDTO requestDTO) {
         String username = requestDTO.getUsername();
         String email = requestDTO.getEmail();
 
@@ -129,14 +128,9 @@ public class MobileRegisterController extends MobileBaseController {
         }
     }
 
-    /**
-     * 邮箱验证码注册
-     *
-     * @param registerDTO 注册参数
-     * @return 结果
-     */
+    @Operation(summary = "邮箱验证码注册", description = "使用邮箱验证码完成用户注册")
     @PostMapping("/registerByEmail")
-    public AjaxResult registerByEmail(@RequestBody MobileRegisterDTO registerDTO) {
+    public AjaxResult registerByEmail(@Validated @RequestBody MobileRegisterDTO registerDTO) {
         // 检查系统是否开启注册功能
         if (!("true".equals(configService.selectConfigByKey("sys.account.registerUser")))) {
             return AjaxResult.error("当前系统没有开启注册功能！");

@@ -4,7 +4,7 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,19 +53,19 @@ public class CoreMemberController extends BaseController
     }
 
     @Operation(summary = "获取会员详情", description = "根据会员ID获取详细信息")
-    @Parameter(name = "memberId", description = "会员ID", required = true)
+    @Parameter(name = "id", description = "会员ID", required = true)
     @PreAuthorize("@ss.hasPermi('core:member:query')")
-    @GetMapping(value = "/{memberId}")
-    public AjaxResult getInfo(@PathVariable Long memberId)
+    @GetMapping(value = "/{id}")
+    public AjaxResult getInfo(@PathVariable Long id)
     {
-        return success(memberService.selectMemberById(memberId));
+        return success(memberService.selectMemberById(id));
     }
 
     @Operation(summary = "新增会员", description = "新增会员信息")
     @PreAuthorize("@ss.hasPermi('core:member:add')")
     @Log(title = "会员管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody CoreMember member)
+    public AjaxResult add(@Validated @RequestBody CoreMember member)
     {
         if (!memberService.checkMemberNameUnique(member))
         {
@@ -87,7 +87,7 @@ public class CoreMemberController extends BaseController
     @PreAuthorize("@ss.hasPermi('core:member:edit')")
     @Log(title = "会员管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody CoreMember member)
+    public AjaxResult edit(@Validated @RequestBody CoreMember member)
     {
         if (!memberService.checkMemberNameUnique(member))
         {
@@ -105,13 +105,23 @@ public class CoreMemberController extends BaseController
         return toAjax(memberService.updateMember(member));
     }
 
-    @Operation(summary = "删除会员", description = "根据会员ID数组删除会员")
-    @Parameter(name = "memberIds", description = "会员ID数组", required = true)
-    @PreAuthorize("@ss.hasPermi('core:member:remove')")
-    @Log(title = "会员管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{memberIds}")
-    public AjaxResult remove(@PathVariable Long[] memberIds)
+    @Operation(summary = "拉黑会员", description = "将会员状态设置为禁用（拉黑）")
+    @Parameter(name = "id", description = "会员ID", required = true)
+    @PreAuthorize("@ss.hasPermi('core:member:edit')")
+    @Log(title = "会员管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/block/{id}")
+    public AjaxResult block(@PathVariable Long id)
     {
-        return toAjax(memberService.deleteMemberByIds(memberIds));
+        return toAjax(memberService.blockMember(id));
+    }
+
+    @Operation(summary = "解除拉黑", description = "将会员状态设置为正常（解除拉黑）")
+    @Parameter(name = "id", description = "会员ID", required = true)
+    @PreAuthorize("@ss.hasPermi('core:member:edit')")
+    @Log(title = "会员管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/unblock/{id}")
+    public AjaxResult unblock(@PathVariable Long id)
+    {
+        return toAjax(memberService.unblockMember(id));
     }
 }

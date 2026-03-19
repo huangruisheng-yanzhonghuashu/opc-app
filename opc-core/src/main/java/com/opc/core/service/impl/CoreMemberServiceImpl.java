@@ -22,41 +22,44 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     }
 
     @Override
-    public CoreMember selectMemberById(Long memberId)
+    public CoreMember selectMemberById(Long id)
     {
-        return memberMapper.selectMemberById(memberId);
-    }
-
-    @Override
-    public int deleteMemberById(Long memberId)
-    {
-        return memberMapper.deleteMemberById(memberId);
-    }
-
-    @Override
-    public int deleteMemberByIds(Long[] memberIds)
-    {
-        return memberMapper.deleteMemberByIds(memberIds);
+        return memberMapper.selectMemberById(id);
     }
 
     @Override
     public int insertMember(CoreMember member)
     {
+        convertPackageToLevel(member);
         return memberMapper.insertMember(member);
     }
 
     @Override
     public int updateMember(CoreMember member)
     {
+        convertPackageToLevel(member);
         return memberMapper.updateMember(member);
+    }
+
+    private void convertPackageToLevel(CoreMember member) {
+        if (member.getCurrentPackage() != null) {
+            String packageName = member.getCurrentPackage();
+            if ("一级".equals(packageName)) {
+                member.setCurrentPackageLevel(1);
+            } else if ("二级".equals(packageName)) {
+                member.setCurrentPackageLevel(2);
+            } else if ("三级".equals(packageName)) {
+                member.setCurrentPackageLevel(3);
+            }
+        }
     }
 
     @Override
     public boolean checkMemberNameUnique(CoreMember member)
     {
-        Long memberId = StringUtils.isNull(member.getMemberId()) ? -1L : member.getMemberId();
+        Long id = StringUtils.isNull(member.getId()) ? -1L : member.getId();
         CoreMember info = memberMapper.checkMemberNameUnique(member.getUsername());
-        if (StringUtils.isNotNull(info) && info.getMemberId().longValue() != memberId.longValue())
+        if (StringUtils.isNotNull(info) && info.getId().longValue() != id.longValue())
         {
             return UserConstants.NOT_UNIQUE;
         }
@@ -66,9 +69,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     @Override
     public boolean checkPhoneUnique(CoreMember member)
     {
-        Long memberId = StringUtils.isNull(member.getMemberId()) ? -1L : member.getMemberId();
+        Long id = StringUtils.isNull(member.getId()) ? -1L : member.getId();
         CoreMember info = memberMapper.checkPhoneUnique(member.getPhoneNumber());
-        if (StringUtils.isNotNull(info) && info.getMemberId().longValue() != memberId.longValue())
+        if (StringUtils.isNotNull(info) && info.getId().longValue() != id.longValue())
         {
             return UserConstants.NOT_UNIQUE;
         }
@@ -78,12 +81,24 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     @Override
     public boolean checkEmailUnique(CoreMember member)
     {
-        Long memberId = StringUtils.isNull(member.getMemberId()) ? -1L : member.getMemberId();
+        Long id = StringUtils.isNull(member.getId()) ? -1L : member.getId();
         CoreMember info = memberMapper.checkEmailUnique(member.getEmail());
-        if (StringUtils.isNotNull(info) && info.getMemberId().longValue() != memberId.longValue())
+        if (StringUtils.isNotNull(info) && info.getId().longValue() != id.longValue())
         {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
+    }
+
+    @Override
+    public int blockMember(Long id)
+    {
+        return memberMapper.blockMember(id);
+    }
+
+    @Override
+    public int unblockMember(Long id)
+    {
+        return memberMapper.unblockMember(id);
     }
 }

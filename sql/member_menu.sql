@@ -18,7 +18,7 @@ insert into sys_menu values('200', '会员管理', '5', '1', 'member', 'core/mem
 insert into sys_menu values('2000', '会员查询', '200', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:member:query', '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('2001', '会员新增', '200', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:member:add', '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('2002', '会员修改', '200', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:member:edit', '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('2003', '会员删除', '200', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:member:remove', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('2003', '会员拉黑', '200', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:member:block', '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('2004', '会员导出', '200', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:member:export', '#', 'admin', sysdate(), '', null, '');
 
 -- ----------------------------

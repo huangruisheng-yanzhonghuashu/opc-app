@@ -163,7 +163,9 @@ springdoc:
     operations-sorter: alpha
     # 禁用默认的请求时长显示，减少问题
     display-request-duration: false
-  packages-to-scan: com.opc.web.controller
+  packages-to-scan: com.opc.web.controller,com.opc.mobile.controller
+  # 扫描DTO模型包路径
+  model-packages: com.opc.web.dto,com.opc.mobile.dto,com.opc.core.domain
 
 # Knife4j 增强配置
 knife4j:

@@ -1,5 +1,6 @@
 package com.opc.core.domain;
 
+import java.time.Instant;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -14,17 +15,7 @@ public class CoreMember extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     @Excel(name = "会员ID", cellType = ColumnType.NUMERIC)
-    private Long memberId;
-
-    @Excel(name = "会员名")
-    private String memberName;
-
-    @Excel(name = "手机号")
-    private String phoneNumber;
-
-    @Excel(name = "邮箱")
-    @Email(message = "邮箱格式不正确")
-    private String email;
+    private Long id;
 
     @Excel(name = "会员名")
     @NotBlank(message = "会员名不能为空")
@@ -35,23 +26,27 @@ public class CoreMember extends BaseEntity
     @Size(min = 0, max = 50, message = "会员昵称长度不能超过50个字符")
     private String nickname;
 
+    @Excel(name = "手机号")
+    private String phoneNumber;
+
+    @Excel(name = "邮箱")
+    @Email(message = "邮箱格式不正确")
+    private String email;
+
+    @Excel(name = "头像")
+    private String avatar;
+
     @Excel(name = "最近活跃时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    private String lastActiveTime;
+    private Instant lastActiveTime;
 
     @Excel(name = "当前购买套餐")
     @Size(min = 0, max = 100, message = "套餐名称长度不能超过100个字符")
     private String currentPackage;
 
-    @Excel(name = "一级用户数", cellType = ColumnType.NUMERIC)
-    private Integer level1Users;
+    @Excel(name = "当前套餐等级", cellType = ColumnType.NUMERIC)
+    private Integer currentPackageLevel;
 
-    @Excel(name = "二级用户数", cellType = ColumnType.NUMERIC)
-    private Integer level2Users;
-
-    @Excel(name = "三级用户数", cellType = ColumnType.NUMERIC)
-    private Integer level3Users;
-
-    @Excel(name = "来源")
+    @Excel(name = "来源", readConverterExp = "email=邮箱,x=X,facebook=Facebook,apple=Apple,google=Google")
     @Size(min = 0, max = 50, message = "来源长度不能超过50个字符")
     private String source;
 
@@ -59,40 +54,23 @@ public class CoreMember extends BaseEntity
     @Size(min = 0, max = 64, message = "来源ID长度不能超过64个字符")
     private String sourceId;
 
+    @Excel(name = "Token")
+    private String token;
+
     @Excel(name = "会员状态", readConverterExp = "0=正常,1=禁用")
     private String status;
 
     @Excel(name = "注册时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    private String registerTime;
+    private Instant registerTime;
 
-    public Long getMemberId()
+    public Long getId()
     {
-        return memberId;
+        return id;
     }
 
-    public void setMemberId(Long memberId)
+    public void setId(Long id)
     {
-        this.memberId = memberId;
-    }
-
-    public String getPhoneNumber()
-    {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber)
-    {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getEmail()
-    {
-        return email;
-    }
-
-    public void setEmail(String email)
-    {
-        this.email = email;
+        this.id = id;
     }
 
     public String getUsername()
@@ -115,12 +93,42 @@ public class CoreMember extends BaseEntity
         this.nickname = nickname;
     }
 
-    public String getLastActiveTime()
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber)
+    {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.email = email;
+    }
+
+    public String getAvatar()
+    {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar)
+    {
+        this.avatar = avatar;
+    }
+
+    public Instant getLastActiveTime()
     {
         return lastActiveTime;
     }
 
-    public void setLastActiveTime(String lastActiveTime)
+    public void setLastActiveTime(Instant lastActiveTime)
     {
         this.lastActiveTime = lastActiveTime;
     }
@@ -135,34 +143,14 @@ public class CoreMember extends BaseEntity
         this.currentPackage = currentPackage;
     }
 
-    public Integer getLevel1Users()
+    public Integer getCurrentPackageLevel()
     {
-        return level1Users;
+        return currentPackageLevel;
     }
 
-    public void setLevel1Users(Integer level1Users)
+    public void setCurrentPackageLevel(Integer currentPackageLevel)
     {
-        this.level1Users = level1Users;
-    }
-
-    public Integer getLevel2Users()
-    {
-        return level2Users;
-    }
-
-    public void setLevel2Users(Integer level2Users)
-    {
-        this.level2Users = level2Users;
-    }
-
-    public Integer getLevel3Users()
-    {
-        return level3Users;
-    }
-
-    public void setLevel3Users(Integer level3Users)
-    {
-        this.level3Users = level3Users;
+        this.currentPackageLevel = currentPackageLevel;
     }
 
     public String getSource()
@@ -185,6 +173,16 @@ public class CoreMember extends BaseEntity
         this.sourceId = sourceId;
     }
 
+    public String getToken()
+    {
+        return token;
+    }
+
+    public void setToken(String token)
+    {
+        this.token = token;
+    }
+
     public String getStatus()
     {
         return status;
@@ -195,12 +193,12 @@ public class CoreMember extends BaseEntity
         this.status = status;
     }
 
-    public String getRegisterTime()
+    public Instant getRegisterTime()
     {
         return registerTime;
     }
 
-    public void setRegisterTime(String registerTime)
+    public void setRegisterTime(Instant registerTime)
     {
         this.registerTime = registerTime;
     }
@@ -208,18 +206,18 @@ public class CoreMember extends BaseEntity
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
-            .append("memberId", getMemberId())
-            .append("phoneNumber", getPhoneNumber())
-            .append("email", getEmail())
+            .append("id", getId())
             .append("username", getUsername())
             .append("nickname", getNickname())
+            .append("phoneNumber", getPhoneNumber())
+            .append("email", getEmail())
+            .append("avatar", getAvatar())
             .append("lastActiveTime", getLastActiveTime())
             .append("currentPackage", getCurrentPackage())
-            .append("level1Users", getLevel1Users())
-            .append("level2Users", getLevel2Users())
-            .append("level3Users", getLevel3Users())
+            .append("currentPackageLevel", getCurrentPackageLevel())
             .append("source", getSource())
             .append("sourceId", getSourceId())
+            .append("token", getToken())
             .append("status", getStatus())
             .append("registerTime", getRegisterTime())
             .append("createBy", getCreateBy())
