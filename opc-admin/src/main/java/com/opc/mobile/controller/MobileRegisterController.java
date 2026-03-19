@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author opc
  */
-@Tag(name = "移动端注册", description = "移动端用户注册相关接口")
+@Tag(name = "移动端会员注册", description = "移动端用户注册相关接口")
 @RestController
 @RequestMapping("/mobile/register")
 public class MobileRegisterController extends MobileBaseController {
