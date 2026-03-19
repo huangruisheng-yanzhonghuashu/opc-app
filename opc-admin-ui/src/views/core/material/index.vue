@@ -1,10 +1,21 @@
 <template>
    <div class="app-container">
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-         <el-tab-pane label="一级用户素材" name="1"></el-tab-pane>
-         <el-tab-pane label="二级用户素材" name="2"></el-tab-pane>
-         <el-tab-pane label="三级用户素材" name="3"></el-tab-pane>
-      </el-tabs>
+      <div class="material-tab">
+         <el-radio-group v-model="activeTab" @change="handleTabChange" class="tab-group">
+            <el-radio-button value="1">
+               <el-icon><User /></el-icon>
+               普通素材
+            </el-radio-button>
+            <el-radio-button value="2">
+               <el-icon><Star /></el-icon>
+               VIP素材
+            </el-radio-button>
+            <el-radio-button value="3">
+               <el-icon><Medal /></el-icon>
+               超级VIP
+            </el-radio-button>
+         </el-radio-group>
+      </div>
 
       <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
          <el-form-item label="标题" prop="title">
@@ -319,6 +330,7 @@
 
 <script setup name="Material">
 import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop } from "@/api/core/material"
+import { User, Star, Medal } from '@element-plus/icons-vue'
 
 const { proxy } = getCurrentInstance()
 
@@ -513,4 +525,18 @@ getList()
 </script>
 
 <style scoped>
+.material-tab {
+  margin-bottom: 20px;
+}
+.tab-group :deep(.el-radio-button__inner) {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tab-group :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
 </style>

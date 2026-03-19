@@ -1,6 +1,7 @@
 package com.opc.core.service;
 
 import java.util.List;
+import java.util.Map;
 import com.opc.core.domain.CoreMember;
 
 public interface ICoreMemberService
@@ -26,4 +27,6 @@ public interface ICoreMemberService
     public int unblockMember(Long id);
 
     public int updateLoginInfo(Long id, String ipaddr);
+
+    public List<Map<String, Object>> getMemberOverview(String startDate, String endDate);
 }

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CorePackageOrderMapper">
+
+	<resultMap type="CorePackageOrder" id="CorePackageOrderResult">
+		<id     property="id"                  column="id"                  />
+		<result property="orderNo"             column="order_no"             />
+		<result property="memberId"            column="member_id"            />
+		<result property="email"               column="email"                />
+		<result property="thirdPartyAccount"  column="third_party_account"  />
+		<result property="nickname"           column="nickname"             />
+		<result property="packageId"          column="package_id"           />
+		<result property="packageName"        column="package_name"        />
+		<result property="packageType"        column="package_type"        />
+		<result property="price"              column="price"                />
+		<result property="payTime"            column="pay_time"            />
+		<result property="payStatus"          column="pay_status"          />
+		<result property="createBy"          column="create_by"           />
+		<result property="createTime"         column="create_time"         />
+		<result property="updateBy"           column="update_by"           />
+		<result property="updateTime"         column="update_time"         />
+		<result property="remark"            column="remark"              />
+	</resultMap>
+
+	<sql id="selectOrderVo">
+        select id, order_no, member_id, email, third_party_account, nickname,
+               package_id, package_name, package_type, price, pay_time, pay_status,
+               create_by, create_time, update_by, update_time, remark
+		from core_package_order
+    </sql>
+
+	<select id="selectOrderList" parameterType="CorePackageOrder" resultMap="CorePackageOrderResult">
+		<include refid="selectOrderVo"/>
+		<where>
+			<if test="email != null and email != ''">
+				AND email like concat('%', #{email}, '%')
+			</if>
+			<if test="thirdPartyAccount != null and thirdPartyAccount != ''">
+				AND third_party_account like concat('%', #{thirdPartyAccount}, '%')
+			</if>
+			<if test="nickname != null and nickname != ''">
+				AND nickname like concat('%', #{nickname}, '%')
+			</if>
+			<if test="packageName != null and packageName != ''">
+				AND package_name like concat('%', #{packageName}, '%')
+			</if>
+			<if test="payStatus != null and payStatus != ''">
+				AND pay_status = #{payStatus}
+			</if>
+		</where>
+		order by id desc
+	</select>
+
+	<select id="selectOrderById" parameterType="Long" resultMap="CorePackageOrderResult">
+		<include refid="selectOrderVo"/>
+		where id = #{id}
+	</select>
+
+	<select id="selectOrderByNo" parameterType="String" resultMap="CorePackageOrderResult">
+		<include refid="selectOrderVo"/>
+		where order_no = #{orderNo}
+	</select>
+
+	<update id="updateOrder" parameterType="CorePackageOrder">
+ 		update core_package_order
+ 		<set>
+ 			<if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+ 			<if test="memberId != null">member_id = #{memberId},</if>
+ 			<if test="email != null">email = #{email},</if>
+ 			<if test="thirdPartyAccount != null">third_party_account = #{thirdPartyAccount},</if>
+ 			<if test="nickname != null">nickname = #{nickname},</if>
+ 			<if test="packageId != null">package_id = #{packageId},</if>
+ 			<if test="packageName != null">package_name = #{packageName},</if>
+ 			<if test="packageType != null">package_type = #{packageType},</if>
+ 			<if test="price != null">price = #{price},</if>
+ 			<if test="payTime != null">pay_time = #{payTime},</if>
+ 			<if test="payStatus != null and payStatus != ''">pay_status = #{payStatus},</if>
+ 			<if test="remark != null">remark = #{remark},</if>
+ 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+ 			update_time = sysdate()
+ 		</set>
+ 		where id = #{id}
+	</update>
+
+ 	<insert id="insertOrder" parameterType="CorePackageOrder" useGeneratedKeys="true" keyProperty="id">
+ 		insert into core_package_order(
+ 			<if test="id != null and id != 0">id,</if>
+ 			<if test="orderNo != null and orderNo != ''">order_no,</if>
+ 			<if test="memberId != null">member_id,</if>
+ 			<if test="email != null">email,</if>
+ 			<if test="thirdPartyAccount != null">third_party_account,</if>
+ 			<if test="nickname != null">nickname,</if>
+ 			<if test="packageId != null">package_id,</if>
+ 			<if test="packageName != null">package_name,</if>
+ 			<if test="packageType != null">package_type,</if>
+ 			<if test="price != null">price,</if>
+ 			<if test="payTime != null">pay_time,</if>
+ 			<if test="payStatus != null and payStatus != ''">pay_status,</if>
+ 			<if test="remark != null">remark,</if>
+ 			<if test="createBy != null and createBy != ''">create_by,</if>
+ 			create_time
+ 		)values(
+ 			<if test="id != null and id != 0">#{id},</if>
+ 			<if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+ 			<if test="memberId != null">#{memberId},</if>
+ 			<if test="email != null">#{email},</if>
+ 			<if test="thirdPartyAccount != null">#{thirdPartyAccount},</if>
+ 			<if test="nickname != null">#{nickname},</if>
+ 			<if test="packageId != null">#{packageId},</if>
+ 			<if test="packageName != null">#{packageName},</if>
+ 			<if test="packageType != null">#{packageType},</if>
+ 			<if test="price != null">#{price},</if>
+ 			<if test="payTime != null">#{payTime},</if>
+ 			<if test="payStatus != null and payStatus != ''">#{payStatus},</if>
+ 			<if test="remark != null">#{remark},</if>
+ 			<if test="createBy != null and createBy != ''">#{createBy},</if>
+ 			sysdate()
+ 		)
+	</insert>
+
+	<delete id="deleteOrderById" parameterType="Long">
+		delete from core_package_order where id = #{id}
+	</delete>
+
+	<delete id="deleteOrderByIds" parameterType="Long">
+		delete from core_package_order where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+ 			#{id}
+ 		</foreach>
+	</delete>
+
+</mapper>

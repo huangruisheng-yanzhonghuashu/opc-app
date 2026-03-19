@@ -1,6 +1,7 @@
 package com.opc.core.mapper;
 
 import java.util.List;
+import java.util.Map;
 import com.opc.core.domain.CoreMember;
 
 public interface CoreMemberMapper
@@ -26,4 +27,6 @@ public interface CoreMemberMapper
     public int unblockMember(Long id);
 
     public int updateLoginInfo(Long id, String ipaddr);
+
+    public List<Map<String, Object>> selectMemberOverview(Map<String, Object> params);
 }

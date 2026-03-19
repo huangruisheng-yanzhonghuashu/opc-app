@@ -1,6 +1,9 @@
 package com.opc.core.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.opc.common.constant.UserConstants;
@@ -115,5 +118,68 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     public int updateLoginInfo(Long id, String ipaddr)
     {
         return memberMapper.updateLoginInfo(id, ipaddr);
+    }
+
+    @Override
+    public List<Map<String, Object>> getMemberOverview(String startDate, String endDate)
+    {
+        Map<String, Object> params = new HashMap<>();
+        params.put("startDate", startDate);
+        params.put("endDate", endDate);
+
+        List<Map<String, Object>> rawData = memberMapper.selectMemberOverview(params);
+
+        Map<String, Map<String, Object>> mergedData = new HashMap<>();
+
+        for (Map<String, Object> row : rawData)
+        {
+            String date = String.valueOf(row.get("date"));
+            if (!mergedData.containsKey(date))
+            {
+                mergedData.put(date, new HashMap<>());
+                mergedData.get(date).put("date", date);
+                mergedData.get(date).put("newUserCount", 0);
+                mergedData.get(date).put("activeUserCount", 0);
+            }
+
+            Long newUserCount = toLong(row.get("newUserCount"));
+            Long activeUserCount = toLong(row.get("activeUserCount"));
+            Long normalUserCount = toLong(row.get("normalUserCount"));
+            Long vipUserCount = toLong(row.get("vipUserCount"));
+
+            if (newUserCount != null && newUserCount > 0)
+            {
+                mergedData.get(date).put("newUserCount", newUserCount);
+            }
+            if (activeUserCount != null && activeUserCount > 0)
+            {
+                mergedData.get(date).put("activeUserCount", activeUserCount);
+            }
+            if (normalUserCount != null && normalUserCount > 0)
+            {
+                mergedData.get(date).put("normalUserCount", normalUserCount);
+            }
+            if (vipUserCount != null && vipUserCount > 0)
+            {
+                mergedData.get(date).put("vipUserCount", vipUserCount);
+            }
+        }
+
+        return new ArrayList<>(mergedData.values());
+    }
+
+    private Long toLong(Object obj)
+    {
+        if (obj == null) return null;
+        if (obj instanceof Long) return (Long) obj;
+        if (obj instanceof Integer) return ((Integer) obj).longValue();
+        try
+        {
+            return Long.parseLong(String.valueOf(obj));
+        }
+        catch (NumberFormatException e)
+        {
+            return null;
+        }
     }
 }
