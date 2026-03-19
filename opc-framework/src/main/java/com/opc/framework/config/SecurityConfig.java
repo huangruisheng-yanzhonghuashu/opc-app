@@ -104,7 +104,7 @@ public class SecurityConfig
                     // 移动端接口允许匿名访问
                     .requestMatchers("/mobile/**").permitAll()
                     // 会员接口允许匿名访问
-                    .requestMatchers("/core/member/login", "/core/member/logout").permitAll()
+                    .requestMatchers("/mobile/member/login", "/mobile/member/logout").permitAll()
                     // 静态资源，可匿名访问
                     .requestMatchers(HttpMethod.GET, "/", "/*.html", "/**.html", "/**.css", "/**.js", "/profile/**").permitAll()
                     .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/doc.html", "/webjars/**", "/druid/**").permitAll()
