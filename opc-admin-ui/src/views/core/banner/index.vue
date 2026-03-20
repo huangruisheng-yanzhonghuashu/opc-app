@@ -129,7 +129,18 @@
                <el-input v-model="form.title" placeholder="请输入标题" />
             </el-form-item>
             <el-form-item label="图片" prop="imageUrl">
-               <el-input v-model="form.imageUrl" placeholder="请输入图片URL" />
+               <el-upload
+                  class="avatar-uploader"
+                  :action="uploadAction"
+                  :headers="uploadHeaders"
+                  :show-file-list="false"
+                  :on-success="handleUploadSuccess"
+                  :on-error="handleUploadError"
+                  :before-upload="beforeUpload"
+               >
+                  <img v-if="form.imageUrl" :src="form.imageUrl" class="avatar" />
+                  <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+               </el-upload>
             </el-form-item>
             <el-form-item label="链接类型" prop="linkType">
                <el-radio-group v-model="form.linkType">
@@ -203,8 +214,13 @@
 
 <script setup name="Banner">
 import { listBanner, getBanner, addBanner, updateBanner, delBanner, changeBannerStatus } from "@/api/core/banner"
+import { getToken } from "@/utils/auth"
 
 const { proxy } = getCurrentInstance()
+
+// 上传相关配置
+const uploadAction = ref(import.meta.env.VITE_APP_BASE_API + "/common/upload")
+const uploadHeaders = ref({ Authorization: "Bearer " + getToken() })
 
 const bannerList = ref([])
 const open = ref(false)
@@ -365,4 +381,69 @@ function handleExport() {
 }
 
 getList()
+
+/** 上传成功回调 */
+function handleUploadSuccess(response) {
+  if (response.code === 200) {
+    form.value.imageUrl = response.url
+    proxy.$modal.msgSuccess("上传成功")
+  } else {
+    proxy.$modal.msgError(response.msg || "上传失败")
+  }
+}
+
+/** 上传失败回调 */
+function handleUploadError() {
+  proxy.$modal.msgError("上传失败")
+}
+
+/** 上传前校验 */
+function beforeUpload(file) {
+  const isJPG = file.type === "image/jpeg"
+  const isPNG = file.type === "image/png"
+  const isGIF = file.type === "image/gif"
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isJPG && !isPNG && !isGIF) {
+    proxy.$modal.msgError("请上传 JPG/PNG/GIF 格式的图片!")
+    return false
+  }
+  if (!isLt2M) {
+    proxy.$modal.msgError("图片大小不能超过 2MB!")
+    return false
+  }
+  return true
+}
 </script>
+
+<style scoped>
+.avatar-uploader {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+  width: 200px;
+  height: 120px;
+}
+.avatar-uploader:hover {
+  border-color: var(--el-color-primary);
+}
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 200px;
+  height: 120px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar {
+  width: 200px;
+  height: 120px;
+  display: block;
+  object-fit: cover;
+}
+</style>
