@@ -36,9 +36,11 @@ const usePermissionStore = defineStore(
         return new Promise(resolve => {
           // 向后端请求路由数据
           getRouters().then(res => {
-            const sdata = JSON.parse(JSON.stringify(res.data))
-            const rdata = JSON.parse(JSON.stringify(res.data))
-            const defaultData = JSON.parse(JSON.stringify(res.data))
+            // 对菜单进行排序：运营管理排在系统管理前面
+            const sortedData = sortMenus(res.data)
+            const sdata = JSON.parse(JSON.stringify(sortedData))
+            const rdata = JSON.parse(JSON.stringify(sortedData))
+            const defaultData = JSON.parse(JSON.stringify(sortedData))
             const sidebarRoutes = filterAsyncRouter(sdata)
             const rewriteRoutes = filterAsyncRouter(rdata, false, true)
             const defaultRoutes = filterAsyncRouter(defaultData)
@@ -111,6 +113,32 @@ export function filterDynamicRoutes(routes) {
     }
   })
   return res
+}
+
+// 菜单排序：将运营管理排在系统管理前面
+function sortMenus(menus) {
+  if (!menus || !Array.isArray(menus)) return menus
+  
+  // 定义菜单顺序优先级，数字越小越靠前
+  const priorityMap = {
+    '运营管理': 1,
+    '系统管理': 2
+  }
+  
+  const sorted = [...menus].sort((a, b) => {
+    const priorityA = priorityMap[a.name] || priorityMap[a.meta?.title] || 99
+    const priorityB = priorityMap[b.name] || priorityMap[b.meta?.title] || 99
+    return priorityA - priorityB
+  })
+  
+  // 递归处理子菜单
+  sorted.forEach(menu => {
+    if (menu.children && menu.children.length > 0) {
+      menu.children = sortMenus(menu.children)
+    }
+  })
+  
+  return sorted
 }
 
 export const loadView = (view) => {

@@ -176,7 +176,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			COUNT(*) as newUserCount,
 			0 as activeUserCount,
 			0 as normalUserCount,
-			0 as vipUserCount
+			0 as vipUserCount,
+			0 as svipUserCount
 		FROM core_member
 		WHERE register_time >= #{startDate}
 		  AND register_time &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
@@ -189,7 +190,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			0 as newUserCount,
 			COUNT(DISTINCT id) as activeUserCount,
 			0 as normalUserCount,
-			0 as vipUserCount
+			0 as vipUserCount,
+			0 as svipUserCount
 		FROM core_member
 		WHERE last_active_time >= #{startDate}
 		  AND last_active_time &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
@@ -202,7 +204,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			0 as newUserCount,
 			0 as activeUserCount,
 			COUNT(CASE WHEN current_package_level = 0 OR current_package_level IS NULL THEN 1 END) as normalUserCount,
-			COUNT(CASE WHEN current_package_level > 0 OR current_package IS NOT NULL THEN 1 END) as vipUserCount
+			COUNT(CASE WHEN current_package_level = 1 THEN 1 END) as vipUserCount,
+			COUNT(CASE WHEN current_package_level >= 2 THEN 1 END) as svipUserCount
 		FROM core_member
 		WHERE status = '0'
 	</select>
