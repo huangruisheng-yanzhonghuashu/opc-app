@@ -19,7 +19,7 @@ import com.opc.mobile.dto.MemberLoginDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "移动端会员登录", description = "会员邮箱密码登录相关接口")
+@Tag(name = "OpenAPI/会员登录", description = "移动端会员邮箱密码登录相关接口")
 @RestController
 @RequestMapping("/mobile/member")
 public class MemberLoginController
