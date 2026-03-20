@@ -1,37 +1,34 @@
 <svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
-  <!-- 运营管理图标 - 实心仪表盘风格 -->
-  <!-- 外圆环背景 -->
-  <circle cx="64" cy="64" r="60" fill="#F5F7FA" stroke="#DCDFE6" stroke-width="2"/>
+  <!-- 运营管理图标 - 实心填充风格 -->
+  <!-- 外圆环 - 粗实心 -->
+  <circle cx="64" cy="64" r="58" fill="none" stroke="#606266" stroke-width="12"/>
   
-  <!-- 外圆环边框 - 更粗更明显 -->
-  <circle cx="64" cy="64" r="56" fill="none" stroke="#606266" stroke-width="10"/>
+  <!-- 内部圆盘背景 -->
+  <circle cx="64" cy="64" r="48" fill="#F5F7FA"/>
   
-  <!-- 内部仪表盘刻度 - 粗短刻度线 -->
-  <path d="M64 12 L64 24" stroke="#909399" stroke-width="8" stroke-linecap="round"/>
-  <path d="M64 104 L64 116" stroke="#909399" stroke-width="8" stroke-linecap="round"/>
-  <path d="M12 64 L24 64" stroke="#909399" stroke-width="8" stroke-linecap="round"/>
-  <path d="M104 64 L116 64" stroke="#909399" stroke-width="8" stroke-linecap="round"/>
+  <!-- 上升箭头/折线 - 实心粗线 -->
+  <path d="M28 88 L48 68 L64 80 L88 56 L108 36" 
+        fill="none" 
+        stroke="#409EFF" 
+        stroke-width="10" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
   
-  <!-- 对角线刻度 -->
-  <path d="M26 26 L35 35" stroke="#C0C4CC" stroke-width="6" stroke-linecap="round"/>
-  <path d="M102 26 L93 35" stroke="#C0C4CC" stroke-width="6" stroke-linecap="round"/>
-  <path d="M26 102 L35 93" stroke="#C0C4CC" stroke-width="6" stroke-linecap="round"/>
-  <path d="M102 102 L93 93" stroke="#C0C4CC" stroke-width="6" stroke-linecap="round"/>
+  <!-- 箭头头部 -->
+  <path d="M92 40 L108 36 L104 52" 
+        fill="none" 
+        stroke="#67C23A" 
+        stroke-width="10" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
   
-  <!-- 上升折线 - 粗实线 -->
-  <polyline points="28,80 44,64 60,72 76,56 100,32" 
-            fill="none" 
-            stroke="#409EFF" 
-            stroke-width="10" 
-            stroke-linecap="round" 
-            stroke-linejoin="round"/>
+  <!-- 数据点 - 实心圆点 -->
+  <circle cx="48" cy="68" r="9" fill="#409EFF"/>
+  <circle cx="64" cy="80" r="9" fill="#409EFF"/>
+  <circle cx="88" cy="56" r="9" fill="#409EFF"/>
+  <circle cx="108" cy="36" r="11" fill="#67C23A"/>
   
-  <!-- 数据点 - 更大更明显 -->
-  <circle cx="44" cy="64" r="8" fill="#409EFF" stroke="#FFFFFF" stroke-width="3"/>
-  <circle cx="60" cy="72" r="8" fill="#409EFF" stroke="#FFFFFF" stroke-width="3"/>
-  <circle cx="76" cy="56" r="8" fill="#409EFF" stroke="#FFFFFF" stroke-width="3"/>
-  <circle cx="100" cy="32" r="10" fill="#67C23A" stroke="#FFFFFF" stroke-width="3"/>
-  
-  <!-- 中心装饰点 -->
-  <circle cx="64" cy="64" r="12" fill="#606266" stroke="#FFFFFF" stroke-width="4"/>
+  <!-- 中心装饰 -->
+  <circle cx="64" cy="64" r="14" fill="#606266"/>
+  <circle cx="64" cy="64" r="8" fill="#FFFFFF"/>
 </svg>
