@@ -249,9 +249,6 @@
                   </el-form-item>
                </el-col>
             </el-row>
-            <el-form-item label="会员展示图片" prop="coverImage">
-               <el-input v-model="form.coverImage" placeholder="请输入会员展示图片URL" />
-            </el-form-item>
             <el-form-item label="正文" prop="content">
                <Editor v-model="form.content" :min-height="300" />
             </el-form-item>
@@ -304,10 +301,6 @@
             </el-descriptions-item>
             <el-descriptions-item label="原链接" :span="2">
                <a v-if="detailData.originalUrl" :href="detailData.originalUrl" target="_blank">{{ detailData.originalUrl }}</a>
-               <span v-else>-</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="会员展示图片" :span="2">
-               <el-image v-if="detailData.coverImage" :src="detailData.coverImage" style="width: 100px; height: 100px" fit="cover" />
                <span v-else>-</span>
             </el-descriptions-item>
             <el-descriptions-item label="总结" :span="2">{{ detailData.summary || '-' }}</el-descriptions-item>
@@ -406,7 +399,6 @@ function reset() {
     publishTime: undefined,
     viewPermission: parseInt(activeTab.value),
     contentType: 'text',
-    coverImage: undefined,
     category: 'normal',
     status: '0',
     isTop: '0',
