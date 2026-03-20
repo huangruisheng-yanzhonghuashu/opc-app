@@ -56,7 +56,7 @@
 </template>
 
 <script setup name="MemberOverview">
-import { getMemberOverview } from "@/api/core/memberOverview"
+import { getMemberOverview } from "@/api/core/memberOverview.js"
 
 const { proxy } = getCurrentInstance()
 
