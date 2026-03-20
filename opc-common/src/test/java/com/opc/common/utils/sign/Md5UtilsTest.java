@@ -27,4 +27,22 @@ public class Md5UtilsTest {
         assertNotNull(hash);
         assertEquals(32, hash.length());
         // 空字符串的MD5值
-        assertEquals("d41d8
+        assertEquals("d41d8cd98f00b204e9800998ecf8427e", hash);
+    }
+
+    @Test
+    @DisplayName("MD5哈希-null")
+    public void testHash_Null() {
+        // null会导致空指针异常，但方法内部捕获了异常
+        String hash = Md5Utils.hash(null);
+        assertNull(hash);
+    }
+
+    @Test
+    @DisplayName("MD5哈希-中文字符")
+    public void testHash_Chinese() {
+        String text = "你好世界";
+        String hash = Md5Utils.hash(text);
+        assertNotNull(hash);
+        assertEquals(32, hash.length());
+        assertTrue(hash.matches("^[0-9
