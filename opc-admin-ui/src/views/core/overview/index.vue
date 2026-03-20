@@ -23,6 +23,13 @@
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
+      <el-form-item>
+        <el-button-group>
+          <el-button @click="setDateRange('month')">一月</el-button>
+          <el-button @click="setDateRange('quarter')">一季</el-button>
+          <el-button @click="setDateRange('year')">一年</el-button>
+        </el-button-group>
+      </el-form-item>
     </el-form>
 
     <el-table v-loading="loading" :data="overviewList" border>
@@ -119,6 +126,25 @@ function handleQuery() {
 function resetQuery() {
   queryParams.startDate = defaultStartDate.value
   queryParams.endDate = defaultEndDate.value
+  getList()
+}
+
+function setDateRange(range) {
+  const now = new Date()
+  const start = new Date()
+  switch (range) {
+    case 'month':
+      start.setMonth(start.getMonth() - 1)
+      break
+    case 'quarter':
+      start.setMonth(start.getMonth() - 3)
+      break
+    case 'year':
+      start.setFullYear(start.getFullYear() - 1)
+      break
+  }
+  queryParams.startDate = formatDate(start)
+  queryParams.endDate = formatDate(now)
   getList()
 }
 
