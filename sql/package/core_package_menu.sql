@@ -1,63 +1,37 @@
 -- ----------------------------
--- 套餐管理菜单（与会员管理同级，都在运营管理下）
+-- 套餐管理 菜单及权限
 -- ----------------------------
 
--- ----------------------------
--- 一级菜单：套餐管理（与会员管理同级）
--- ----------------------------
-INSERT INTO sys_menu VALUES('400', '套餐管理', '5', '3', 'package', '', '', '', 1, 0, 'M', '0', '0', '', 'money', 'admin', SYSDATE(), '', NULL, '套餐管理目录');
+-- 一级菜单：套餐管理（目录类型，上级：运营管理 menu_id=5，与数据概览同级）
+insert into sys_menu values('4000', '套餐管理', '5', '5', 'packageManage', '', '', '', 1, 0, 'M', '0', '0', '', 'shopping', 'admin', sysdate(), '', null, '套餐管理目录');
+
+-- 菜单：会员页面配置（上级：套餐管理）
+insert into sys_menu values('4001', '会员页面配置', '4000', '1', 'memberConfig', 'core/memberConfig/index', '', '', 1, 0, 'C', '0', '0', 'core:memberConfig:list', 'config', 'admin', sysdate(), '', null, '会员页面配置菜单');
+
+-- 菜单：套餐配置（上级：套餐管理）
+insert into sys_menu values('4002', '套餐配置', '4000', '2', 'package', 'core/package/index', '', '', 1, 0, 'C', '0', '0', 'core:package:list', 'gift', 'admin', sysdate(), '', null, '套餐配置菜单');
+
+-- 菜单：套餐订单（上级：套餐管理）
+insert into sys_menu values('4003', '套餐订单', '4000', '3', 'packageOrder', 'core/packageOrder/index', '', '', 1, 0, 'C', '0', '0', 'core:packageOrder:list', 'order', 'admin', sysdate(), '', null, '套餐订单菜单');
 
 -- ----------------------------
--- 二级菜单：会员页面配置（包含banner图和VIP引导图两个配置区块）
+-- 会员页面配置权限按钮
 -- ----------------------------
-INSERT INTO sys_menu VALUES('410', '会员页面配置', '400', '1', 'memberConfig', 'core/memberConfig/index', '', '', 1, 0, 'C', '0', '0', 'core:memberConfig:list', 'setting', 'admin', SYSDATE(), '', NULL, '会员页面配置菜单');
+insert into sys_menu values('4010', '会员页面配置查询', '4001', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:memberConfig:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('4011', '会员页面配置保存', '4001', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:memberConfig:save', '#', 'admin', sysdate(), '', null, '');
 
 -- ----------------------------
--- 二级菜单：付费套餐配置
+-- 套餐配置权限按钮
 -- ----------------------------
-INSERT INTO sys_menu VALUES('420', '付费套餐配置', '400', '2', 'package', 'core/package/index', '', '', 1, 0, 'C', '0', '0', 'core:package:list', 'shopping', 'admin', SYSDATE(), '', NULL, '付费套餐配置菜单');
+insert into sys_menu values('4020', '套餐查询', '4002', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('4021', '套餐新增', '4002', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:add', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('4022', '套餐修改', '4002', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:edit', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('4023', '套餐删除', '4002', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:remove', '#', 'admin', sysdate(), '', null, '');
 
 -- ----------------------------
--- 二级菜单：套餐购买明细
+-- 套餐订单权限按钮
 -- ----------------------------
-INSERT INTO sys_menu VALUES('430', '套餐购买明细', '400', '3', 'packageOrder', 'core/packageOrder/index', '', '', 1, 0, 'C', '0', '0', 'core:packageOrder:list', 'list', 'admin', SYSDATE(), '', NULL, '套餐购买明细菜单');
-
--- ----------------------------
--- 按钮权限 - 会员页面配置
--- ----------------------------
-INSERT INTO sys_menu VALUES('4100', '配置查询', '410', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:memberConfig:query', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('4101', '配置保存', '410', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:memberConfig:save', '#', 'admin', SYSDATE(), '', NULL, '');
-
--- ----------------------------
--- 按钮权限 - 付费套餐配置
--- ----------------------------
-INSERT INTO sys_menu VALUES('4200', '套餐查询', '420', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:query', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('4201', '套餐新增', '420', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:add', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('4202', '套餐修改', '420', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:edit', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('4203', '套餐删除', '420', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:package:remove', '#', 'admin', SYSDATE(), '', NULL, '');
-
--- ----------------------------
--- 按钮权限 - 套餐购买明细
--- ----------------------------
-INSERT INTO sys_menu VALUES('4300', '订单查询', '430', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:query', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('4301', '订单新增', '430', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:add', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('4302', '订单修改', '430', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:edit', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('4303', '订单删除', '430', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:remove', '#', 'admin', SYSDATE(), '', NULL, '');
-
--- ----------------------------
--- 为超级管理员角色赋予套餐管理所有权限
--- ----------------------------
-INSERT INTO sys_role_menu VALUES ('1', '400');
-INSERT INTO sys_role_menu VALUES ('1', '410');
-INSERT INTO sys_role_menu VALUES ('1', '4100');
-INSERT INTO sys_role_menu VALUES ('1', '4101');
-INSERT INTO sys_role_menu VALUES ('1', '420');
-INSERT INTO sys_role_menu VALUES ('1', '4200');
-INSERT INTO sys_role_menu VALUES ('1', '4201');
-INSERT INTO sys_role_menu VALUES ('1', '4202');
-INSERT INTO sys_role_menu VALUES ('1', '4203');
-INSERT INTO sys_role_menu VALUES ('1', '430');
-INSERT INTO sys_role_menu VALUES ('1', '4300');
-INSERT INTO sys_role_menu VALUES ('1', '4301');
-INSERT INTO sys_role_menu VALUES ('1', '4302');
-INSERT INTO sys_role_menu VALUES ('1', '4303');
+insert into sys_menu values('4030', '订单查询', '4003', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('4031', '订单新增', '4003', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:add', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('4032', '订单修改', '4003', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:edit', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('4033', '订单删除', '4003', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:remove', '#', 'admin', sysdate(), '', null, '');

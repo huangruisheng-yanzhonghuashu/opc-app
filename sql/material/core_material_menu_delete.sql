@@ -1,12 +1,9 @@
 -- ----------------------------
--- 素材管理菜单删除脚本
+-- 删除素材管理菜单及权限
 -- ----------------------------
 
--- 删除素材管理相关菜单权限
-DELETE FROM sys_role_menu WHERE menu_id IN (300, 3000, 3001, 3002, 3003, 3004, 3005, 3006);
+-- 删除素材权限
+delete from sys_menu where menu_id in ('3116', '3115', '3114', '3113', '3112', '3111', '3110');
 
--- 删除素材管理按钮权限
-DELETE FROM sys_menu WHERE menu_id IN (3000, 3001, 3002, 3003, 3004, 3005, 3006);
-
--- 删除素材管理菜单
-DELETE FROM sys_menu WHERE menu_id = 300;
+-- 删除素材菜单
+delete from sys_menu where menu_id = '3100';

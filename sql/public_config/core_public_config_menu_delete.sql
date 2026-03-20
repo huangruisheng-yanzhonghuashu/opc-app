@@ -1,21 +1,18 @@
 -- ----------------------------
--- 公共配置菜单删除脚本
+-- 删除公共配置菜单及权限
 -- ----------------------------
 
--- 删除公共配置相关菜单权限
-DELETE FROM sys_role_menu WHERE menu_id IN (400, 401, 4010, 4011, 4012, 4013, 4014, 4015, 402, 4020, 4021, 4022, 4023, 4024, 4025);
+-- 删除采集信息源权限
+delete from sys_menu where menu_id in ('3025', '3024', '3023', '3022', '3021', '3020');
 
--- 删除采集信息源按钮权限
-DELETE FROM sys_menu WHERE menu_id IN (4020, 4021, 4022, 4023, 4024, 4025);
+-- 删除Banner权限
+delete from sys_menu where menu_id in ('3015', '3014', '3013', '3012', '3011', '3010');
 
 -- 删除采集信息源菜单
-DELETE FROM sys_menu WHERE menu_id = 402;
-
--- 删除Banner按钮权限
-DELETE FROM sys_menu WHERE menu_id IN (4010, 4011, 4012, 4013, 4014, 4015);
+delete from sys_menu where menu_id = '3002';
 
 -- 删除Banner菜单
-DELETE FROM sys_menu WHERE menu_id = 401;
+delete from sys_menu where menu_id = '3001';
 
 -- 删除公共配置目录
-DELETE FROM sys_menu WHERE menu_id = 400;
+delete from sys_menu where menu_id = '3000';

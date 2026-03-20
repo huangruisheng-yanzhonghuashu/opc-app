@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "会员页面配置管理", description = "会员页面配置相关操作")
+@Tag(name = "会员页面配置", description = "会员页面配置相关操作")
 @RestController
 @RequestMapping("/core/memberConfig")
 public class CoreMemberConfigController extends BaseController

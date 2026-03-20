@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "资讯页banner配置", description = "Banner相关操作")
+@Tag(name = "Banner配置", description = "Banner相关操作")
 @RestController
 @RequestMapping("/core/banner")
 public class CoreBannerController extends BaseController

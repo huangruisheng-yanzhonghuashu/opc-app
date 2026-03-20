@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "采集信息源配置", description = "采集信息源相关操作")
+@Tag(name = "采集信息源", description = "采集信息源相关操作")
 @RestController
 @RequestMapping("/core/collect")
 public class CoreCollectSourceController extends BaseController

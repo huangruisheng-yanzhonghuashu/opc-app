@@ -1,50 +1,32 @@
 -- ----------------------------
--- 公共配置菜单（与会员管理同级，都在运营管理下，parent_id=5）
--- 注意：菜单ID已改为600系列，避免与套餐管理(400系列)冲突
+-- 公共配置 菜单及权限
 -- ----------------------------
 
--- 公共配置目录
-INSERT INTO sys_menu VALUES('600', '公共配置', '5', '3', 'publicConfig', '', '', '', 1, 0, 'M', '0', '0', '', 'system', 'admin', SYSDATE(), '', NULL, '公共配置目录');
+-- 一级菜单：公共配置（目录类型，上级：运营管理 menu_id=5）
+insert into sys_menu values('3000', '公共配置', '5', '2', 'publicConfig', '', '', '', 1, 0, 'M', '0', '0', '', 'cog', 'admin', sysdate(), '', null, '公共配置目录');
+
+-- 菜单：资讯页banner配置（上级：公共配置）
+insert into sys_menu values('3001', 'banner配置', '3000', '1', 'banner', 'core/banner/index', '', '', 1, 0, 'C', '0', '0', 'core:banner:list', 'image', 'admin', sysdate(), '', null, '资讯页banner配置菜单');
+
+-- 菜单：采集信息源配置（上级：公共配置）
+insert into sys_menu values('3002', '采集信息源', '3000', '2', 'collectSource', 'core/collectSource/index', '', '', 1, 0, 'C', '0', '0', 'core:collect:list', 'source', 'admin', sysdate(), '', null, '采集信息源配置菜单');
 
 -- ----------------------------
--- 资讯页banner配置菜单（parent_id=600）
+-- Banner配置权限按钮
 -- ----------------------------
-INSERT INTO sys_menu VALUES('601', '资讯页banner配置', '600', '1', 'banner', 'core/banner/index', '', '', 1, 0, 'C', '0', '0', 'core:banner:list', 'chart', 'admin', SYSDATE(), '', NULL, '资讯页banner配置菜单');
-
--- 按钮权限
-INSERT INTO sys_menu VALUES('6010', 'Banner查询', '601', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:query', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6011', 'Banner新增', '601', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:add', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6012', 'Banner修改', '601', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:edit', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6013', 'Banner删除', '601', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:remove', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6014', 'Banner状态', '601', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:changeStatus', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6015', 'Banner导出', '601', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:export', '#', 'admin', SYSDATE(), '', NULL, '');
+insert into sys_menu values('3010', 'Banner查询', '3001', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3011', 'Banner新增', '3001', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:add', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3012', 'Banner修改', '3001', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:edit', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3013', 'Banner删除', '3001', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:remove', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3014', 'Banner导出', '3001', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:export', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3015', 'Banner状态修改', '3001', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'core:banner:changeStatus', '#', 'admin', sysdate(), '', null, '');
 
 -- ----------------------------
--- 采集信息源配置菜单（parent_id=600）
+-- 采集信息源配置权限按钮
 -- ----------------------------
-INSERT INTO sys_menu VALUES('602', '采集信息源配置', '600', '2', 'collectSource', 'core/collectSource/index', '', '', 1, 0, 'C', '0', '0', 'core:collect:list', 'link', 'admin', SYSDATE(), '', NULL, '采集信息源配置菜单');
-
--- 按钮权限
-INSERT INTO sys_menu VALUES('6020', '配置查询', '602', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:query', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6021', '配置新增', '602', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:add', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6022', '配置修改', '602', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:edit', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6023', '配置删除', '602', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:remove', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6024', '配置状态', '602', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:changeStatus', '#', 'admin', SYSDATE(), '', NULL, '');
-INSERT INTO sys_menu VALUES('6025', '配置导出', '602', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:export', '#', 'admin', SYSDATE(), '', NULL, '');
-
--- 为超级管理员角色赋予公共配置所有权限
-INSERT INTO sys_role_menu VALUES ('1', '600');
-INSERT INTO sys_role_menu VALUES ('1', '601');
-INSERT INTO sys_role_menu VALUES ('1', '6010');
-INSERT INTO sys_role_menu VALUES ('1', '6011');
-INSERT INTO sys_role_menu VALUES ('1', '6012');
-INSERT INTO sys_role_menu VALUES ('1', '6013');
-INSERT INTO sys_role_menu VALUES ('1', '6014');
-INSERT INTO sys_role_menu VALUES ('1', '6015');
-INSERT INTO sys_role_menu VALUES ('1', '602');
-INSERT INTO sys_role_menu VALUES ('1', '6020');
-INSERT INTO sys_role_menu VALUES ('1', '6021');
-INSERT INTO sys_role_menu VALUES ('1', '6022');
-INSERT INTO sys_role_menu VALUES ('1', '6023');
-INSERT INTO sys_role_menu VALUES ('1', '6024');
-INSERT INTO sys_role_menu VALUES ('1', '6025');
+insert into sys_menu values('3020', '采集信息源查询', '3002', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3021', '采集信息源新增', '3002', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:add', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3022', '采集信息源修改', '3002', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:edit', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3023', '采集信息源删除', '3002', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:remove', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3024', '采集信息源导出', '3002', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:export', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('3025', '采集信息源状态修改', '3002', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'core:collect:changeStatus', '#', 'admin', sysdate(), '', null, '');
