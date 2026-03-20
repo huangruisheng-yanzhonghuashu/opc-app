@@ -292,7 +292,7 @@
                </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="头像" :span="2">
-               <el-avatar :size="60" :src="detailData.avatar" v-if="detailData.avatar" />
+               <el-avatar :size="60" :src="getAvatarUrl(detailData.avatar)" v-if="detailData.avatar" />
                <el-avatar :size="60" v-else>{{ detailData.username?.charAt(0) }}</el-avatar>
             </el-descriptions-item>
             <el-descriptions-item label="手机号" :span="1">{{ detailData.phoneNumber || '-' }}</el-descriptions-item>
