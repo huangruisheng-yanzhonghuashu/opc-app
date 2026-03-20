@@ -202,6 +202,7 @@
                         <el-option label="纯文本" value="text" />
                         <el-option label="图文" value="image" />
                         <el-option label="视频" value="video" />
+                        <el-option label="混合类型" value="mixed" />
                      </el-select>
                   </el-form-item>
                </el-col>
@@ -286,7 +287,7 @@
                <el-tag type="success">{{ detailData.viewPermission }}级套餐</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="内容类型" :span="1">
-               <span>{{ detailData.contentType === 'text' ? '纯文本' : detailData.contentType === 'image' ? '图文' : '视频' }}</span>
+               <span>{{ getContentTypeLabel(detailData.contentType) }}</span>
             </el-descriptions-item>
             <el-descriptions-item label="状态" :span="1">
                <el-tag :type="detailData.status === '0' ? 'success' : 'danger'">
@@ -366,6 +367,16 @@ function getCategoryLabel(category) {
     'svip': '超级VIP'
   }
   return map[category] || category || '-'
+}
+
+function getContentTypeLabel(contentType) {
+  const map = {
+    'text': '纯文本',
+    'image': '图文',
+    'video': '视频',
+    'mixed': '混合类型'
+  }
+  return map[contentType] || contentType || '-'
 }
 
 function getList() {
