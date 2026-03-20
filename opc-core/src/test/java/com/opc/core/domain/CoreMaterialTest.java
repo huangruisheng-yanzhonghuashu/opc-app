@@ -26,7 +26,6 @@ public class CoreMaterialTest
         material.setPublishTime(Instant.parse("2024-01-01T10:00:00Z"));
         material.setViewPermission(1);
         material.setContentType("article");
-        material.setCoverImage("https://example.com/cover.jpg");
         material.setCategory("tech");
         material.setStatus("0");
         material.setIsTop("1");
@@ -47,7 +46,6 @@ public class CoreMaterialTest
         assertEquals(Instant.parse("2024-01-01T10:00:00Z"), material.getPublishTime());
         assertEquals(Integer.valueOf(1), material.getViewPermission());
         assertEquals("article", material.getContentType());
-        assertEquals("https://example.com/cover.jpg", material.getCoverImage());
         assertEquals("tech", material.getCategory());
         assertEquals("0", material.getStatus());
         assertEquals("1", material.getIsTop());

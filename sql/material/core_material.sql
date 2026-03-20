@@ -18,7 +18,6 @@ CREATE TABLE core_material (
     publish_time        DATETIME        DEFAULT NULL               COMMENT '发布时间',
     view_permission     INT             DEFAULT 1                  COMMENT '查看权限（1一级套餐 2二级套餐 3三级套餐）',
     content_type        VARCHAR(20)     DEFAULT 'text'             COMMENT '内容类型（text/image/video）',
-    cover_image         VARCHAR(500)    DEFAULT NULL               COMMENT '会员展示图片',
     category            VARCHAR(50)     DEFAULT NULL               COMMENT '分类（normal/vip_column/vip/svip）',
     status              CHAR(1)         DEFAULT '0'                COMMENT '状态（0上线 1下线）',
     is_top              CHAR(1)         DEFAULT '0'                COMMENT '是否置顶（0否 1是）',

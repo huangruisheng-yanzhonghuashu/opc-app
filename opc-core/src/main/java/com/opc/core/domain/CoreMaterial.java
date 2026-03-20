@@ -56,9 +56,6 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "内容类型")
     private String contentType;
 
-    @Excel(name = "会员展示图片")
-    private String coverImage;
-
     @Excel(name = "分类")
     private String category;
 
@@ -221,16 +218,6 @@ public class CoreMaterial extends BaseEntity
         this.contentType = contentType;
     }
 
-    public String getCoverImage()
-    {
-        return coverImage;
-    }
-
-    public void setCoverImage(String coverImage)
-    {
-        this.coverImage = coverImage;
-    }
-
     public String getCategory()
     {
         return category;
@@ -289,7 +276,6 @@ public class CoreMaterial extends BaseEntity
             .append("publishTime", getPublishTime())
             .append("viewPermission", getViewPermission())
             .append("contentType", getContentType())
-            .append("coverImage", getCoverImage())
             .append("category", getCategory())
             .append("status", getStatus())
             .append("isTop", getIsTop())
