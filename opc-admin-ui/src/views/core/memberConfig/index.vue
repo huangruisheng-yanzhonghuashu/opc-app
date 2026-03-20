@@ -27,7 +27,7 @@
          </el-table-column>
          <el-table-column label="图片" align="center" prop="imageUrl" width="120">
             <template #default="scope">
-               <el-image v-if="scope.row.imageUrl" :src="scope.row.imageUrl" style="width: 60px; height: 60px" fit="cover" />
+               <el-image v-if="scope.row.imageUrl" :src="getImageUrl(scope.row.imageUrl)" style="width: 60px; height: 60px" fit="cover" />
                <span v-else>-</span>
             </template>
          </el-table-column>
@@ -73,7 +73,7 @@
             </el-form-item>
             <div v-if="form.configType === 'banner'">
                <el-form-item label="图片" prop="imageUrl">
-                  <el-input v-model="form.imageUrl" placeholder="请输入图片URL" />
+                  <ImageUpload v-model="form.imageUrl" :limit="1" />
                </el-form-item>
                <el-form-item label="文章链接/id" prop="articleLink">
                   <el-input v-model="form.articleLink" placeholder="请输入文章链接或ID" />
@@ -81,7 +81,7 @@
             </div>
             <div v-if="form.configType === 'vip_guide'">
                <el-form-item label="富文本内容" prop="richContent">
-                  <el-input v-model="form.richContent" type="textarea" placeholder="请输入富文本内容" :rows="6" />
+                  <Editor v-model="form.richContent" :min-height="300" />
                </el-form-item>
             </div>
             <el-form-item label="状态" prop="status">
@@ -106,8 +106,13 @@
 
 <script setup name="MemberConfig">
 import { listMemberConfig, saveMemberConfig } from "@/api/core/memberConfig"
+import ImageUpload from "@/components/ImageUpload/index.vue"
+import Editor from "@/components/Editor/index.vue"
+import { isExternal } from "@/utils/validate"
 
 const { proxy } = getCurrentInstance()
+
+const baseUrl = import.meta.env.VITE_APP_BASE_API
 
 const configList = ref([])
 const open = ref(false)
@@ -127,6 +132,12 @@ const data = reactive({
 })
 
 const { queryParams, form, rules } = toRefs(data)
+
+function getImageUrl(url) {
+  if (!url) return ''
+  if (isExternal(url)) return url
+  return baseUrl + url
+}
 
 function getList() {
   loading.value = true
