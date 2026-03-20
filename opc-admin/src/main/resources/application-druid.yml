@@ -7,6 +7,8 @@ spring:
             # 主库数据源
             master:
                 url: jdbc:mysql://52.77.145.99:3306/opc?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                #url: jdbc:mysql://vps-sg-aws-opc.43046721.xyz:3306/opc?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                #username: dbuser
                 username: dbuser
                 password: qazwsxedc
             # 从库数据源

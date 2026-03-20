@@ -42,7 +42,7 @@ cd RuoYi-Vue3
 # 安装依赖
 yarn --registry=https://registry.npmmirror.com
 
-# 启动服务
+# 启动服务[dist](dist)
 yarn dev
 
 # 构建测试环境 yarn build:stage

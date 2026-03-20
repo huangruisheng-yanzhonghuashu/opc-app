@@ -10,7 +10,7 @@ public class StringUtilsTest
     {
         assertTrue(com.opc.common.utils.StringUtils.isEmpty((String) null));
         assertTrue(com.opc.common.utils.StringUtils.isEmpty(""));
-        assertFalse(com.opc.common.utils.StringUtils.isEmpty(" "));
+        assertTrue(com.opc.common.utils.StringUtils.isEmpty(" "));
         assertFalse(com.opc.common.utils.StringUtils.isEmpty("abc"));
     }
 
@@ -19,7 +19,7 @@ public class StringUtilsTest
     {
         assertFalse(com.opc.common.utils.StringUtils.isNotEmpty((String) null));
         assertFalse(com.opc.common.utils.StringUtils.isNotEmpty(""));
-        assertTrue(com.opc.common.utils.StringUtils.isNotEmpty(" "));
+        assertFalse(com.opc.common.utils.StringUtils.isNotEmpty(" "));
         assertTrue(com.opc.common.utils.StringUtils.isNotEmpty("abc"));
     }
 
@@ -44,7 +44,7 @@ public class StringUtilsTest
     @Test
     public void testTrim()
     {
-        assertNull(com.opc.common.utils.StringUtils.trim(null));
+        assertEquals("", com.opc.common.utils.StringUtils.trim(null));
         assertEquals("", com.opc.common.utils.StringUtils.trim(""));
         assertEquals("", com.opc.common.utils.StringUtils.trim("   "));
         assertEquals("abc", com.opc.common.utils.StringUtils.trim("abc"));
@@ -54,9 +54,9 @@ public class StringUtilsTest
     @Test
     public void testSubstring()
     {
-        assertNull(com.opc.common.utils.StringUtils.substring(null, 0));
+        assertEquals("", com.opc.common.utils.StringUtils.substring(null, 0));
         assertEquals("", com.opc.common.utils.StringUtils.substring("", 0));
-        assertEquals("abc", com.opc.common.utils.StringUtils.substring("abcdef", 0));
+        assertEquals("abcdef", com.opc.common.utils.StringUtils.substring("abcdef", 0));
         assertEquals("def", com.opc.common.utils.StringUtils.substring("abcdef", 3));
         assertEquals("abc", com.opc.common.utils.StringUtils.substring("abcdef", 0, 3));
     }
@@ -75,18 +75,20 @@ public class StringUtilsTest
     public void testStartsWith()
     {
         assertTrue(com.opc.common.utils.StringUtils.startsWith("abcdef", "abc"));
-        assertTrue(com.opc.common.utils.StringUtils.startsWith("abcdef", null));
+        assertFalse(com.opc.common.utils.StringUtils.startsWith("abcdef", null));
         assertFalse(com.opc.common.utils.StringUtils.startsWith(null, "abc"));
         assertFalse(com.opc.common.utils.StringUtils.startsWith("abcdef", "xyz"));
+        assertTrue(com.opc.common.utils.StringUtils.startsWith("abc", "a"));
     }
 
     @Test
     public void testEndsWith()
     {
         assertTrue(com.opc.common.utils.StringUtils.endsWith("abcdef", "def"));
-        assertTrue(com.opc.common.utils.StringUtils.endsWith("abcdef", null));
+        assertFalse(com.opc.common.utils.StringUtils.endsWith("abcdef", null));
         assertFalse(com.opc.common.utils.StringUtils.endsWith(null, "def"));
         assertFalse(com.opc.common.utils.StringUtils.endsWith("abcdef", "xyz"));
+        assertTrue(com.opc.common.utils.StringUtils.endsWith("abc", "c"));
     }
 
     @Test

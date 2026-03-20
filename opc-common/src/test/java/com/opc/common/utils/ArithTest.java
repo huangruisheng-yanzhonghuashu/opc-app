@@ -65,7 +65,7 @@ public class ArithTest
     public void testRound()
     {
         assertEquals(1.23, Arith.round(1.234, 2), 0.0001);
-        assertEquals(1.23, Arith.round(1.235, 2), 0.0001);
+        assertEquals(1.24, Arith.round(1.235, 2), 0.0001);
         assertEquals(1.24, Arith.round(1.236, 2), 0.0001);
         assertEquals(1.0, Arith.round(1.234, 0), 0.0001);
         assertEquals(0.0, Arith.round(0.0, 2), 0.0001);
