@@ -2,4 +2,4 @@
 -- 新增运营管理（一级菜单）
 -- ----------------------------
 -- 一级菜单：运营管理
-insert into sys_menu values('5', '运营管理', '0', '5', 'operation', 'user', '', '', 1, 0, 'M', '0', '0', '', 'operation', 'admin', sysdate(), '', null, '运营管理目录');
+insert into sys_menu values('5', '运营管理', '0', '5', 'operation', 'operation', '', '', 1, 0, 'M', '0', '0', '', 'operation', 'admin', sysdate(), '', null, '运营管理目录');
