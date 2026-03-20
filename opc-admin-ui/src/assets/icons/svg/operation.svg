@@ -1,16 +1,28 @@
-<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
-  <!-- 运营管理图标 - 齿轮与图表组合 -->
-  <!-- 外圈齿轮 -->
-  <path d="M64 8 L68 8 L70 18 L74 19 L80 12 L84 15 L81 24 L85 27 L94 22 L97 26 L91 34 L94 38 L104 36 L106 41 L98 47 L99 52 L110 52 L111 57 L101 60 L101 65 L111 68 L110 73 L99 73 L98 78 L106 84 L104 89 L94 87 L91 91 L97 99 L94 103 L85 98 L81 101 L84 110 L80 113 L74 106 L70 107 L68 117 L64 117 L62 107 L58 106 L52 113 L48 110 L51 101 L47 98 L38 103 L35 99 L41 91 L38 87 L28 89 L26 84 L34 78 L33 73 L22 73 L21 68 L31 65 L31 60 L21 57 L22 52 L33 52 L34 47 L26 41 L28 36 L38 38 L41 34 L35 26 L38 22 L47 27 L51 24 L48 15 L52 12 L58 19 L62 18 L64 8 Z" fill="#909399"/>
-  <!-- 内圈 -->
-  <circle cx="64" cy="64" r="20" fill="#606266"/>
-  <!-- 中心圆点 -->
-  <circle cx="64" cy="64" r="10" fill="#409EFF"/>
-  <!-- 上升图表线 -->
-  <polyline points="44,84 54,74 64,78 74,68 84,58" fill="none" stroke="#67C23A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- 图表点 -->
-  <circle cx="54" cy="74" r="3" fill="#67C23A"/>
-  <circle cx="64" cy="78" r="3" fill="#67C23A"/>
-  <circle cx="74" cy="68" r="3" fill="#67C23A"/>
-  <circle cx="84" cy="58" r="3" fill="#67C23A"/>
+<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+  <!-- 运营管理图标 - 简洁的仪表盘/图表风格 -->
+  <!-- 外圆环 -->
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#909399" stroke-width="8"/>
+  
+  <!-- 内部仪表盘刻度 -->
+  <path d="M64 20 L64 28" stroke="#C0C4CC" stroke-width="4" stroke-linecap="round"/>
+  <path d="M64 100 L64 108" stroke="#C0C4CC" stroke-width="4" stroke-linecap="round"/>
+  <path d="M20 64 L28 64" stroke="#C0C4CC" stroke-width="4" stroke-linecap="round"/>
+  <path d="M100 64 L108 64" stroke="#C0C4CC" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- 上升折线 - 更粗更明显 -->
+  <polyline points="32,76 48,60 64,68 80,52 96,36" 
+            fill="none" 
+            stroke="#409EFF" 
+            stroke-width="8" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"/>
+  
+  <!-- 数据点 -->
+  <circle cx="48" cy="60" r="6" fill="#409EFF"/>
+  <circle cx="64" cy="68" r="6" fill="#409EFF"/>
+  <circle cx="80" cy="52" r="6" fill="#409EFF"/>
+  <circle cx="96" cy="36" r="6" fill="#67C23A"/>
+  
+  <!-- 中心点 -->
+  <circle cx="64" cy="64" r="8" fill="#606266"/>
 </svg>
