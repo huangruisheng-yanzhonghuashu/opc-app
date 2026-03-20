@@ -25,9 +25,9 @@
       </el-form-item>
       <el-form-item>
         <el-button-group>
-          <el-button @click="setDateRange('month')">一月</el-button>
-          <el-button @click="setDateRange('quarter')">一季</el-button>
-          <el-button @click="setDateRange('year')">一年</el-button>
+          <el-button type="info" plain @click="setDateRange('month')">一月</el-button>
+          <el-button type="warning" plain @click="setDateRange('quarter')">一季</el-button>
+          <el-button type="primary" plain @click="setDateRange('year')">一年</el-button>
         </el-button-group>
       </el-form-item>
     </el-form>
