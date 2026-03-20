@@ -140,7 +140,7 @@
          @pagination="getList"
       />
 
-      <el-dialog :title="title" v-model="open" width="800px" append-to-body>
+      <el-dialog :title="title" v-model="open" width="1000px" append-to-body>
          <el-form ref="materialRef" :model="form" :rules="rules" label-width="100px">
             <el-row>
                <el-col :span="12">
@@ -252,11 +252,11 @@
             <el-form-item label="会员展示图片" prop="coverImage">
                <el-input v-model="form.coverImage" placeholder="请输入会员展示图片URL" />
             </el-form-item>
+            <el-form-item label="正文" prop="content">
+               <Editor v-model="form.content" :min-height="300" />
+            </el-form-item>
             <el-form-item label="总结" prop="summary">
                <el-input v-model="form.summary" type="textarea" placeholder="请输入总结" :rows="2" />
-            </el-form-item>
-            <el-form-item label="正文" prop="content">
-               <el-input v-model="form.content" type="textarea" placeholder="请输入正文" :rows="6" />
             </el-form-item>
             <el-form-item label="备注" prop="remark">
                <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" :rows="2" />
@@ -312,7 +312,7 @@
             </el-descriptions-item>
             <el-descriptions-item label="总结" :span="2">{{ detailData.summary || '-' }}</el-descriptions-item>
             <el-descriptions-item label="正文" :span="2">
-               <div v-if="detailData.content" style="max-height: 300px; overflow-y: auto; white-space: pre-wrap;">{{ detailData.content }}</div>
+               <div v-if="detailData.content" style="max-height: 400px; overflow-y: auto; border: 1px solid #e4e7ed; padding: 10px; border-radius: 4px;" v-html="detailData.content"></div>
                <span v-else>-</span>
             </el-descriptions-item>
             <el-descriptions-item label="创建时间" :span="1">{{ parseTime(detailData.createTime) || '-' }}</el-descriptions-item>
@@ -331,6 +331,7 @@
 <script setup name="Material">
 import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop } from "@/api/core/material"
 import { User, Star, Medal } from '@element-plus/icons-vue'
+import Editor from "@/components/Editor/index.vue"
 
 const { proxy } = getCurrentInstance()
 
