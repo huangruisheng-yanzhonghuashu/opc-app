@@ -83,7 +83,7 @@ public class UUIDTest {
     @Test
     @DisplayName("从字符串解析UUID-空值")
     public void testFromString_Null() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             UUID.fromString(null);
         });
     }

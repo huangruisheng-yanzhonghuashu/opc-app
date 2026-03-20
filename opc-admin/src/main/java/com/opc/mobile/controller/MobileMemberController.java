@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author opc
  */
-@Tag(name = "OpenAPI/会员管理", description = "移动端会员信息、图片上传管理接口")
+@Tag(name = "会员管理", description = "移动端会员信息、图片上传管理接口")
 @RestController
 @RequestMapping("/mobile/member")
 public class MobileMemberController

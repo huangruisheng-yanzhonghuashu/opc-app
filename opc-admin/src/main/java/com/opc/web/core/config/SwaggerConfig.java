@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,32 @@ public class SwaggerConfig
             // 配置安全策略的具体实现
             .components(new io.swagger.v3.oas.models.Components()
                 .addSecuritySchemes("Authorization", securityScheme()));
+    }
+
+    /**
+     * 默认 API 分组（管理后台接口）
+     */
+    @Bean
+    public GroupedOpenApi defaultApi()
+    {
+        return GroupedOpenApi.builder()
+            .group("default")
+            .displayName("管理后台")
+            .pathsToMatch("/web/**", "/tool/**", "/dev-api/**")
+            .build();
+    }
+
+    /**
+     * OpenAPI 分组（移动端接口）
+     */
+    @Bean
+    public GroupedOpenApi openApi()
+    {
+        return GroupedOpenApi.builder()
+            .group("openapi")
+            .displayName("OpenAPI")
+            .pathsToMatch("/mobile/**")
+            .build();
     }
 
     /**
