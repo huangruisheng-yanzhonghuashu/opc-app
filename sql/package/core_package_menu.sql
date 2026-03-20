@@ -6,7 +6,7 @@
 insert into sys_menu values('4000', '套餐管理', '5', '5', 'packageManage', '', '', '', 1, 0, 'M', '0', '0', '', 'shopping', 'admin', sysdate(), '', null, '套餐管理目录');
 
 -- 菜单：会员页面配置（上级：套餐管理）
-insert into sys_menu values('4001', '会员页面配置', '4000', '1', 'memberConfig', 'core/memberConfig/index', '', '', 1, 0, 'C', '0', '0', 'core:memberConfig:list', 'config', 'admin', sysdate(), '', null, '会员页面配置菜单');
+insert into sys_menu values('4001', '会员页面', '4000', '1', 'memberConfig', 'core/memberConfig/index', '', '', 1, 0, 'C', '0', '0', 'core:memberConfig:list', 'config', 'admin', sysdate(), '', null, '会员页面配置菜单');
 
 -- 菜单：套餐配置（上级：套餐管理）
 insert into sys_menu values('4002', '套餐配置', '4000', '2', 'package', 'core/package/index', '', '', 1, 0, 'C', '0', '0', 'core:package:list', 'gift', 'admin', sysdate(), '', null, '套餐配置菜单');
