@@ -121,7 +121,7 @@
       <el-dialog :title="title" v-model="open" width="600px" append-to-body>
          <el-form ref="collectSourceRef" :model="form" :rules="rules" label-width="100px">
             <el-form-item label="关键词" prop="keyword">
-               <el-input v-model="form.keyword" placeholder="请输入关键词" />
+               <el-input v-model="form.keyword" placeholder="请输入关键词，多个使用中文逗号（，）分割" />
             </el-form-item>
             <el-form-item label="信息源链接" prop="sourceUrl">
                <el-input v-model="form.sourceUrl" placeholder="请输入信息源链接" />
@@ -208,7 +208,24 @@ const data = reactive({
     status: undefined
   },
   rules: {
-    keyword: [{ required: true, message: "关键词不能为空", trigger: "blur" }],
+    keyword: [
+      { required: true, message: "关键词不能为空", trigger: "blur" },
+      { validator: (rule, value, callback) => {
+        if (value && value.includes(',')) {
+          callback(new Error("请使用中文逗号（，）分割多个关键词"))
+          return
+        }
+        if (value && value.includes('，')) {
+          const keywords = value.split('，').map(k => k.trim()).filter(k => k)
+          const uniqueKeywords = [...new Set(keywords)]
+          if (keywords.length !== uniqueKeywords.length) {
+            callback(new Error("关键词不能重复"))
+            return
+          }
+        }
+        callback()
+      }, trigger: "blur" }
+    ],
     sourceUrl: [{ required: true, message: "信息源链接不能为空", trigger: "blur" }],
     sourceType: [{ required: true, message: "来源类型不能为空", trigger: "change" }]
   }

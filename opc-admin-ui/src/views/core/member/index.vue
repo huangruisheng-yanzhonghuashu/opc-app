@@ -99,7 +99,7 @@
          <el-table-column label="会员ID" align="center" prop="id" width="80" />
          <el-table-column label="头像" align="center" prop="avatar" width="80">
             <template #default="scope">
-               <el-avatar :size="40" :src="scope.row.avatar" v-if="scope.row.avatar" />
+               <el-avatar :size="40" :src="getAvatarUrl(scope.row.avatar)" v-if="scope.row.avatar" />
                <el-avatar :size="40" v-else>{{ scope.row.username?.charAt(0) }}</el-avatar>
             </template>
          </el-table-column>
@@ -197,7 +197,7 @@
             <el-row>
                <el-col :span="12">
                   <el-form-item label="头像" prop="avatar">
-                     <el-input v-model="form.avatar" placeholder="请输入头像URL" />
+                     <ImageUpload v-model="form.avatar" :limit="1" />
                   </el-form-item>
                </el-col>
                <el-col :span="12">
@@ -330,9 +330,12 @@
 
 <script setup name="Member">
 import { listMember, addMember, getMember, updateMember, blockMember, unblockMember } from "@/api/core/member"
+import { isExternal } from "@/utils/validate"
 
 const { proxy } = getCurrentInstance()
 const { sys_normal_disable } = proxy.useDict("sys_normal_disable")
+
+const baseUrl = import.meta.env.VITE_APP_BASE_API
 
 const memberList = ref([])
 const open = ref(false)
@@ -373,6 +376,13 @@ function getPackageLabel(currentPackage, currentPackageLevel) {
   if (currentPackageLevel === 2) return '二级'
   if (currentPackageLevel === 3) return '三级'
   return '-'
+}
+
+/** 获取头像完整URL */
+function getAvatarUrl(avatar) {
+  if (!avatar) return ''
+  if (isExternal(avatar)) return avatar
+  return baseUrl + avatar
 }
 
 /** 查询会员列表 */
