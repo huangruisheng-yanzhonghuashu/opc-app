@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CoreFeedbackMapper">
+
+	<resultMap type="CoreFeedback" id="CoreFeedbackResult">
+		<id     property="id"              column="id"                />
+		<result property="memberId"        column="member_id"         />
+		<result property="memberName"      column="member_name"       />
+		<result property="type"            column="type"              />
+		<result property="title"           column="title"             />
+		<result property="content"         column="content"           />
+		<result property="contact"         column="contact"           />
+		<result property="status"          column="status"            />
+		<result property="reply"           column="reply"             />
+		<result property="replyTime"       column="reply_time"        />
+		<result property="replyBy"         column="reply_by"          />
+		<result property="createBy"        column="create_by"         />
+		<result property="createTime"      column="create_time"       />
+		<result property="updateBy"        column="update_by"         />
+		<result property="updateTime"      column="update_time"       />
+		<result property="remark"          column="remark"            />
+	</resultMap>
+
+	<sql id="selectFeedbackVo">
+        select id, member_id, member_name, type, title, content, contact, status,
+               reply, reply_time, reply_by, create_by, create_time, update_by, update_time, remark
+		from core_feedback
+    </sql>
+
+	<select id="selectFeedbackList" parameterType="CoreFeedback" resultMap="CoreFeedbackResult">
+		<include refid="selectFeedbackVo"/>
+		<where>
+			<if test="memberId != null">
+				AND member_id = #{memberId}
+			</if>
+			<if test="memberName != null and memberName != ''">
+				AND member_name like concat('%', #{memberName}, '%')
+			</if>
+			<if test="type != null and type != ''">
+				AND type = #{type}
+			</if>
+			<if test="title != null and title != ''">
+				AND title like concat('%', #{title}, '%')
+			</if>
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+			<if test="contact != null and contact != ''">
+				AND contact like concat('%', #{contact}, '%')
+			</if>
+		</where>
+		order by create_time desc
+	</select>
+
+	<select id="selectFeedbackById" parameterType="Long" resultMap="CoreFeedbackResult">
+		<include refid="selectFeedbackVo"/>
+		where id = #{id}
+	</select>
+
+	<insert id="insertFeedback" parameterType="CoreFeedback" useGeneratedKeys="true" keyProperty="id">
+		insert into core_feedback(
+			<if test="id != null and id != 0">id,</if>
+			<if test="memberId != null">member_id,</if>
+			<if test="memberName != null">member_name,</if>
+			<if test="type != null and type != ''">type,</if>
+			<if test="title != null and title != ''">title,</if>
+			<if test="content != null and content != ''">content,</if>
+			<if test="contact != null">contact,</if>
+			<if test="status != null and status != ''">status,</if>
+			<if test="createBy != null and createBy != ''">create_by,</if>
+			create_time
+		)values(
+			<if test="id != null and id != 0">#{id},</if>
+			<if test="memberId != null">#{memberId},</if>
+			<if test="memberName != null">#{memberName},</if>
+			<if test="type != null and type != ''">#{type},</if>
+			<if test="title != null and title != ''">#{title},</if>
+			<if test="content != null and content != ''">#{content},</if>
+			<if test="contact != null">#{contact},</if>
+			<if test="status != null and status != ''">#{status},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			sysdate()
+		)
+	</insert>
+
+	<update id="updateFeedback" parameterType="CoreFeedback">
+ 		update core_feedback
+ 		<set>
+ 			<if test="memberId != null">member_id = #{memberId},</if>
+ 			<if test="memberName != null">member_name = #{memberName},</if>
+ 			<if test="type != null and type != ''">type = #{type},</if>
+ 			<if test="title != null and title != ''">title = #{title},</if>
+ 			<if test="content != null and content != ''">content = #{content},</if>
+ 			<if test="contact != null">contact = #{contact},</if>
+ 			<if test="status != null and status != ''">status = #{status},</if>
+ 			<if test="reply != null">reply = #{reply},</if>
+ 			<if test="replyTime != null">reply_time = #{replyTime},</if>
+ 			<if test="replyBy != null">reply_by = #{replyBy},</if>
+ 			<if test="remark != null">remark = #{remark},</if>
+ 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+ 			update_time = sysdate()
+ 		</set>
+ 		where id = #{id}
+	</update>
+
+	<update id="replyFeedback" parameterType="CoreFeedback">
+		update core_feedback
+		set reply = #{reply},
+		    reply_time = #{replyTime},
+		    reply_by = #{replyBy},
+		    status = '2',
+		    update_time = sysdate()
+		where id = #{id}
+	</update>
+
+	<delete id="deleteFeedbackById" parameterType="Long">
+        delete from core_feedback where id = #{id}
+    </delete>
+
+    <delete id="deleteFeedbackByIds">
+        delete from core_feedback where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
