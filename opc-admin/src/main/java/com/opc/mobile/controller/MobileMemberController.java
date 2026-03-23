@@ -26,6 +26,7 @@ import com.opc.mobile.dto.MemberUpdateUserNameDTO;
 import com.opc.mobile.dto.MemberUpdatePasswordDTO;
 import com.opc.mobile.dto.MemberCancelDTO;
 import com.opc.mobile.dto.MemberBindEmailDTO;
+import com.opc.mobile.dto.EmailCodeRequestDTO;
 import com.opc.web.dto.EmailDTO;
 import com.opc.web.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
