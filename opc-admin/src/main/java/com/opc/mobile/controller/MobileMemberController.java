@@ -152,4 +152,66 @@ public class MobileMemberController
             return AjaxResult.error("修改失败：" + e.getMessage());
         }
     }
+
+    /**
+     * 头像修改接口
+     */
+    @Operation(summary = "头像修改", description = "上传新头像并自动更新会员头像")
+    @Log(title = "头像修改", businessType = BusinessType.UPDATE)
+    @PostMapping("/avatar")
+    public AjaxResult updateAvatar(MultipartFile file, HttpServletRequest request)
+    {
+        // 验证会员登录状态
+        MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
+        if (memberLoginVO == null)
+        {
+            return AjaxResult.error("请先登录");
+        }
+
+        try
+        {
+            if (file == null || file.isEmpty())
+            {
+                return AjaxResult.error("请选择要上传的新头像");
+            }
+
+            // 上传文件路径
+            String filePath = RuoYiConfig.getUploadPath();
+            // 上传并返回新文件名称
+            String fileName = FileUploadUtils.upload(filePath, file);
+            String url = serverConfig.getUrl() + fileName;
+
+            // 更新会员头像
+            CoreMember member = memberService.selectMemberById(memberLoginVO.getMemberId());
+            if (member == null)
+            {
+                return AjaxResult.error("会员不存在");
+            }
+            member.setAvatar(url);
+            int result = memberService.updateMember(member);
+
+            if (result > 0)
+            {
+                // 更新登录用户信息
+                memberLoginVO.setAvatar(url);
+                memberTokenService.setLoginUser(memberLoginVO);
+
+                log.info("会员头像修改成功：memberId={}, fileName={}", memberLoginVO.getMemberId(), fileName);
+
+                AjaxResult ajax = AjaxResult.success("头像修改成功");
+                ajax.put("url", url);
+                ajax.put("avatar", url);
+                return ajax;
+            }
+            else
+            {
+                return AjaxResult.error("头像更新失败");
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("会员头像修改失败：memberId={}", memberLoginVO.getMemberId(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
 }
