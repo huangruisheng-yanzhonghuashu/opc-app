@@ -20,6 +20,7 @@ import com.opc.common.utils.file.FileUtils;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.domain.vo.MemberLoginVO;
 import com.opc.core.service.ICoreMemberService;
+import com.opc.core.service.ICorePackageOrderService;
 import com.opc.core.service.MemberTokenService;
 import com.opc.framework.config.ServerConfig;
 import com.opc.mobile.dto.MemberUpdateUserNameDTO;
@@ -27,6 +28,8 @@ import com.opc.mobile.dto.MemberUpdatePasswordDTO;
 import com.opc.mobile.dto.MemberCancelDTO;
 import com.opc.mobile.dto.MemberBindEmailDTO;
 import com.opc.mobile.dto.EmailCodeRequestDTO;
+import com.opc.mobile.dto.OrderIdDTO;
+import com.opc.core.domain.CorePackageOrder;
 import com.opc.web.dto.EmailDTO;
 import com.opc.web.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +37,7 @@ import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,6 +60,9 @@ public class MobileMemberController
 
     @Autowired
     private ICoreMemberService memberService;
+
+    @Autowired
+    private ICorePackageOrderService packageOrderService;
 
     @Autowired
     private ServerConfig serverConfig;
@@ -319,7 +326,7 @@ public class MobileMemberController
 
 
     @Operation(summary = "获取会员信息", description = "获取当前登录会员的详细信息")
-    @GetMapping("/getMemberInfo")
+    @PostMapping("/getMemberInfo")
     public AjaxResult getMemberInfo()
     {
         MemberLoginVO memberLoginVO = memberLoginService.getMemberLoginUser();
@@ -556,6 +563,80 @@ public class MobileMemberController
         emailDTO.setSubject(subject);
         emailDTO.setContent(content);
         return emailDTO;
+    }
+
+    /**
+     * 购买记录列表接口
+     */
+    @Operation(summary = "购买记录列表", description = "获取当前登录会员的购买记录列表")
+    @PostMapping("/order/list")
+    public AjaxResult getOrderList(HttpServletRequest request)
+    {
+        MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
+        if (memberLoginVO == null)
+        {
+            return AjaxResult.error("请先登录");
+        }
+
+        try
+        {
+            CorePackageOrder queryOrder = new CorePackageOrder();
+            queryOrder.setMemberId(memberLoginVO.getMemberId());
+            List<CorePackageOrder> orderList = packageOrderService.selectOrderList(queryOrder);
+
+            log.info("会员查询购买记录列表：memberId={}, 记录数={}", memberLoginVO.getMemberId(), orderList.size());
+
+            return AjaxResult.success(orderList);
+        }
+        catch (Exception e)
+        {
+            log.error("查询购买记录列表失败：memberId={}", memberLoginVO.getMemberId(), e);
+            return AjaxResult.error("查询购买记录失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 购买记录详情接口
+     */
+    @Operation(summary = "购买记录详情", description = "根据订单ID获取购买记录详情")
+    @PostMapping("/order/detail")
+    public AjaxResult getOrderDetail(@RequestBody OrderIdDTO orderIdDTO, HttpServletRequest request)
+    {
+        MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
+        if (memberLoginVO == null)
+        {
+            return AjaxResult.error("请先登录");
+        }
+
+        Long id = orderIdDTO.getId();
+        if (id == null || id <= 0)
+        {
+            return AjaxResult.error("订单ID不能为空");
+        }
+
+        try
+        {
+            CorePackageOrder order = packageOrderService.selectOrderById(id);
+            if (order == null)
+            {
+                return AjaxResult.error("订单不存在");
+            }
+
+            // 验证订单是否属于当前会员
+            if (!order.getMemberId().equals(memberLoginVO.getMemberId()))
+            {
+                return AjaxResult.error("无权查看该订单");
+            }
+
+            log.info("会员查询购买记录详情：memberId={}, orderId={}", memberLoginVO.getMemberId(), id);
+
+            return AjaxResult.success(order);
+        }
+        catch (Exception e)
+        {
+            log.error("查询购买记录详情失败：memberId={}, orderId={}", memberLoginVO.getMemberId(), id, e);
+            return AjaxResult.error("查询订单详情失败：" + e.getMessage());
+        }
     }
 
 }
