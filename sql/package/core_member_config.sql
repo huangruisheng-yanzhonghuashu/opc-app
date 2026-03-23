@@ -6,7 +6,8 @@ CREATE TABLE core_member_config (
     id                  BIGINT(20)      NOT NULL AUTO_INCREMENT    COMMENT '配置ID',
     config_type         VARCHAR(50)     NOT NULL                   COMMENT '配置类型（banner/vip_guide）',
     image_url           VARCHAR(500)    DEFAULT NULL               COMMENT '图片URL',
-    article_link        VARCHAR(500)    DEFAULT NULL               COMMENT '文章链接/id',
+    link_type           VARCHAR(20)     DEFAULT 'article'          COMMENT '链接类型（article=文章ID, link=外部链接）',
+    article_link        VARCHAR(500)    DEFAULT NULL               COMMENT '链接地址（文章ID或外部链接）',
     rich_content        LONGTEXT        DEFAULT NULL               COMMENT '富文本内容（用于vip引导图片）',
     status              CHAR(1)         DEFAULT '0'                 COMMENT '状态（0启用 1禁用）',
     create_by           VARCHAR(64)     DEFAULT ''                  COMMENT '创建者',
@@ -14,8 +15,9 @@ CREATE TABLE core_member_config (
     update_by           VARCHAR(64)     DEFAULT ''                  COMMENT '更新者',
     update_time         DATETIME                                    COMMENT '更新时间',
     remark              VARCHAR(500)    DEFAULT NULL                COMMENT '备注',
+    sort_order          INT             DEFAULT 0                   COMMENT '排序号',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_config_type (config_type)
+    KEY idx_sort_order (sort_order)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='会员页面配置表';
 
 -- 配置类型说明：

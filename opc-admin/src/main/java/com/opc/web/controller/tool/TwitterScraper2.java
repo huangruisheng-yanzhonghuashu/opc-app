@@ -1,20 +1,14 @@
 package com.opc.web.controller.tool;
 
+import com.microsoft.playwright.*;
+import com.microsoft.playwright.options.Cookie;
+import com.microsoft.playwright.options.WaitForSelectorState;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,76 +21,83 @@ public class TwitterScraper2 {
     private static final String AUTH_TOKEN = "3bd653f7c2bbc1486afd8187b6f67558fb8e5274";
 
     public static void main(String[] args) {
-        System.out.println("=== Twitter 搜索抓取程序 ===\n");
+        System.out.println("=== Twitter 搜索抓取程序 (Playwright) ===\n");
         System.out.println("正在启动浏览器...");
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-blink-features=AutomationControlled");
-        options.addArguments("--remote-debugging-port=9222");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--disable-software-rasterizer");
-        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-        options.addArguments("--start-maximized");
-        options.addArguments("--user-data-dir=d:/opc/chrome_user_data");
+        // 创建 Playwright 实例
+        try (Playwright playwright = Playwright.create()) {
+            BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions()
+                    .setHeadless(false)
+                    .setArgs(List.of(
+                            "--no-sandbox",
+                            "--disable-dev-shm-usage",
+                            "--disable-blink-features=AutomationControlled",
+                            "--disable-gpu",
+                            "--disable-software-rasterizer",
+                            "--start-maximized"
+                    ));
 
-        WebDriver driver = new ChromeDriver(options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+            Browser browser = playwright.chromium().launch(launchOptions);
+            BrowserContext context = browser.newContext(new Browser.NewContextOptions()
+                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"));
+            Page page = context.newPage();
 
-        try {
-            // 先访问X.com以设置cookie
-            System.out.println("正在设置登录Cookie...");
-            driver.get("https://x.com");
-            sleep(4000);
-
-            // 添加auth_token cookie
-            Cookie authCookie = new Cookie("auth_token", AUTH_TOKEN, ".x.com", "/", null);
-            driver.manage().addCookie(authCookie);
-            System.out.println("   Cookie已设置: auth_token");
-
-            // 刷新页面以应用cookie
-            driver.navigate().refresh();
-            sleep(5000);
-
-            System.out.println("   当前页面: " + driver.getCurrentUrl());
-
-            step5_navigateToTarget(driver, TARGET_URL);
-            step6_scrapeMultiplePages(driver, wait, MAX_PAGES);
-
-        } catch (Exception e) {
-            System.out.println("错误: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            System.out.println("\n按回车键关闭浏览器...");
             try {
-                System.in.read();
-            } catch (IOException e) {
+                // 先访问X.com以设置cookie
+                System.out.println("正在设置登录Cookie...");
+                page.navigate("https://x.com");
+                sleep(4000);
+
+                // 添加auth_token cookie
+                Cookie authCookie = new Cookie("auth_token", AUTH_TOKEN);
+                authCookie.domain = ".x.com";
+                authCookie.path = "/";
+                context.addCookies(List.of(authCookie));
+                System.out.println("   Cookie已设置: auth_token");
+
+                // 刷新页面以应用cookie
+                page.reload();
+                sleep(5000);
+
+                System.out.println("   当前页面: " + page.url());
+
+                step5_navigateToTarget(page, TARGET_URL);
+                step6_scrapeMultiplePages(page, MAX_PAGES);
+
+            } catch (Exception e) {
+                System.out.println("错误: " + e.getMessage());
                 e.printStackTrace();
+            } finally {
+                System.out.println("\n按回车键关闭浏览器...");
+                try {
+                    System.in.read();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                browser.close();
+                System.out.println("程序已退出");
             }
-            driver.quit();
-            System.out.println("程序已退出");
         }
     }
 
-    private static void step5_navigateToTarget(WebDriver driver, String url) {
+    private static void step5_navigateToTarget(Page page, String url) {
         System.out.println("\n[步骤 5] 跳转到搜索页面...");
-        driver.get(url);
+        page.navigate(url);
         sleep(5000);
-        System.out.println("   已跳转到: " + driver.getCurrentUrl());
+        System.out.println("   已跳转到: " + page.url());
     }
 
-    private static void step6_scrapeMultiplePages(WebDriver driver, WebDriverWait wait, int maxPages) {
+    private static void step6_scrapeMultiplePages(Page page, int maxPages) {
         System.out.println("\n[步骤 6] 开始抓取多页推文 (最多 " + maxPages + " 页)...");
 
         List<Map<String, String>> allTweets = new ArrayList<>();
 
-        for (int page = 1; page <= maxPages; page++) {
-            System.out.println("\n=== 正在抓取第 " + page + " 页 ===");
+        for (int pageNum = 1; pageNum <= maxPages; pageNum++) {
+            System.out.println("\n=== 正在抓取第 " + pageNum + " 页 ===");
 
             // 等待推文加载
             try {
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("[data-testid='tweet']")));
+                page.waitForSelector("[data-testid='tweet']", new Page.WaitForSelectorOptions().setState(WaitForSelectorState.VISIBLE).setTimeout(30000));
                 sleep(4000);
             } catch (Exception e) {
                 System.out.println("   等待推文加载超时: " + e.getMessage());
@@ -104,23 +105,23 @@ public class TwitterScraper2 {
             }
 
             // 获取页面源码并解析
-            String pageSource = driver.getPageSource();
+            String pageSource = page.content();
             List<Map<String, String>> pageTweets = parseTweetsWithJsoup(pageSource);
 
             if (pageTweets.isEmpty()) {
-                System.out.println("   第 " + page + " 页未找到推文，停止翻页");
+                System.out.println("   第 " + pageNum + " 页未找到推文，停止翻页");
                 break;
             }
 
             // 抓取每条推文的详情内容
-            scrapeTweetDetails(driver, wait, pageTweets);
+            scrapeTweetDetails(page, pageTweets);
 
             allTweets.addAll(pageTweets);
-            System.out.println("   第 " + page + " 页抓取完成，本页 " + pageTweets.size() + " 条，累计 " + allTweets.size() + " 条");
+            System.out.println("   第 " + pageNum + " 页抓取完成，本页 " + pageTweets.size() + " 条，累计 " + allTweets.size() + " 条");
 
             // 检查是否还有下一页
-            if (page < maxPages) {
-                boolean hasMore = scrollDownAndCheckMore(driver, wait);
+            if (pageNum < maxPages) {
+                boolean hasMore = scrollDownAndCheckMore(page);
                 if (!hasMore) {
                     System.out.println("   已到达页面底部或没有更多推文，停止翻页");
                     break;
@@ -137,7 +138,7 @@ public class TwitterScraper2 {
         saveTweetsToFile(allTweets);
     }
 
-    private static void scrapeTweetDetails(WebDriver driver, WebDriverWait wait, List<Map<String, String>> tweets) {
+    private static void scrapeTweetDetails(Page page, List<Map<String, String>> tweets) {
         for (int i = 0; i < tweets.size(); i++) {
             Map<String, String> tweetData = tweets.get(i);
 
@@ -153,15 +154,15 @@ public class TwitterScraper2 {
 
                     // 访问详情页
                     try {
-                        driver.get(detailUrl);
+                        page.navigate(detailUrl);
                         sleep(5000);
 
                         // 等待详情页加载
-                        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("[data-testid='tweet']")));
+                        page.waitForSelector("[data-testid='tweet']", new Page.WaitForSelectorOptions().setState(WaitForSelectorState.VISIBLE).setTimeout(30000));
                         sleep(3000);
 
                         // 获取详情页信息
-                        String detailPageSource = driver.getPageSource();
+                        String detailPageSource = page.content();
                         Document detailDoc = Jsoup.parse(detailPageSource);
 
                         // 提取推文内容（详情页可能有更多内容）
@@ -311,17 +312,16 @@ public class TwitterScraper2 {
         }
     }
 
-    private static boolean scrollDownAndCheckMore(WebDriver driver, WebDriverWait wait) {
+    private static boolean scrollDownAndCheckMore(Page page) {
         try {
             // 滚动到底部加载更多
-            WebElement body = driver.findElement(By.tagName("body"));
             for (int i = 0; i < 3; i++) {
-                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.scrollTo(0, document.body.scrollHeight);");
+                page.evaluate("() => { window.scrollTo(0, document.body.scrollHeight); }");
                 sleep(3000);
             }
 
             // 检查是否有新的推文加载
-            Elements tweets = Jsoup.parse(driver.getPageSource()).select("[data-testid='tweet']");
+            Elements tweets = Jsoup.parse(page.content()).select("[data-testid='tweet']");
             if (tweets.size() == 0) {
                 return false;
             }

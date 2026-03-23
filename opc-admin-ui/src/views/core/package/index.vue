@@ -68,6 +68,12 @@
                <el-tag v-else-if="scope.row.packageType === 'svip'" type="warning">超级VIP会员</el-tag>
             </template>
          </el-table-column>
+         <el-table-column label="套餐图片" align="center" prop="imageUrl" width="100">
+            <template #default="scope">
+               <el-image v-if="scope.row.imageUrl" :src="getImageUrl(scope.row.imageUrl)" style="width: 60px; height: 60px" fit="cover" />
+               <span v-else>-</span>
+            </template>
+         </el-table-column>
          <el-table-column label="状态" align="center" prop="status" width="80">
             <template #default="scope">
                <el-tag :type="scope.row.status === '0' ? 'success' : 'danger'">
@@ -96,7 +102,7 @@
          @pagination="getList"
       />
 
-      <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+      <el-dialog :title="title" v-model="open" width="800px" append-to-body>
          <el-form ref="packageRef" :model="form" :rules="rules" label-width="100px">
             <el-row>
                <el-col :span="12">
@@ -129,8 +135,11 @@
                   </el-form-item>
                </el-col>
             </el-row>
+            <el-form-item label="套餐图片" prop="imageUrl">
+               <ImageUpload v-model="form.imageUrl" :limit="1" />
+            </el-form-item>
             <el-form-item label="套餐描述" prop="description">
-               <el-input v-model="form.description" type="textarea" placeholder="请输入套餐描述" :rows="3" />
+               <Editor v-model="form.description" :min-height="200" placeholder="请输入套餐描述" />
             </el-form-item>
             <el-form-item label="备注" prop="remark">
                <el-input v-model="form.remark" type="textarea" placeholder="请输入备注" :rows="2" />
@@ -148,8 +157,13 @@
 
 <script setup name="Package">
 import { listPackage, addPackage, updatePackage, delPackage } from "@/api/core/package"
+import ImageUpload from "@/components/ImageUpload/index.vue"
+import Editor from "@/components/Editor/index.vue"
+import { isExternal } from "@/utils/validate"
 
 const { proxy } = getCurrentInstance()
+
+const baseUrl = import.meta.env.VITE_APP_BASE_API
 
 const packageList = ref([])
 const open = ref(false)
@@ -178,6 +192,12 @@ const data = reactive({
 })
 
 const { queryParams, form, rules } = toRefs(data)
+
+function getImageUrl(url) {
+  if (!url) return ''
+  if (isExternal(url)) return url
+  return baseUrl + url
+}
 
 function getList() {
   loading.value = true

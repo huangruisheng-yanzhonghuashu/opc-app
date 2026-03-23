@@ -19,6 +19,9 @@ public class CoreMemberConfig extends BaseEntity
     @Excel(name = "图片URL")
     private String imageUrl;
 
+    @Excel(name = "链接类型", readConverterExp = "article=文章ID,link=外部链接")
+    private String linkType;
+
     @Excel(name = "文章链接/id")
     private String articleLink;
 
@@ -26,6 +29,9 @@ public class CoreMemberConfig extends BaseEntity
 
     @Excel(name = "状态", readConverterExp = "0=启用,1=禁用")
     private String status;
+
+    @Excel(name = "排序号")
+    private Integer sortOrder;
 
     public Long getId()
     {
@@ -45,6 +51,16 @@ public class CoreMemberConfig extends BaseEntity
     public void setConfigType(String configType)
     {
         this.configType = configType;
+    }
+
+    public String getLinkType()
+    {
+        return linkType;
+    }
+
+    public void setLinkType(String linkType)
+    {
+        this.linkType = linkType;
     }
 
     public String getImageUrl()
@@ -87,11 +103,22 @@ public class CoreMemberConfig extends BaseEntity
         this.status = status;
     }
 
+    public Integer getSortOrder()
+    {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder)
+    {
+        this.sortOrder = sortOrder;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
             .append("configType", getConfigType())
+            .append("linkType", getLinkType())
             .append("imageUrl", getImageUrl())
             .append("articleLink", getArticleLink())
             .append("richContent", getRichContent())
@@ -101,6 +128,7 @@ public class CoreMemberConfig extends BaseEntity
             .append("updateBy", getUpdateBy())
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
+            .append("sortOrder", getSortOrder())
             .toString();
     }
 }

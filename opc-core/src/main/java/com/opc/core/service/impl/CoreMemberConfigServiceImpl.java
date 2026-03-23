@@ -26,7 +26,7 @@ public class CoreMemberConfigServiceImpl implements ICoreMemberConfigService
     }
 
     @Override
-    public CoreMemberConfig selectConfigByType(String configType)
+    public List<CoreMemberConfig> selectConfigByType(String configType)
     {
         return configMapper.selectConfigByType(configType);
     }
@@ -34,12 +34,17 @@ public class CoreMemberConfigServiceImpl implements ICoreMemberConfigService
     @Override
     public int saveConfig(CoreMemberConfig config)
     {
-        CoreMemberConfig existing = configMapper.selectConfigByType(config.getConfigType());
-        if (existing != null) {
-            config.setId(existing.getId());
+        if (config.getId() != null) {
+            config.setUpdateBy(config.getUpdateBy());
             return configMapper.updateConfig(config);
         } else {
             return configMapper.insertConfig(config);
         }
+    }
+
+    @Override
+    public int deleteConfig(Long id)
+    {
+        return configMapper.deleteConfigById(id);
     }
 }

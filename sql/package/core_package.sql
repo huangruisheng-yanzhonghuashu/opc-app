@@ -8,6 +8,7 @@ CREATE TABLE core_package (
     package_price       DECIMAL(10,2)   NOT NULL                   COMMENT '套餐价格',
     package_type        VARCHAR(20)     NOT NULL                   COMMENT '套餐分类（normal/vip/svip）',
     description         TEXT            DEFAULT NULL               COMMENT '套餐描述',
+    image_url           VARCHAR(500)    DEFAULT NULL               COMMENT '套餐图片URL',
     status              CHAR(1)         DEFAULT '0'                 COMMENT '状态（0上架 1下架）',
     create_by           VARCHAR(64)     DEFAULT ''                  COMMENT '创建者',
     create_time         DATETIME                                    COMMENT '创建时间',

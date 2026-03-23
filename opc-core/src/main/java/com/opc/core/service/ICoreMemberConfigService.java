@@ -9,7 +9,9 @@ public interface ICoreMemberConfigService
 
     public CoreMemberConfig selectConfigById(Long id);
 
-    public CoreMemberConfig selectConfigByType(String configType);
+    public List<CoreMemberConfig> selectConfigByType(String configType);
 
     public int saveConfig(CoreMemberConfig config);
+
+    public int deleteConfig(Long id);
 }

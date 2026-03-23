@@ -29,3 +29,10 @@ export function saveMemberConfig(data) {
     data: data
   })
 }
+
+export function deleteMemberConfig(id) {
+  return request({
+    url: '/core/memberConfig/' + id,
+    method: 'delete'
+  })
+}

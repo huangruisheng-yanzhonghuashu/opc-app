@@ -25,6 +25,9 @@ public class CorePackage extends BaseEntity
 
     private String description;
 
+    @Excel(name = "套餐图片")
+    private String imageUrl;
+
     @Excel(name = "状态", readConverterExp = "0=上架,1=下架")
     private String status;
 
@@ -78,6 +81,16 @@ public class CorePackage extends BaseEntity
         this.description = description;
     }
 
+    public String getImageUrl()
+    {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl)
+    {
+        this.imageUrl = imageUrl;
+    }
+
     public String getStatus()
     {
         return status;
@@ -96,6 +109,7 @@ public class CorePackage extends BaseEntity
             .append("packagePrice", getPackagePrice())
             .append("packageType", getPackageType())
             .append("description", getDescription())
+            .append("imageUrl", getImageUrl())
             .append("status", getStatus())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())

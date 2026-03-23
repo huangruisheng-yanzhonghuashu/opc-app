@@ -14,6 +14,9 @@
       </el-form>
 
       <el-row :gutter="10" class="mb8">
+         <el-col :span="1.5">
+            <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['core:memberConfig:save']">新增</el-button>
+         </el-col>
          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
 
@@ -23,6 +26,12 @@
             <template #default="scope">
                <el-tag v-if="scope.row.configType === 'banner'" type="primary">会员页Banner图</el-tag>
                <el-tag v-else-if="scope.row.configType === 'vip_guide'" type="warning">VIP引导图片</el-tag>
+            </template>
+         </el-table-column>
+         <el-table-column label="排序号" align="center" prop="sortOrder" width="80" sortable>
+            <template #default="scope">
+               <span v-if="scope.row.configType === 'banner'">{{ scope.row.sortOrder }}</span>
+               <span v-else>-</span>
             </template>
          </el-table-column>
          <el-table-column label="图片" align="center" prop="imageUrl" width="120">
@@ -40,8 +49,8 @@
          </el-table-column>
          <el-table-column label="状态" align="center" prop="status" width="80">
             <template #default="scope">
-               <el-tag :type="scope.row.status === '0' ? 'success' : 'danger'">
-                  {{ scope.row.status === '0' ? '启用' : '禁用' }}
+               <el-tag :type="scope.row.status === '0' ? 'success' : 'info'">
+                  {{ scope.row.status === '0' ? '上架' : '下架' }}
                </el-tag>
             </template>
          </el-table-column>
@@ -50,9 +59,10 @@
                <span>{{ parseTime(scope.row.updateTime) }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="操作" width="120" align="center" class-name="small-padding fixed-width">
+         <el-table-column label="操作" width="180" align="center" class-name="small-padding fixed-width">
             <template #default="scope">
                <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['core:memberConfig:save']">编辑</el-button>
+               <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['core:memberConfig:delete']">删除</el-button>
             </template>
          </el-table-column>
       </el-table>
@@ -67,7 +77,13 @@
 
       <el-dialog :title="title" v-model="open" width="700px" append-to-body>
          <el-form ref="configRef" :model="form" :rules="rules" label-width="140px">
-            <el-form-item label="配置类型" prop="configType">
+            <el-form-item label="配置类型" prop="configType" v-if="!form.id">
+               <el-select v-model="form.configType" placeholder="请选择配置类型" style="width: 100%">
+                  <el-option label="会员页Banner图" value="banner" />
+                  <el-option label="VIP引导图片" value="vip_guide" />
+               </el-select>
+            </el-form-item>
+            <el-form-item label="配置类型" v-else>
                <el-tag v-if="form.configType === 'banner'" type="primary">会员页Banner图</el-tag>
                <el-tag v-else-if="form.configType === 'vip_guide'" type="warning">VIP引导图片</el-tag>
             </el-form-item>
@@ -75,8 +91,14 @@
                <el-form-item label="图片" prop="imageUrl">
                   <ImageUpload v-model="form.imageUrl" :limit="1" />
                </el-form-item>
-               <el-form-item label="文章链接/id" prop="articleLink">
-                  <el-input v-model="form.articleLink" placeholder="请输入文章链接或ID" />
+               <el-form-item label="链接类型" prop="linkType">
+                  <el-radio-group v-model="form.linkType">
+                     <el-radio label="article">文章ID</el-radio>
+                     <el-radio label="link">外部链接</el-radio>
+                  </el-radio-group>
+               </el-form-item>
+               <el-form-item :label="form.linkType === 'article' ? '文章ID' : '外部链接'" prop="articleLink">
+                  <el-input v-model="form.articleLink" :placeholder="form.linkType === 'article' ? '请输入文章ID' : '请输入外部链接URL'" />
                </el-form-item>
             </div>
             <div v-if="form.configType === 'vip_guide'">
@@ -84,10 +106,14 @@
                   <Editor v-model="form.richContent" :min-height="300" />
                </el-form-item>
             </div>
+            <el-form-item label="排序号" prop="sortOrder" v-if="form.configType === 'banner'">
+               <el-input-number v-model="form.sortOrder" :min="0" :max="999" placeholder="请输入排序号" style="width: 200px" />
+               <span class="form-tip">数字越小排序越靠前</span>
+            </el-form-item>
             <el-form-item label="状态" prop="status">
                <el-radio-group v-model="form.status">
-                  <el-radio label="0">启用</el-radio>
-                  <el-radio label="1">禁用</el-radio>
+                  <el-radio label="0">上架</el-radio>
+                  <el-radio label="1">下架</el-radio>
                </el-radio-group>
             </el-form-item>
             <el-form-item label="备注" prop="remark">
@@ -105,7 +131,7 @@
 </template>
 
 <script setup name="MemberConfig">
-import { listMemberConfig, saveMemberConfig } from "@/api/core/memberConfig"
+import { listMemberConfig, saveMemberConfig, deleteMemberConfig } from "@/api/core/memberConfig"
 import ImageUpload from "@/components/ImageUpload/index.vue"
 import Editor from "@/components/Editor/index.vue"
 import { isExternal } from "@/utils/validate"
@@ -122,13 +148,25 @@ const total = ref(0)
 const title = ref("")
 
 const data = reactive({
-  form: {},
+  form: {
+    id: undefined,
+    configType: undefined,
+    linkType: "article",
+    imageUrl: undefined,
+    articleLink: undefined,
+    richContent: undefined,
+    sortOrder: 0,
+    status: "0",
+    remark: undefined
+  },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
     configType: undefined
   },
-  rules: {}
+  rules: {
+    configType: [{ required: true, message: "请选择配置类型", trigger: "change" }]
+  }
 })
 
 const { queryParams, form, rules } = toRefs(data)
@@ -157,9 +195,11 @@ function reset() {
   form.value = {
     id: undefined,
     configType: undefined,
+    linkType: "article",
     imageUrl: undefined,
     articleLink: undefined,
     richContent: undefined,
+    sortOrder: 0,
     status: "0",
     remark: undefined
   }
@@ -176,19 +216,37 @@ function resetQuery() {
   handleQuery()
 }
 
+function handleAdd() {
+  reset()
+  form.value.configType = 'banner'
+  open.value = true
+  title.value = "新增配置"
+}
+
 function handleUpdate(row) {
   reset()
   form.value = {
     id: row.id,
     configType: row.configType,
+    linkType: row.linkType || "article",
     imageUrl: row.imageUrl,
     articleLink: row.articleLink,
     richContent: row.richContent,
+    sortOrder: row.sortOrder || 0,
     status: row.status,
     remark: row.remark
   }
   open.value = true
   title.value = "编辑配置"
+}
+
+function handleDelete(row) {
+  proxy.$modal.confirm('确认删除该配置吗？').then(function() {
+    return deleteMemberConfig(row.id)
+  }).then(() => {
+    getList()
+    proxy.$modal.msgSuccess("删除成功")
+  }).catch(() => {})
 }
 
 function submitForm() {
@@ -205,3 +263,11 @@ function submitForm() {
 
 getList()
 </script>
+
+<style scoped>
+.form-tip {
+  margin-left: 10px;
+  color: #909399;
+  font-size: 12px;
+}
+</style>

@@ -9,7 +9,9 @@ public interface CoreMemberConfigMapper
 
     public CoreMemberConfig selectConfigById(Long id);
 
-    public CoreMemberConfig selectConfigByType(String configType);
+    public List<CoreMemberConfig> selectConfigByType(String configType);
+
+    public int deleteConfigById(Long id);
 
     public int insertConfig(CoreMemberConfig config);
 

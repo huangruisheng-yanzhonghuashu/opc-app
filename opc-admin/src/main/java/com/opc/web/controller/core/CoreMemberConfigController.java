@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,13 +49,23 @@ public class CoreMemberConfigController extends BaseController
         return success(configService.selectConfigById(id));
     }
 
-    @Operation(summary = "根据类型获取配置", description = "根据配置类型获取配置信息")
+    @Operation(summary = "根据类型获取配置", description = "根据配置类型获取配置列表")
     @Parameter(name = "type", description = "配置类型(banner/vip_guide)", required = true)
     @PreAuthorize("@ss.hasPermi('core:memberConfig:query')")
     @GetMapping("/type/{type}")
     public AjaxResult getByType(@PathVariable String type)
     {
         return success(configService.selectConfigByType(type));
+    }
+
+    @Operation(summary = "删除会员页面配置", description = "根据ID删除配置")
+    @Parameter(name = "id", description = "配置ID", required = true)
+    @PreAuthorize("@ss.hasPermi('core:memberConfig:delete')")
+    @Log(title = "会员页面配置", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{id}")
+    public AjaxResult delete(@PathVariable Long id)
+    {
+        return toAjax(configService.deleteConfig(id));
     }
 
     @Operation(summary = "保存会员页面配置", description = "保存或更新配置信息")

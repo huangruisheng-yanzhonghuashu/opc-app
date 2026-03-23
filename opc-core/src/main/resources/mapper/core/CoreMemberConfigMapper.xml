@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<resultMap type="CoreMemberConfig" id="CoreMemberConfigResult">
 		<id     property="id"              column="id"                />
 		<result property="configType"     column="config_type"       />
+		<result property="linkType"       column="link_type"         />
 		<result property="imageUrl"       column="image_url"         />
 		<result property="articleLink"    column="article_link"      />
 		<result property="richContent"   column="rich_content"      />
@@ -16,11 +17,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="updateBy"       column="update_by"        />
 		<result property="updateTime"     column="update_time"      />
 		<result property="remark"         column="remark"           />
+	<result property="sortOrder"      column="sort_order"       />
 	</resultMap>
 
 	<sql id="selectConfigVo">
-        select id, config_type, image_url, article_link, rich_content, status,
-               create_by, create_time, update_by, update_time, remark
+        select id, config_type, link_type, image_url, article_link, rich_content, status,
+               create_by, create_time, update_by, update_time, remark, sort_order
 		from core_member_config
     </sql>
 
@@ -34,7 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 				AND status = #{status}
 			</if>
 		</where>
-		order by id
+		order by sort_order asc, id asc
 	</select>
 
 	<select id="selectConfigById" parameterType="Long" resultMap="CoreMemberConfigResult">
@@ -50,39 +52,49 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<update id="updateConfig" parameterType="CoreMemberConfig">
  		update core_member_config
  		<set>
- 			<if test="imageUrl != null">image_url = #{imageUrl},</if>
- 			<if test="articleLink != null">article_link = #{articleLink},</if>
+		<if test="linkType != null and linkType != ''">link_type = #{linkType},</if>
+			<if test="imageUrl != null">image_url = #{imageUrl},</if>
+			<if test="articleLink != null">article_link = #{articleLink},</if>
  			<if test="richContent != null">rich_content = #{richContent},</if>
  			<if test="status != null and status != ''">status = #{status},</if>
- 			<if test="remark != null">remark = #{remark},</if>
- 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
- 			update_time = sysdate()
- 		</set>
- 		where id = #{id}
+		<if test="remark != null">remark = #{remark},</if>
+			<if test="sortOrder != null">sort_order = #{sortOrder},</if>
+			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+			update_time = sysdate()
+		</set>
+		where id = #{id}
 	</update>
 
  	<insert id="insertConfig" parameterType="CoreMemberConfig" useGeneratedKeys="true" keyProperty="id">
  		insert into core_member_config(
  			<if test="id != null and id != 0">id,</if>
- 			<if test="configType != null and configType != ''">config_type,</if>
- 			<if test="imageUrl != null">image_url,</if>
+		<if test="configType != null and configType != ''">config_type,</if>
+			<if test="linkType != null and linkType != ''">link_type,</if>
+			<if test="imageUrl != null">image_url,</if>
  			<if test="articleLink != null">article_link,</if>
  			<if test="richContent != null">rich_content,</if>
  			<if test="status != null and status != ''">status,</if>
- 			<if test="remark != null">remark,</if>
- 			<if test="createBy != null and createBy != ''">create_by,</if>
- 			create_time
- 		)values(
- 			<if test="id != null and id != 0">#{id},</if>
- 			<if test="configType != null and configType != ''">#{configType},</if>
- 			<if test="imageUrl != null">#{imageUrl},</if>
- 			<if test="articleLink != null">#{articleLink},</if>
- 			<if test="richContent != null">#{richContent},</if>
- 			<if test="status != null and status != ''">#{status},</if>
- 			<if test="remark != null">#{remark},</if>
- 			<if test="createBy != null and createBy != ''">#{createBy},</if>
- 			sysdate()
- 		)
+		<if test="remark != null">remark,</if>
+			<if test="sortOrder != null">sort_order,</if>
+			<if test="createBy != null and createBy != ''">create_by,</if>
+			create_time
+		)values(
+			<if test="id != null and id != 0">#{id},</if>
+			<if test="configType != null and configType != ''">#{configType},</if>
+			<if test="linkType != null and linkType != ''">#{linkType},</if>
+			<if test="imageUrl != null">#{imageUrl},</if>
+			<if test="articleLink != null">#{articleLink},</if>
+			<if test="richContent != null">#{richContent},</if>
+			<if test="status != null and status != ''">#{status},</if>
+			<if test="remark != null">#{remark},</if>
+			<if test="sortOrder != null">#{sortOrder},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			sysdate()
+		)
 	</insert>
+
+	<delete id="deleteConfigById" parameterType="Long">
+		delete from core_member_config where id = #{id}
+	</delete>
 
 </mapper>
