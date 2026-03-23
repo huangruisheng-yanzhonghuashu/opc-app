@@ -19,6 +19,7 @@ import com.opc.common.utils.file.FileUploadUtils;
 import com.opc.common.utils.file.FileUtils;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.domain.vo.MemberLoginVO;
+import com.opc.core.service.ICoreFeedbackService;
 import com.opc.core.service.ICoreMemberService;
 import com.opc.core.service.ICorePackageOrderService;
 import com.opc.core.service.MemberTokenService;
@@ -29,7 +30,10 @@ import com.opc.mobile.dto.MemberCancelDTO;
 import com.opc.mobile.dto.MemberBindEmailDTO;
 import com.opc.mobile.dto.EmailCodeRequestDTO;
 import com.opc.mobile.dto.OrderIdDTO;
+import com.opc.core.domain.CoreFeedback;
 import com.opc.core.domain.CorePackageOrder;
+import com.opc.mobile.dto.FeedbackSubmitDTO;
+import com.opc.mobile.dto.FeedbackIdDTO;
 import com.opc.web.dto.EmailDTO;
 import com.opc.web.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author opc
  */
-@Tag(name = "会员管理", description = "移动端会员信息、图片上传管理接口")
+@Tag(name = "会员管理", description = "移动端会员信息、图片上传、购买记录、意见反馈管理接口")
 @RestController
 @RequestMapping("/mobile/member")
 public class MobileMemberController
@@ -63,6 +67,9 @@ public class MobileMemberController
 
     @Autowired
     private ICorePackageOrderService packageOrderService;
+
+    @Autowired
+    private ICoreFeedbackService feedbackService;
 
     @Autowired
     private ServerConfig serverConfig;
@@ -637,6 +644,101 @@ public class MobileMemberController
             log.error("查询购买记录详情失败：memberId={}, orderId={}", memberLoginVO.getMemberId(), id, e);
             return AjaxResult.error("查询订单详情失败：" + e.getMessage());
         }
+    }
+
+    /**
+     * 提交意见反馈
+     */
+    @Operation(summary = "提交意见反馈", description = "移动端会员提交意见反馈")
+    @Log(title = "移动端意见反馈", businessType = BusinessType.INSERT)
+    @PostMapping("/feedback/submit")
+    public AjaxResult submitFeedback(@Valid @RequestBody FeedbackSubmitDTO submitDTO, HttpServletRequest request)
+    {
+        MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
+
+        CoreFeedback feedback = new CoreFeedback();
+
+        // 如果已登录，关联会员信息
+        if (memberLoginVO != null) {
+            feedback.setMemberId(memberLoginVO.getMemberId());
+            feedback.setMemberName(memberLoginVO.getNickname() != null ? memberLoginVO.getNickname() : memberLoginVO.getUsername());
+        } else if (submitDTO.getMemberId() != null) {
+            // 兼容未登录但传了memberId的情况
+            CoreMember member = memberService.selectMemberById(submitDTO.getMemberId());
+            if (member != null) {
+                feedback.setMemberId(member.getId());
+                feedback.setMemberName(member.getNickname() != null ? member.getNickname() : member.getUsername());
+            }
+        }
+
+        feedback.setType(submitDTO.getType());
+        feedback.setTitle(submitDTO.getTitle());
+        feedback.setContent(submitDTO.getContent());
+        feedback.setContact(submitDTO.getContact());
+
+        int result = feedbackService.insertFeedback(feedback);
+        if (result > 0)
+        {
+            log.info("会员提交意见反馈成功：memberId={}, title={}", feedback.getMemberId(), submitDTO.getTitle());
+            return AjaxResult.success("提交成功");
+        }
+        else
+        {
+            return AjaxResult.error("提交失败");
+        }
+    }
+
+    /**
+     * 获取反馈列表
+     */
+    @Operation(summary = "获取反馈列表", description = "获取当前登录会员的反馈列表")
+    @PostMapping("/feedback/list")
+    public AjaxResult feedbackList(HttpServletRequest request)
+    {
+        MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
+        if (memberLoginVO == null)
+        {
+            return AjaxResult.error("请先登录");
+        }
+
+        CoreFeedback feedback = new CoreFeedback();
+        feedback.setMemberId(memberLoginVO.getMemberId());
+        List<CoreFeedback> list = feedbackService.selectFeedbackList(feedback);
+
+        log.info("会员查询反馈列表：memberId={}, 记录数={}", memberLoginVO.getMemberId(), list.size());
+
+        return AjaxResult.success(list);
+    }
+
+    /**
+     * 获取反馈详情
+     */
+    @Operation(summary = "获取反馈详情", description = "根据反馈ID获取详细信息")
+    @PostMapping("/feedback/detail")
+    public AjaxResult feedbackDetail(@Valid @RequestBody FeedbackIdDTO feedbackIdDTO, HttpServletRequest request)
+    {
+        MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
+        if (memberLoginVO == null)
+        {
+            return AjaxResult.error("请先登录");
+        }
+
+        Long id = feedbackIdDTO.getId();
+        CoreFeedback feedback = feedbackService.selectFeedbackById(id);
+        if (feedback == null)
+        {
+            return AjaxResult.error("反馈不存在");
+        }
+
+        // 验证反馈是否属于当前会员
+        if (feedback.getMemberId() == null || !feedback.getMemberId().equals(memberLoginVO.getMemberId()))
+        {
+            return AjaxResult.error("无权查看该反馈");
+        }
+
+        log.info("会员查询反馈详情：memberId={}, feedbackId={}", memberLoginVO.getMemberId(), id);
+
+        return AjaxResult.success(feedback);
     }
 
 }
