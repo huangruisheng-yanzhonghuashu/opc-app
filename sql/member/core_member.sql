@@ -17,15 +17,15 @@ create table core_member
     source                varchar(50)  default null comment '来源（email邮箱 x X facebook Facebook apple Apple google Google）',
     source_id             varchar(64)  default null comment '来源ID',
     token                 varchar(500) default null comment 'Token',
-    status                char(1)      default '0' comment '会员状态（0正常 1禁用/拉黑）',
+    status                char(1)      default '0' comment '会员状态（0正常 1禁用/拉黑 2已注销）',
     register_time         timestamp    default null comment '注册时间',
+    invite_code           varchar(50)  default null comment '邀请码',
     create_by             varchar(64)  default '' comment '创建者',
     create_time           datetime comment '创建时间',
     update_by             varchar(64)  default '' comment '更新者',
     update_time           datetime comment '更新时间',
     remark                varchar(500) default null comment '备注',
     primary key (id),
-    unique key uk_username (username),
     unique key uk_phone_number (phone_number),
     unique key uk_email (email)
 ) engine=innodb auto_increment=1 comment = '会员信息表';

@@ -32,6 +32,9 @@ public class MobileRegisterDTO {
     @NotBlank(message = "验证码不能为空")
     private String code;
 
+    @Schema(description = "邀请码", example = "INV123456")
+    private String inviteCode;
+
     public String getUsername() {
         return username;
     }
@@ -62,5 +65,13 @@ public class MobileRegisterDTO {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getInviteCode() {
+        return inviteCode;
+    }
+
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
     }
 }

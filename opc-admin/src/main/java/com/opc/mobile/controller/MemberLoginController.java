@@ -41,18 +41,6 @@ public class MemberLoginController
         return ajax;
     }
 
-    @Operation(summary = "获取会员信息", description = "获取当前登录会员的详细信息")
-    @GetMapping("/getMemberInfo")
-    public AjaxResult getMemberInfo()
-    {
-        MemberLoginVO memberLoginVO = memberLoginService.getMemberLoginUser();
-        if (StringUtils.isNull(memberLoginVO))
-        {
-            return AjaxResult.error("用户未登录");
-        }
-        return AjaxResult.success(memberLoginVO);
-    }
-
     @Operation(summary = "会员登出", description = "退出当前会员登录")
     @Log(title = "会员登出", businessType = BusinessType.OTHER)
     @PostMapping("/logout")

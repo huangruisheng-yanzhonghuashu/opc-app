@@ -61,11 +61,15 @@ public class CoreMember extends BaseEntity
     @Excel(name = "Token")
     private String token;
 
-    @Excel(name = "会员状态", readConverterExp = "0=正常,1=禁用")
+    @Excel(name = "会员状态", readConverterExp = "0=正常,1=禁用,2=已注销")
     private String status;
 
     @Excel(name = "注册时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Instant registerTime;
+
+    @Excel(name = "邀请码")
+    @Size(min = 0, max = 50, message = "邀请码长度不能超过50个字符")
+    private String inviteCode;
 
     public Long getId()
     {
@@ -217,6 +221,16 @@ public class CoreMember extends BaseEntity
         this.registerTime = registerTime;
     }
 
+    public String getInviteCode()
+    {
+        return inviteCode;
+    }
+
+    public void setInviteCode(String inviteCode)
+    {
+        this.inviteCode = inviteCode;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -234,6 +248,7 @@ public class CoreMember extends BaseEntity
             .append("token", getToken())
             .append("status", getStatus())
             .append("registerTime", getRegisterTime())
+            .append("inviteCode", getInviteCode())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())

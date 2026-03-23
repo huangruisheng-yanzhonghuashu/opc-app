@@ -97,6 +97,18 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     }
 
     @Override
+    public boolean checkNicknameUnique(CoreMember member)
+    {
+        Long id = StringUtils.isNull(member.getId()) ? -1L : member.getId();
+        CoreMember info = memberMapper.checkNicknameUnique(member.getNickname());
+        if (StringUtils.isNotNull(info) && info.getId().longValue() != id.longValue())
+        {
+            return UserConstants.NOT_UNIQUE;
+        }
+        return UserConstants.UNIQUE;
+    }
+
+    @Override
     public int blockMember(Long id)
     {
         return memberMapper.blockMember(id);
@@ -106,6 +118,12 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     public int unblockMember(Long id)
     {
         return memberMapper.unblockMember(id);
+    }
+
+    @Override
+    public int cancelMember(Long id)
+    {
+        return memberMapper.cancelMember(id);
     }
 
     @Override

@@ -22,9 +22,18 @@ public interface CoreMemberMapper
 
     public CoreMember checkEmailUnique(String email);
 
+    public CoreMember checkNicknameUnique(String nickname);
+
     public int blockMember(Long id);
 
     public int unblockMember(Long id);
+
+    /**
+     * 注销会员（状态改为已注销）
+     * @param id 会员ID
+     * @return 结果
+     */
+    public int cancelMember(Long id);
 
     public int updateLoginInfo(Long id, String ipaddr);
 

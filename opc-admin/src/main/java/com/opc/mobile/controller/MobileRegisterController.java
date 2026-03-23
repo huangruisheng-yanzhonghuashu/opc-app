@@ -62,21 +62,11 @@ public class MobileRegisterController extends MobileBaseController {
     @Operation(summary = "发送邮箱验证码", description = "向指定邮箱发送注册验证码，验证码有效期5分钟")
     @PostMapping("/sendEmailCode")
     public AjaxResult sendEmailCode(@Validated @RequestBody EmailCodeRequestDTO requestDTO) {
-        String username = requestDTO.getUsername();
         String email = requestDTO.getEmail();
 
         // 参数校验
-        if (StringUtils.isEmpty(username)) {
-            return AjaxResult.error("用户名不能为空");
-        }
         if (StringUtils.isEmpty(email)) {
             return AjaxResult.error("邮箱不能为空");
-        }
-
-        // 校验用户名长度
-        if (username.length() < UserConstants.USERNAME_MIN_LENGTH
-                || username.length() > UserConstants.USERNAME_MAX_LENGTH) {
-            return AjaxResult.error("账户长度必须在2到20个字符之间");
         }
 
         // 校验邮箱格式
@@ -84,14 +74,8 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("邮箱格式不正确");
         }
 
-        // 检查用户名是否已存在（从会员表判断）
-        CoreMember member = new CoreMember();
-        member.setUsername(username);
-        if (!memberService.checkMemberNameUnique(member)) {
-            return AjaxResult.error("用户名已存在");
-        }
-
         // 检查邮箱是否已存在（从会员表判断）
+        CoreMember member = new CoreMember();
         member.setEmail(email);
         if (!memberService.checkEmailUnique(member)) {
             return AjaxResult.error("邮箱已被注册");
@@ -112,7 +96,7 @@ public class MobileRegisterController extends MobileBaseController {
 
         // 发送邮件
         String subject = "注册验证码";
-        String content = buildEmailContent(username, code);
+        String content = buildEmailContent(code);
         boolean sendResult = emailService.sendHtmlEmail(
                 createEmailDTO(mailFrom, email, subject, content)
         );
@@ -120,10 +104,10 @@ public class MobileRegisterController extends MobileBaseController {
         if (sendResult) {
             // 将验证码存入Redis，有效期5分钟
             redisCache.setCacheObject(cacheKey, code, 5, TimeUnit.MINUTES);
-            log.info("邮箱验证码发送成功：username={}, email={}", username, email);
+            log.info("邮箱验证码发送成功：email={}", email);
             return AjaxResult.success("验证码已发送至您的邮箱，有效期5分钟");
         } else {
-            log.error("邮箱验证码发送失败：username={}, email={}", username, email);
+            log.error("邮箱验证码发送失败：email={}", email);
             return AjaxResult.error("验证码发送失败，请稍后重试");
         }
     }
@@ -195,6 +179,10 @@ public class MobileRegisterController extends MobileBaseController {
         member.setPassword(SecurityUtils.encryptPassword(password));
         member.setEmail(email);
         member.setSource("email");
+        // 设置邀请码（如有）
+        if (StringUtils.isNotEmpty(registerDTO.getInviteCode())) {
+            member.setInviteCode(registerDTO.getInviteCode());
+        }
 
         boolean regFlag = memberService.insertMember(member) > 0;
         if (!regFlag) {
@@ -224,14 +212,13 @@ public class MobileRegisterController extends MobileBaseController {
     /**
      * 构建邮件内容
      *
-     * @param username 用户名
-     * @param code     验证码
+     * @param code 验证码
      * @return HTML内容
      */
-    private String buildEmailContent(String username, String code) {
+    private String buildEmailContent(String code) {
         return "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>" +
                 "<h2 style='color: #333; text-align: center;'>用户注册</h2>" +
-                "<p style='color: #666; font-size: 14px;'>尊敬的 <strong>" + username + "</strong>，您好！</p>" +
+                "<p style='color: #666; font-size: 14px;'>尊敬的用户，您好！</p>" +
                 "<p style='color: #666; font-size: 14px;'>您正在进行账号注册，验证码为：</p>" +
                 "<div style='background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0; border-radius: 3px;'>" +
                 "<span style='font-size: 28px; font-weight: bold; color: #1890ff; letter-spacing: 5px;'>" + code + "</span>" +
