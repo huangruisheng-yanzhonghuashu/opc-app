@@ -1,22 +1,24 @@
 package com.opc.core.service.impl;
 
 import com.opc.common.exception.ServiceException;
+import com.opc.common.utils.ServletUtils;
+import com.opc.common.utils.ip.IpUtils;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.domain.vo.MemberLoginVO;
 import com.opc.core.service.ICoreMemberService;
 import com.opc.core.service.MemberTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.util.Arrays;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,11 +55,15 @@ public class MemberLoginServiceImplTest
         when(passwordEncoder.matches(password, member.getPassword())).thenReturn(true);
         when(memberTokenService.createToken(any(MemberLoginVO.class))).thenReturn("mock-token");
 
-        String token = memberLoginService.login(email, password);
+        try (MockedStatic<IpUtils> ipUtilsMock = mockStatic(IpUtils.class)) {
+            ipUtilsMock.when(IpUtils::getIpAddr).thenReturn("127.0.0.1");
 
-        assertNotNull(token);
-        assertEquals("mock-token", token);
-        verify(memberService).updateLoginInfo(eq(1L), anyString());
+            String token = memberLoginService.login(email, password);
+
+            assertNotNull(token);
+            assertEquals("mock-token", token);
+            verify(memberService).updateLoginInfo(eq(1L), eq("127.0.0.1"));
+        }
     }
 
     @Test
@@ -135,13 +141,18 @@ public class MemberLoginServiceImplTest
         loginVO.setMemberId(1L);
         loginVO.setUsername("testuser");
 
-        when(memberTokenService.getLoginUser(any())).thenReturn(loginVO);
+        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
 
-        MemberLoginVO result = memberLoginService.getMemberLoginUser();
+        try (MockedStatic<ServletUtils> servletUtilsMock = mockStatic(ServletUtils.class)) {
+            servletUtilsMock.when(ServletUtils::getRequest).thenReturn(mockRequest);
+            when(memberTokenService.getLoginUser(any(HttpServletRequest.class))).thenReturn(loginVO);
 
-        assertNotNull(result);
-        assertEquals(1L, result.getMemberId());
-        assertEquals("testuser", result.getUsername());
+            MemberLoginVO result = memberLoginService.getMemberLoginUser();
+
+            assertNotNull(result);
+            assertEquals(1L, result.getMemberId());
+            assertEquals("testuser", result.getUsername());
+        }
     }
 
     @Test
