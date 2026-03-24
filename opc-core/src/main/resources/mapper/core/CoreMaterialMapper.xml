@@ -51,6 +51,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="status != null and status != ''">
 				AND status = #{status}
 			</if>
+			<if test="isTop != null and isTop != ''">
+				AND is_top = #{isTop}
+			</if>
 			<if test="viewPermission != null">
 				AND view_permission = #{viewPermission}
 			</if>

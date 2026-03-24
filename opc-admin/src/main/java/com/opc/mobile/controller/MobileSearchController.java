@@ -60,7 +60,7 @@ public class MobileSearchController extends BaseController
      * @param searchDTO 搜索参数
      * @return 分页数据
      */
-    @Operation(summary = "全局搜索", description = "根据关键字模糊搜索素材标题，分页返回结果")
+    @Operation(summary = "全局搜索列表", description = "根据关键字模糊搜索素材标题，分页返回结果")
     @PostMapping("")
     public TableDataInfo searchMaterial(@RequestBody MaterialSearchDTO searchDTO)
     {

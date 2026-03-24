@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.page.TableDataInfo;
 import com.opc.core.domain.CoreBanner;
+import com.opc.core.domain.CoreMaterial;
 import com.opc.core.service.ICoreBannerService;
+import com.opc.core.service.ICoreMaterialService;
 import com.opc.mobile.dto.BannerQueryDTO;
+import com.opc.mobile.dto.TopMaterialQueryDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +32,9 @@ public class MobileHomeController extends BaseController
     @Autowired
     private ICoreBannerService bannerService;
 
+    @Autowired
+    private ICoreMaterialService materialService;
+
     /**
      * 分页查询Banner列表
      *
@@ -44,6 +50,29 @@ public class MobileHomeController extends BaseController
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
         List<CoreBanner> list = bannerService.selectBannerList(banner);
+        return getDataTable(list);
+    }
+
+    /**
+     * 分页查询置顶素材列表
+     *
+     * @param queryDTO 查询参数
+     * @return 分页数据
+     */
+    @Operation(summary = "获取置顶内容列表", description = "查询置顶素材列表，按发布时间倒序排序")
+    @Parameter(name = "queryDTO", description = "置顶素材查询参数")
+    @PostMapping("/material/top/list")
+    public TableDataInfo topMaterialList(@RequestBody TopMaterialQueryDTO queryDTO)
+    {
+        CoreMaterial material = new CoreMaterial();
+        // 只查询置顶的素材
+        material.setIsTop("1");
+        // 只查询上线的素材
+        material.setStatus("0");
+
+        PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
+        PageHelper.orderBy("publish_time desc");
+        List<CoreMaterial> list = materialService.selectMaterialList(material);
         return getDataTable(list);
     }
 }
