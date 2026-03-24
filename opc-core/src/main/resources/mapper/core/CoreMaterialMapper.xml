@@ -57,6 +57,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="packageType != null">
 				AND package_type = #{packageType}
 			</if>
+			<if test="params.maxPackageType != null">
+				AND package_type &lt;= #{params.maxPackageType}
+			</if>
 			<if test="source != null and source != ''">
 				AND source = #{source}
 			</if>
@@ -193,6 +196,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		where mt.tag_id = #{tagId}
 		<if test="status != null and status != ''">
 			and m.status = #{status}
+		</if>
+		<if test="maxPackageType != null">
+			and m.package_type &lt;= #{maxPackageType}
 		</if>
 		order by m.is_top desc, m.publish_time desc
 	</select>

@@ -29,7 +29,8 @@ public interface CoreMaterialMapper
      *
      * @param tagId 标签ID
      * @param status 状态
+     * @param maxPackageType 最大套餐类型（会员只能看到packageType小于等于此值的素材）
      * @return 素材列表
      */
-    public List<CoreMaterial> selectMaterialListByTagId(@Param("tagId") Long tagId, @Param("status") String status);
+    public List<CoreMaterial> selectMaterialListByTagId(@Param("tagId") Long tagId, @Param("status") String status, @Param("maxPackageType") Integer maxPackageType);
 }

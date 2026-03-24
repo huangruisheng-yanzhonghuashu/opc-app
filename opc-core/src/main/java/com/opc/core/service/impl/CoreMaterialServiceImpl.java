@@ -107,8 +107,8 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     }
 
     @Override
-    public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status)
+    public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status, Integer maxPackageType)
     {
-        return materialMapper.selectMaterialListByTagId(tagId, status);
+        return materialMapper.selectMaterialListByTagId(tagId, status, maxPackageType);
     }
 }

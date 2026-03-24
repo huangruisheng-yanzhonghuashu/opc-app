@@ -26,7 +26,8 @@ public interface ICoreMaterialService
      *
      * @param tagId 标签ID
      * @param status 状态
+     * @param maxPackageType 最大套餐类型（会员只能看到packageType小于等于此值的素材）
      * @return 素材列表
      */
-    public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status);
+    public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status, Integer maxPackageType);
 }
