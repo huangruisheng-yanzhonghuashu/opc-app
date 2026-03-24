@@ -3,17 +3,22 @@ package com.opc.mobile.controller;
 import java.util.List;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.opc.common.core.controller.BaseController;
+import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.core.page.TableDataInfo;
 import com.opc.core.domain.CoreBanner;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreTag;
 import com.opc.core.service.ICoreBannerService;
 import com.opc.core.service.ICoreMaterialService;
+import com.opc.core.service.ICoreTagService;
 import com.opc.mobile.dto.BannerQueryDTO;
+import com.opc.mobile.dto.MaterialByTagQueryDTO;
 import com.opc.mobile.dto.TopMaterialQueryDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,6 +39,9 @@ public class MobileHomeController extends BaseController
 
     @Autowired
     private ICoreMaterialService materialService;
+
+    @Autowired
+    private ICoreTagService tagService;
 
     /**
      * 分页查询Banner列表
@@ -73,6 +81,38 @@ public class MobileHomeController extends BaseController
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
         PageHelper.orderBy("publish_time desc");
         List<CoreMaterial> list = materialService.selectMaterialList(material);
+        return getDataTable(list);
+    }
+
+    /**
+     * 查询标签列表
+     *
+     * @return 标签列表
+     */
+    @Operation(summary = "获取标签列表", description = "查询启用的标签列表，按sortOrder升序排序")
+    @GetMapping("/tag/list")
+    public AjaxResult tagList()
+    {
+        CoreTag tag = new CoreTag();
+        // 只查询启用的标签
+        tag.setStatus("0");
+
+        List<CoreTag> list = tagService.selectTagList(tag);
+        return success(list);
+    }
+
+    /**
+     * 根据标签查询素材列表
+     *
+     * @param queryDTO 查询参数
+     * @return 分页数据
+     */
+    @Operation(summary = "根据标签查询内容列表", description = "根据标签ID查询素材列表，按发布时间倒序排序")
+    @PostMapping("/material/byTag/list")
+    public TableDataInfo materialListByTag(@RequestBody MaterialByTagQueryDTO queryDTO)
+    {
+        PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
+        List<CoreMaterial> list = materialService.selectMaterialListByTagId(queryDTO.getTagId(), "0");
         return getDataTable(list);
     }
 }

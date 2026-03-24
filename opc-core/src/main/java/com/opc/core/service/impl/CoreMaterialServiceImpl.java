@@ -105,4 +105,10 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         material.setIsTop(isTop);
         return materialMapper.changeTop(material);
     }
+
+    @Override
+    public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status)
+    {
+        return materialMapper.selectMaterialListByTagId(tagId, status);
+    }
 }

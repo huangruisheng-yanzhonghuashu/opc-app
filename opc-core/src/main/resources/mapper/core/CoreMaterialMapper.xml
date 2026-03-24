@@ -180,4 +180,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		values (#{materialId}, #{tagId}, sysdate())
 	</insert>
 
+	<select id="selectMaterialListByTagId" resultMap="CoreMaterialResult">
+		select m.id, m.title, m.author, m.summary, m.content, m.original_url, m.original_id, m.reply_count,
+		       m.like_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
+		       m.view_permission, m.content_type, m.category, m.status, m.is_top, m.source,
+		       m.create_by, m.create_time, m.update_by, m.update_time, m.remark
+		from core_material m
+		inner join core_material_tag mt on m.id = mt.material_id
+		where mt.tag_id = #{tagId}
+		<if test="status != null and status != ''">
+			and m.status = #{status}
+		</if>
+		order by m.is_top desc, m.publish_time desc
+	</select>
+
 </mapper>

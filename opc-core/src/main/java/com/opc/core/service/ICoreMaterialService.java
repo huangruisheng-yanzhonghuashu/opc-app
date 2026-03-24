@@ -20,4 +20,13 @@ public interface ICoreMaterialService
     public int changeStatus(Long id, String status);
 
     public int changeTop(Long id, String isTop);
+
+    /**
+     * 根据标签ID查询素材列表
+     *
+     * @param tagId 标签ID
+     * @param status 状态
+     * @return 素材列表
+     */
+    public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status);
 }
