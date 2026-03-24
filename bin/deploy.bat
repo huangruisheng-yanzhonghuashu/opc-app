@@ -12,15 +12,15 @@ set "REMOTE_DIR=/Data/service/opc"
 set "TEMP_KEY_FILE=%TEMP%\opc_key_%RANDOM%.tmp"
 
 echo.
-echo [Step 0/5] Creating temporary key file...
+echo [Step 0/4] Creating temporary key file...
 echo ----------------------------------------
 (
 echo -----BEGIN OPENSSH PRIVATE KEY-----
 echo b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-QyNTUxOQAAACBwZIGaqfZielhtehgCCEgjQ4xMlBDelECdyEeMN1U2IQAAAJiOx6Ycjsem
-HAAAAAtzc2gtZWQyNTUxOQAAACBwZIGaqfZielhtehgCCEgjQ4xMlBDelECdyEeMN1U2IQ
-AAAEBvX6wmHEi3NzirnI+sVwqjDUcVStv7XUPl/Z54URConXBkgZqp9mJ6WG16GAIISCND
-jEyUEN6UQJ3IR4w3VTYhAAAAE215LWxpbnV4LXNlcnZlci1rZXkBAg==
+echo QyNTUxOQAAACBwZIGaqfZielhtehgCCEgjQ4xMlBDelECdyEeMN1U2IQAAAJiOx6Ycjsem
+echo HAAAAAtzc2gtZWQyNTUxOQAAACBwZIGaqfZielhtehgCCEgjQ4xMlBDelECdyEeMN1U2IQ
+echo AAAEBvX6wmHEi3NzirnI+sVwqjDUcVStv7XUPl/Z54URConXBkgZqp9mJ6WG16GAIISCND
+echo jEyUEN6UQJ3IR4w3VTYhAAAAE215LWxpbnV4LXNlcnZlci1rZXkBAg==
 echo -----END OPENSSH PRIVATE KEY-----
 ) > "%TEMP_KEY_FILE%"
 icacls "%TEMP_KEY_FILE%" /inheritance:r >nul 2>&1
@@ -29,21 +29,17 @@ icacls "%TEMP_KEY_FILE%" /remove "BUILTIN\Users" >nul 2>&1
 icacls "%TEMP_KEY_FILE%" /grant "%USERNAME%:RX" >nul 2>&1
 echo [OK] Temp key file created!
 
+echo.
+echo [Step 1/4] Cleaning and Building project...
+echo ----------------------------------------
 cd /d "%~dp0.."
 
-:: Step 1: Kill local process using port 8080
-echo.
-echo [Step 1/5] Killing local process using port 8080...
-echo ----------------------------------------
+:: Kill process using port 8080
+echo [INFO] Checking for process using port 8080...
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8080') do (
     echo [INFO] Killing process with PID: %%a
     taskkill /F /PID %%a >nul 2>&1
 )
-echo [OK] Port 8080 is free!
-
-echo.
-echo [Step 2/5] Cleaning and Building project...
-echo ----------------------------------------
 
 :: Try to kill Java processes that might lock files
 taskkill /F /IM java.exe >nul 2>&1
@@ -65,7 +61,7 @@ if not exist "%JAR_FILE%" (
 )
 
 echo.
-echo [Step 3/5] Uploading JAR to server...
+echo [Step 2/4] Uploading JAR to server...
 echo ----------------------------------------
 echo Target: %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_DIR%
 scp -P %REMOTE_PORT% -i "%TEMP_KEY_FILE%" -o StrictHostKeyChecking=no "%JAR_FILE%" "%REMOTE_USER%@%REMOTE_HOST%:%REMOTE_DIR%/"
@@ -76,23 +72,19 @@ if errorlevel 1 (
 echo [OK] Upload completed!
 
 echo.
-echo [Step 4/5] Killing remote process on port 8080...
+echo [Step 3/4] Running run.sh on server...
 echo ----------------------------------------
+echo [INFO] Killing process using port 8080 on server...
 ssh -p %REMOTE_PORT% -i "%TEMP_KEY_FILE%" -o StrictHostKeyChecking=no "%REMOTE_USER%@%REMOTE_HOST%" "sudo lsof -ti:8080 | xargs -r sudo kill -9"
-echo [OK] Remote port 8080 is free!
-
-echo.
-echo [Step 5/5] Running run.sh on server...
-echo ----------------------------------------
 ssh -p %REMOTE_PORT% -i "%TEMP_KEY_FILE%" -o StrictHostKeyChecking=no "%REMOTE_USER%@%REMOTE_HOST%" "cd %REMOTE_DIR% && sudo nohup ./run.sh > /dev/null 2>&1 &"
 if errorlevel 1 (
     echo [ERROR] Remote command failed!
     exit /b 1
 )
-echo [OK] Service started!
+echo [OK] Service restarted!
 
 echo.
-echo [Step 6/6] Cleaning up...
+echo [Step 4/4] Cleaning up...
 echo ----------------------------------------
 del /F /Q "%TEMP_KEY_FILE%" >nul 2>&1
 echo [OK] Cleanup completed!
