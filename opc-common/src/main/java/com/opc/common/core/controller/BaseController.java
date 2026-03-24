@@ -2,7 +2,9 @@ package com.opc.common.core.controller;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.WebDataBinder;
@@ -198,5 +200,47 @@ public class BaseController
     public String getUsername()
     {
         return getLoginUser().getUsername();
+    }
+
+    /**
+     * 检查套餐权限
+     *
+     * @param currentPackageLevel 当前会员套餐等级
+     * @param category 素材分类
+     * @return 是否有权限
+     */
+    protected boolean checkPackagePermission(Integer currentPackageLevel, String category)
+    {
+        // 如果会员没有套餐等级，则只能查看免费内容
+        if (currentPackageLevel == null)
+        {
+            currentPackageLevel = 0;
+        }
+
+        // 获取分类所需的套餐等级
+        Integer requiredLevel = getCategoryRequiredLevel(category);
+
+        // 判断当前套餐等级是否满足要求
+        return currentPackageLevel >= requiredLevel;
+    }
+
+    /**
+     * 获取分类所需的套餐等级
+     *
+     * @param category 素材分类
+     * @return 所需套餐等级
+     */
+    protected Integer getCategoryRequiredLevel(String category)
+    {
+        // 定义分类和套餐等级的映射关系
+        Map<String, Integer> categoryLevelMap = new HashMap<>();
+        categoryLevelMap.put("free", 0);              // 免费内容
+        categoryLevelMap.put("normal", 1);            // 普通会员
+        categoryLevelMap.put("morning_report", 1);    // 晨报
+        categoryLevelMap.put("vip", 2);               // VIP会员内容
+        categoryLevelMap.put("svip", 3);              // 超级VIP内容
+
+        // 默认返回普通会员等级
+        return categoryLevelMap.getOrDefault(category, 1);
     }
 }
