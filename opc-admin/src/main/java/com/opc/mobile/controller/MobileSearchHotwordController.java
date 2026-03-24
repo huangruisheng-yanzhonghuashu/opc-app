@@ -1,6 +1,7 @@
 package com.opc.mobile.controller;
 
 import java.util.List;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.page.TableDataInfo;
 import com.opc.core.domain.CoreSearchHotword;
+import com.opc.mobile.dto.SearchHotwordQueryDTO;
 import com.opc.core.service.ICoreSearchHotwordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,17 +31,17 @@ public class MobileSearchHotwordController extends BaseController
     /**
      * 分页查询搜索热词列表
      *
-     * @param searchHotword 查询参数
+     * @param queryDTO 查询参数
      * @return 分页数据
      */
-    @Operation(summary = "获取搜索热词列表", description = "分页查询启用的搜索热词列表，支持按名称模糊查询")
+    @Operation(summary = "获取搜索热词列表", description = "分页查询搜索热词列表，支持按名称模糊查询")
     @PostMapping("/list")
-    public TableDataInfo list(@RequestBody CoreSearchHotword searchHotword)
+    public TableDataInfo list(@RequestBody SearchHotwordQueryDTO queryDTO)
     {
-        // 移动端只查询启用的热词
-        searchHotword.setStatus("0");
+        CoreSearchHotword searchHotword = new CoreSearchHotword();
+        searchHotword.setKeyword(queryDTO.getKeyword());
 
-        startPage();
+        PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
         List<CoreSearchHotword> list = searchHotwordService.selectSearchHotwordList(searchHotword);
         return getDataTable(list);
     }
