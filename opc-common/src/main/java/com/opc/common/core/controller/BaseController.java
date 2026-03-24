@@ -205,36 +205,31 @@ public class BaseController
     /**
      * 检查套餐权限
      *
-     * @param packageType 当前会员套餐分类
-     * @param category 素材分类
+     * @param memberPackageType 当前会员套餐分类
+     * @param materialPackageType 素材所需套餐分类
      * @return 是否有权限
      */
-    protected boolean checkPackagePermission(Integer packageType, String category)
+    protected boolean checkPackagePermission(Integer memberPackageType, Integer materialPackageType)
     {
-        // 获取分类所需的套餐等级
-        Integer requiredLevel = getCategoryRequiredLevel(category);
+        // 素材没有设置套餐分类时，默认允许访问
+        if (materialPackageType == null)
+        {
+            return true;
+        }
 
-        // 判断当前套餐类型是否满足要求（null表示无套餐，只能看免费内容）
-        return packageType != null && packageType >= requiredLevel;
-    }
+        // 会员无套餐时，只能看免费内容（素材未设置package_type）
+        if (memberPackageType == null)
+        {
+            return false;
+        }
 
-    /**
-     * 获取分类所需的套餐等级
-     *
-     * @param category 素材分类
-     * @return 所需套餐等级
-     */
-    protected Integer getCategoryRequiredLevel(String category)
-    {
-        // 定义分类和套餐等级的映射关系
-        Map<String, Integer> categoryLevelMap = new HashMap<>();
-        categoryLevelMap.put("free", 0);              // 免费内容
-        categoryLevelMap.put("normal", 1);            // 普通会员
-        categoryLevelMap.put("morning_report", 1);    // 晨报
-        categoryLevelMap.put("vip", 2);               // VIP会员内容
-        categoryLevelMap.put("svip", 3);              // 超级VIP内容
+        // 晨报(0)和普通会员(1)内容，普通会员及以上都可查看
+        if (materialPackageType == 0 || materialPackageType == 1)
+        {
+            return memberPackageType >= 1;
+        }
 
-        // 默认返回普通会员等级
-        return categoryLevelMap.getOrDefault(category, 1);
+        // 其他情况：VIP(2)、超级VIP(3)内容需要对应等级
+        return memberPackageType >= materialPackageType;
     }
 }

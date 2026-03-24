@@ -17,7 +17,7 @@ CREATE TABLE core_material (
     comment_count      BIGINT(20)     DEFAULT 0                  COMMENT '评论数',
     publish_time        DATETIME        DEFAULT NULL               COMMENT '发布时间',
     content_type        VARCHAR(20)     DEFAULT 'text'             COMMENT '内容类型（text/image/video）',
-    category            VARCHAR(50)     DEFAULT NULL               COMMENT '分类（normal/vip_column/vip/svip）',
+    package_type        INT             DEFAULT NULL               COMMENT '套餐分类（0晨报 1普通会员 2VIP会员 3超级VIP会员）',
     status              CHAR(1)         DEFAULT '0'                COMMENT '状态（0上线 1下线）',
     is_top              CHAR(1)         DEFAULT '0'                COMMENT '是否置顶（0否 1是）',
     source              VARCHAR(50)     DEFAULT NULL               COMMENT '来源（crawler爬取/manual手动）',
@@ -30,6 +30,6 @@ CREATE TABLE core_material (
     PRIMARY KEY (id),
     KEY idx_status (status),
     KEY idx_is_top (is_top),
-    KEY idx_category (category),
+    KEY idx_package_type (package_type),
     KEY idx_publish_time (publish_time)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='素材表';

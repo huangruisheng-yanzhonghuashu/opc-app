@@ -154,8 +154,8 @@ public class MobileHomeController extends BaseController
     public TableDataInfo morningReportList(@RequestBody MorningReportQueryDTO queryDTO)
     {
         CoreMaterial material = new CoreMaterial();
-        // 查询晨报类型的素材
-        material.setCategory("morning_report");
+        // 查询晨报类型的素材（晨报是普通会员可看，package_type = 1）
+        material.setPackageType(1);
         // 只查询上线的素材
         material.setStatus("0");
         // 设置查询当天创建的数据

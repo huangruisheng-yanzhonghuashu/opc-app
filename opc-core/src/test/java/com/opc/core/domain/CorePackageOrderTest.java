@@ -20,7 +20,7 @@ public class CorePackageOrderTest
         order.setNickname("Test User");
         order.setPackageId(10L);
         order.setPackageName("VIP Package");
-        order.setPackageType("vip");
+        order.setPackageType(0);
         order.setPrice(new BigDecimal("99.99"));
         order.setPayTime(LocalDateTime.of(2024, 1, 1, 12, 0, 0));
         order.setPayStatus("1");

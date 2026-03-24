@@ -93,9 +93,9 @@
                <span v-else>-</span>
             </template>
          </el-table-column>
-         <el-table-column label="分类" align="center" prop="category" width="100">
+         <el-table-column label="套餐分类" align="center" prop="packageType" width="100">
             <template #default="scope">
-               <span>{{ getCategoryLabel(scope.row.category) }}</span>
+               <span>{{ getPackageTypeLabel(scope.row.packageType) }}</span>
             </template>
          </el-table-column>
          <el-table-column label="来源" align="center" prop="source" width="80">
@@ -181,12 +181,12 @@
                   </el-form-item>
                </el-col>
                <el-col :span="12">
-                  <el-form-item label="分类" prop="category">
-                     <el-select v-model="form.category" placeholder="请选择分类" style="width: 100%">
-                        <el-option label="普通素材" value="normal" />
-                        <el-option label="VIP素材" value="vip" />
-                        <el-option label="超级VIP" value="svip" />
-                        <el-option label="晨报" value="morning_report" />
+                  <el-form-item label="套餐分类" prop="packageType">
+                     <el-select v-model="form.packageType" placeholder="请选择套餐分类" style="width: 100%">
+                        <el-option label="晨报" :value="0" />
+                        <el-option label="普通会员" :value="1" />
+                        <el-option label="VIP会员" :value="2" />
+                        <el-option label="超级VIP会员" :value="3" />
                      </el-select>
                   </el-form-item>
                </el-col>
@@ -314,7 +314,7 @@
             <el-descriptions-item label="查看数" :span="1">{{ detailData.viewCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="转发数" :span="1">{{ detailData.shareCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="评论数" :span="1">{{ detailData.commentCount || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="分类" :span="1">{{ getCategoryLabel(detailData.category) }}</el-descriptions-item>
+            <el-descriptions-item label="套餐分类" :span="1">{{ getPackageTypeLabel(detailData.packageType) }}</el-descriptions-item>
             <el-descriptions-item label="内容类型" :span="1">
                <span>{{ getContentTypeLabel(detailData.contentType) }}</span>
             </el-descriptions-item>
@@ -406,14 +406,12 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data)
 
-function getCategoryLabel(category) {
-  const map = {
-    'normal': '普通素材',
-    'vip': 'VIP素材',
-    'svip': '超级VIP',
-    'morning_report': '晨报'
-  }
-  return map[category] || category || '-'
+function getPackageTypeLabel(packageType) {
+  if (packageType === 0) return '晨报'
+  if (packageType === 1) return '普通会员'
+  if (packageType === 2) return 'VIP会员'
+  if (packageType === 3) return '超级VIP会员'
+  return '-'
 }
 
 function getContentTypeLabel(contentType) {
@@ -461,7 +459,7 @@ function reset() {
     commentCount: 0,
     publishTime: undefined,
     contentType: 'text',
-    category: 'normal',
+    packageType: 1,
     status: '0',
     isTop: '0',
     source: 'manual',
@@ -497,11 +495,11 @@ function handleTabChange(tabName) {
 function handleAdd() {
   reset()
   if (activeTab.value === '1') {
-    form.value.category = 'normal'
+    form.value.packageType = 1
   } else if (activeTab.value === '2') {
-    form.value.category = 'vip'
+    form.value.packageType = 2
   } else {
-    form.value.category = 'svip'
+    form.value.packageType = 3
   }
   getTagOptions()
   open.value = true

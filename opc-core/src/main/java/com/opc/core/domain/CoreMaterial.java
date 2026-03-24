@@ -54,8 +54,8 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "内容类型")
     private String contentType;
 
-    @Excel(name = "分类")
-    private String category;
+    @Excel(name = "套餐分类", readConverterExp = "0=晨报,1=普通会员,2=VIP会员,3=超级VIP会员")
+    private Integer packageType;
 
     @Excel(name = "状态", readConverterExp = "0=上线,1=下线")
     private String status;
@@ -213,14 +213,14 @@ public class CoreMaterial extends BaseEntity
         this.contentType = contentType;
     }
 
-    public String getCategory()
+    public Integer getPackageType()
     {
-        return category;
+        return packageType;
     }
 
-    public void setCategory(String category)
+    public void setPackageType(Integer packageType)
     {
-        this.category = category;
+        this.packageType = packageType;
     }
 
     public String getStatus()
@@ -300,7 +300,7 @@ public class CoreMaterial extends BaseEntity
             .append("commentCount", getCommentCount())
             .append("publishTime", getPublishTime())
             .append("contentType", getContentType())
-            .append("category", getCategory())
+            .append("packageType", getPackageType())
             .append("status", getStatus())
             .append("isTop", getIsTop())
             .append("source", getSource())

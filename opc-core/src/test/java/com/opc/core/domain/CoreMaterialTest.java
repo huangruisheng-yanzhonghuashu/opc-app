@@ -25,7 +25,7 @@ public class CoreMaterialTest
         material.setCommentCount(20L);
         material.setPublishTime(Instant.parse("2024-01-01T10:00:00Z"));
         material.setContentType("article");
-        material.setCategory("tech");
+        material.setPackageType(1);
         material.setStatus("0");
         material.setIsTop("1");
         material.setSource("twitter");
@@ -45,7 +45,7 @@ public class CoreMaterialTest
         assertEquals(Long.valueOf(20), material.getCommentCount());
         assertEquals(Instant.parse("2024-01-01T10:00:00Z"), material.getPublishTime());
         assertEquals("article", material.getContentType());
-        assertEquals("tech", material.getCategory());
+        assertEquals(Integer.valueOf(1), material.getPackageType());
         assertEquals("0", material.getStatus());
         assertEquals("1", material.getIsTop());
         assertEquals("twitter", material.getSource());

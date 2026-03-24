@@ -14,7 +14,7 @@ public class CorePackageTest
         pkg.setId(1L);
         pkg.setPackageName("VIP Package");
         pkg.setPackagePrice(new BigDecimal("99.99"));
-        pkg.setPackageType("vip");
+        pkg.setPackageType(0);
         pkg.setDescription("VIP membership package");
         pkg.setStatus("0");
 
@@ -32,7 +32,7 @@ public class CorePackageTest
         CorePackage pkg = new CorePackage();
         pkg.setId(1L);
         pkg.setPackageName("VIP Package");
-        pkg.setPackageType("vip");
+        pkg.setPackageType(1);
 
         String str = pkg.toString();
         assertNotNull(str);
@@ -70,13 +70,13 @@ public class CorePackageTest
     {
         CorePackage pkg = new CorePackage();
 
-        pkg.setPackageType("normal");
-        assertEquals("normal", pkg.getPackageType());
+        pkg.setPackageType(1);
+        assertEquals(1, pkg.getPackageType());
 
-        pkg.setPackageType("vip");
-        assertEquals("vip", pkg.getPackageType());
+        pkg.setPackageType(2);
+        assertEquals(1, pkg.getPackageType());
 
-        pkg.setPackageType("svip");
-        assertEquals("svip", pkg.getPackageType());
+        pkg.setPackageType(2);
+        assertEquals(3, pkg.getPackageType());
     }
 }
