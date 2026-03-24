@@ -109,7 +109,9 @@ public class MobileHomeController extends BaseController
         material.getParams().put("maxPackageType", member.getPackageType());
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
-        PageHelper.orderBy("publish_time desc");
+        // 处理排序
+        String orderBy = queryDTO.getOrderByColumn() + " " + (queryDTO.getIsAsc() ? "asc" : "desc");
+        PageHelper.orderBy(orderBy);
         List<CoreMaterial> list = materialService.selectMaterialList(material);
         return getDataTable(list);
     }
@@ -150,7 +152,9 @@ public class MobileHomeController extends BaseController
         material.getParams().put("maxPackageType", member.getPackageType());
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
-        PageHelper.orderBy("publish_time desc");
+        // 处理排序
+        String orderBy = queryDTO.getOrderByColumn() + " " + (queryDTO.getIsAsc() ? "asc" : "desc");
+        PageHelper.orderBy(orderBy);
         List<CoreMaterial> list = materialService.selectMaterialList(material);
         return getDataTable(list);
     }
@@ -198,6 +202,9 @@ public class MobileHomeController extends BaseController
         }
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
+        // 处理排序
+        String orderBy = queryDTO.getOrderByColumn() + " " + (queryDTO.getIsAsc() ? "asc" : "desc");
+        PageHelper.orderBy(orderBy);
         List<CoreMaterial> list = materialService.selectMaterialListByTagId(queryDTO.getTagId(), "0", member.getPackageType());
         return getDataTable(list);
     }
@@ -239,7 +246,9 @@ public class MobileHomeController extends BaseController
         material.getParams().put("endCreateTime", today + " 23:59:59");
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
-        PageHelper.orderBy("publish_time desc");
+        // 处理排序
+        String orderBy = queryDTO.getOrderByColumn() + " " + (queryDTO.getIsAsc() ? "asc" : "desc");
+        PageHelper.orderBy(orderBy);
         List<CoreMaterial> list = materialService.selectMaterialList(material);
         return getDataTable(list);
     }

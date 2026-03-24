@@ -70,6 +70,9 @@ public class MobileSearchController extends BaseController
         material.setStatus("0");
 
         PageHelper.startPage(searchDTO.getPageNum(), searchDTO.getPageSize());
+        // 处理排序
+        String orderBy = searchDTO.getOrderByColumn() + " " + (searchDTO.getIsAsc() ? "asc" : "desc");
+        PageHelper.orderBy(orderBy);
         List<CoreMaterial> list = materialService.selectMaterialList(material);
         return getDataTable(list);
     }

@@ -18,6 +18,14 @@ public class MorningReportQueryDTO {
     @Schema(description = "每页大小，默认为10", example = "10")
     private Integer pageSize = 10;
 
+    /** 排序字段 */
+    @Schema(description = "排序字段，可选值：create_time(创建时间),  view_count(查看数)，默认create_time", example = "create_time")
+    private String orderByColumn = "create_time";
+
+    /** 是否升序 */
+    @Schema(description = "是否升序，true=升序，false=降序，默认false", example = "false")
+    private Boolean isAsc = false;
+
     public Integer getPageNum() {
         return pageNum;
     }
@@ -32,5 +40,21 @@ public class MorningReportQueryDTO {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getOrderByColumn() {
+        return orderByColumn;
+    }
+
+    public void setOrderByColumn(String orderByColumn) {
+        this.orderByColumn = orderByColumn;
+    }
+
+    public Boolean getIsAsc() {
+        return isAsc;
+    }
+
+    public void setIsAsc(Boolean isAsc) {
+        this.isAsc = isAsc;
     }
 }
