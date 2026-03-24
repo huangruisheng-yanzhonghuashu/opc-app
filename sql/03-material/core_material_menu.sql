@@ -24,7 +24,7 @@ INSERT INTO sys_menu VALUES('40116', '素材置顶修改', '40001', '7', '', '',
 -- ----------------------------
 -- 标签库管理子菜单
 -- ----------------------------
-INSERT INTO sys_menu VALUES('40002', '标签库管理', '40000', '2', 'tag', 'core/tag/index', '', '', 1, 0, 'C', '0', '0', 'core:tag:list', 'collection-tag', 'admin', sysdate(), '', null, '标签库管理菜单');
+INSERT INTO sys_menu VALUES('40002', '标签库管理', '40000', '2', 'tag', 'core/tag/index', '', '', 1, 0, 'C', '0', '0', 'core:tag:list', 'tag', 'admin', sysdate(), '', null, '标签库管理菜单');
 
 -- ----------------------------
 -- 标签库管理权限按钮
