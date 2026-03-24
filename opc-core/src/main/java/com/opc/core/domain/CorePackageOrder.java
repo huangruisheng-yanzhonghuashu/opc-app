@@ -34,8 +34,8 @@ public class CorePackageOrder extends BaseEntity
     @Excel(name = "套餐名称")
     private String packageName;
 
-    @Excel(name = "套餐分类", readConverterExp = "normal=普通会员,vip=VIP会员,svip=超级VIP会员")
-    private String packageType;
+    @Excel(name = "套餐分类", readConverterExp = "1=普通会员,2=VIP会员,3=超级VIP会员")
+    private Integer packageType;
 
     @Excel(name = "价格", cellType = ColumnType.NUMERIC)
     private BigDecimal price;
@@ -126,12 +126,12 @@ public class CorePackageOrder extends BaseEntity
         this.packageName = packageName;
     }
 
-    public String getPackageType()
+    public Integer getPackageType()
     {
         return packageType;
     }
 
-    public void setPackageType(String packageType)
+    public void setPackageType(Integer packageType)
     {
         this.packageType = packageType;
     }

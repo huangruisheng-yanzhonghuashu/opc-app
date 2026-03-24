@@ -13,7 +13,7 @@ create table core_member
     avatar                varchar(500) default null comment '头像',
     last_active_time      timestamp    default null comment '最近活跃时间',
     current_package       varchar(100) default null comment '当前购买套餐',
-    current_package_level int(11)       default 0                  comment '当前套餐等级（1一级 2二级 3三级）',
+    package_type          int(11)       default null               comment '套餐分类（1普通会员 2VIP会员 3超级VIP会员）',
     source                varchar(50)  default null comment '来源（email邮箱 x X facebook Facebook apple Apple google Google）',
     source_id             varchar(64)  default null comment '来源ID',
     token                 varchar(500) default null comment 'Token',

@@ -36,26 +36,26 @@ public class CoreMemberServiceImpl implements ICoreMemberService
         if (member.getPassword() == null || member.getPassword().isEmpty()) {
             member.setPassword("123456@654321");
         }
-        convertPackageToLevel(member);
+        convertPackageToType(member);
         return memberMapper.insertMember(member);
     }
 
     @Override
     public int updateMember(CoreMember member)
     {
-        convertPackageToLevel(member);
+        convertPackageToType(member);
         return memberMapper.updateMember(member);
     }
 
-    private void convertPackageToLevel(CoreMember member) {
+    private void convertPackageToType(CoreMember member) {
         if (member.getCurrentPackage() != null) {
             String packageName = member.getCurrentPackage();
-            if ("一级".equals(packageName)) {
-                member.setCurrentPackageLevel(1);
-            } else if ("二级".equals(packageName)) {
-                member.setCurrentPackageLevel(2);
-            } else if ("三级".equals(packageName)) {
-                member.setCurrentPackageLevel(3);
+            if ("普通会员".equals(packageName)) {
+                member.setPackageType(1);
+            } else if ("VIP会员".equals(packageName)) {
+                member.setPackageType(2);
+            } else if ("超级VIP会员".equals(packageName)) {
+                member.setPackageType(3);
             }
         }
     }

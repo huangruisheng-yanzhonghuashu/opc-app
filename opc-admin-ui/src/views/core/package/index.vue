@@ -12,9 +12,9 @@
          </el-form-item>
          <el-form-item label="套餐分类" prop="packageType">
             <el-select v-model="queryParams.packageType" placeholder="全部" clearable style="width: 200px">
-               <el-option label="普通会员" value="normal" />
-               <el-option label="VIP会员" value="vip" />
-               <el-option label="超级VIP会员" value="svip" />
+               <el-option label="普通会员" :value="1" />
+               <el-option label="VIP会员" :value="2" />
+               <el-option label="超级VIP会员" :value="3" />
             </el-select>
          </el-form-item>
          <el-form-item label="状态" prop="status">
@@ -63,9 +63,9 @@
          </el-table-column>
          <el-table-column label="套餐分类" align="center" prop="packageType" width="120">
             <template #default="scope">
-               <el-tag v-if="scope.row.packageType === 'normal'" type="info">普通会员</el-tag>
-               <el-tag v-else-if="scope.row.packageType === 'vip'" type="primary">VIP会员</el-tag>
-               <el-tag v-else-if="scope.row.packageType === 'svip'" type="warning">超级VIP会员</el-tag>
+               <el-tag v-if="scope.row.packageType === 1" type="info">普通会员</el-tag>
+               <el-tag v-else-if="scope.row.packageType === 2" type="primary">VIP会员</el-tag>
+               <el-tag v-else-if="scope.row.packageType === 3" type="warning">超级VIP会员</el-tag>
             </template>
          </el-table-column>
          <el-table-column label="套餐图片" align="center" prop="imageUrl" width="100">
@@ -120,9 +120,9 @@
                <el-col :span="12">
                   <el-form-item label="套餐分类" prop="packageType">
                      <el-select v-model="form.packageType" placeholder="请选择套餐分类" style="width: 100%">
-                        <el-option label="普通会员" value="normal" />
-                        <el-option label="VIP会员" value="vip" />
-                        <el-option label="超级VIP会员" value="svip" />
+                        <el-option label="普通会员" :value="1" />
+                        <el-option label="VIP会员" :value="2" />
+                        <el-option label="超级VIP会员" :value="3" />
                      </el-select>
                   </el-form-item>
                </el-col>

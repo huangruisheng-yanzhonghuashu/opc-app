@@ -77,7 +77,7 @@ public class MobileContentController extends BaseController
         }
 
         // 校验套餐权限（调用父类方法）
-        if (!checkPackagePermission(member.getCurrentPackageLevel(), material.getCategory()))
+        if (!checkPackagePermission(member.getPackageType(), material.getCategory()))
         {
             return AjaxResult.error("当前套餐无权限查看该内容");
         }

@@ -14,7 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="avatar"          column="avatar"            />
 		<result property="lastActiveTime"  column="last_active_time"  />
 		<result property="currentPackage"  column="current_package"   />
-		<result property="currentPackageLevel" column="current_package_level" />
+		<result property="packageType" column="package_type" />
 		<result property="source"          column="source"            />
 		<result property="sourceId"        column="source_id"         />
 		<result property="token"           column="token"             />
@@ -30,7 +30,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<sql id="selectMemberVo">
         select id, username, password, nickname, phone_number, email, avatar, last_active_time,
-               current_package, current_package_level, source, source_id, token, status, register_time,
+               current_package, package_type, source, source_id, token, status, register_time,
                invite_code, create_by, create_time, update_by, update_time, remark
 		from core_member
     </sql>
@@ -95,7 +95,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="avatar != null">avatar = #{avatar},</if>
  			<if test="lastActiveTime != null">last_active_time = #{lastActiveTime},</if>
  			<if test="currentPackage != null">current_package = #{currentPackage},</if>
- 			<if test="currentPackageLevel != null">current_package_level = #{currentPackageLevel},</if>
+ 			<if test="packageType != null">package_type = #{packageType},</if>
  			<if test="source != null">source = #{source},</if>
  			<if test="sourceId != null">source_id = #{sourceId},</if>
  			<if test="token != null">token = #{token},</if>
@@ -120,7 +120,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="avatar != null">avatar,</if>
  			<if test="lastActiveTime != null">last_active_time,</if>
  			<if test="currentPackage != null">current_package,</if>
- 			<if test="currentPackageLevel != null">current_package_level,</if>
+ 			<if test="packageType != null">package_type,</if>
  			<if test="source != null">source,</if>
  			<if test="sourceId != null">source_id,</if>
  			<if test="token != null">token,</if>
@@ -140,7 +140,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="avatar != null">#{avatar},</if>
 			<if test="lastActiveTime != null">#{lastActiveTime},</if>
 			<if test="currentPackage != null">#{currentPackage},</if>
-			<if test="currentPackageLevel != null">#{currentPackageLevel},</if>
+			<if test="packageType != null">#{packageType},</if>
 			<if test="source != null">#{source},</if>
 			<if test="sourceId != null">#{sourceId},</if>
 			<if test="token != null">#{token},</if>
@@ -219,9 +219,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			#{endDate} as date,
 			0 as newUserCount,
 			0 as activeUserCount,
-			COUNT(CASE WHEN current_package_level = 0 OR current_package_level IS NULL THEN 1 END) as normalUserCount,
-			COUNT(CASE WHEN current_package_level = 1 THEN 1 END) as vipUserCount,
-			COUNT(CASE WHEN current_package_level >= 2 THEN 1 END) as svipUserCount
+			COUNT(CASE WHEN package_type IS NULL THEN 1 END) as normalUserCount,
+			COUNT(CASE WHEN package_type = 1 THEN 1 END) as vipUserCount,
+			COUNT(CASE WHEN package_type >= 2 THEN 1 END) as svipUserCount
 		FROM core_member
 		WHERE status = '0'
 	</select>

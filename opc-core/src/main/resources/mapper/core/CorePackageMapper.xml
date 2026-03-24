@@ -31,7 +31,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="packageName != null and packageName != ''">
 				AND package_name like concat('%', #{packageName}, '%')
 			</if>
-			<if test="packageType != null and packageType != ''">
+			<if test="packageType != null">
 				AND package_type = #{packageType}
 			</if>
 			<if test="status != null and status != ''">
@@ -51,7 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		<set>
  			<if test="packageName != null and packageName != ''">package_name = #{packageName},</if>
  			<if test="packagePrice != null">package_price = #{packagePrice},</if>
- 			<if test="packageType != null and packageType != ''">package_type = #{packageType},</if>
+ 			<if test="packageType != null">package_type = #{packageType},</if>
 		<if test="description != null">description = #{description},</if>
 			<if test="imageUrl != null">image_url = #{imageUrl},</if>
 			<if test="status != null and status != ''">status = #{status},</if>
@@ -67,7 +67,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="id != null and id != 0">id,</if>
  			<if test="packageName != null and packageName != ''">package_name,</if>
  			<if test="packagePrice != null">package_price,</if>
- 			<if test="packageType != null and packageType != ''">package_type,</if>
+ 			<if test="packageType != null">package_type,</if>
 		<if test="description != null">description,</if>
 			<if test="imageUrl != null">image_url,</if>
 			<if test="status != null and status != ''">status,</if>
@@ -78,7 +78,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="id != null and id != 0">#{id},</if>
 			<if test="packageName != null and packageName != ''">#{packageName},</if>
 			<if test="packagePrice != null">#{packagePrice},</if>
-			<if test="packageType != null and packageType != ''">#{packageType},</if>
+			<if test="packageType != null">#{packageType},</if>
 			<if test="description != null">#{description},</if>
 			<if test="imageUrl != null">#{imageUrl},</if>
 			<if test="status != null and status != ''">#{status},</if>

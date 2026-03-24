@@ -47,8 +47,8 @@ public class CoreMember extends BaseEntity
     @Size(min = 0, max = 100, message = "套餐名称长度不能超过100个字符")
     private String currentPackage;
 
-    @Excel(name = "当前套餐等级", cellType = ColumnType.NUMERIC)
-    private Integer currentPackageLevel;
+    @Excel(name = "套餐分类", readConverterExp = "1=普通会员,2=VIP会员,3=超级VIP会员")
+    private Integer packageType;
 
     @Excel(name = "来源", readConverterExp = "email=邮箱,x=X,facebook=Facebook,apple=Apple,google=Google")
     @Size(min = 0, max = 50, message = "来源长度不能超过50个字符")
@@ -161,14 +161,14 @@ public class CoreMember extends BaseEntity
         this.currentPackage = currentPackage;
     }
 
-    public Integer getCurrentPackageLevel()
+    public Integer getPackageType()
     {
-        return currentPackageLevel;
+        return packageType;
     }
 
-    public void setCurrentPackageLevel(Integer currentPackageLevel)
+    public void setPackageType(Integer packageType)
     {
-        this.currentPackageLevel = currentPackageLevel;
+        this.packageType = packageType;
     }
 
     public String getSource()
@@ -242,7 +242,7 @@ public class CoreMember extends BaseEntity
             .append("avatar", getAvatar())
             .append("lastActiveTime", getLastActiveTime())
             .append("currentPackage", getCurrentPackage())
-            .append("currentPackageLevel", getCurrentPackageLevel())
+            .append("packageType", getPackageType())
             .append("source", getSource())
             .append("sourceId", getSourceId())
             .append("token", getToken())

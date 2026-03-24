@@ -11,7 +11,7 @@ CREATE TABLE core_package_order (
     nickname            VARCHAR(50)     DEFAULT NULL                COMMENT '昵称',
     package_id          BIGINT(20)     NOT NULL                   COMMENT '套餐ID',
     package_name        VARCHAR(100)    NOT NULL                   COMMENT '套餐名称',
-    package_type        VARCHAR(20)     NOT NULL                   COMMENT '套餐分类',
+    package_type        INT             NOT NULL                   COMMENT '套餐分类（1普通会员 2VIP会员 3超级VIP会员）',
     price               DECIMAL(10,2)   NOT NULL                   COMMENT '价格',
     pay_time            DATETIME        DEFAULT NULL                COMMENT '支付时间',
     pay_status          CHAR(1)         DEFAULT '0'                 COMMENT '支付状态（0待支付 1已支付 2已取消）',

@@ -107,9 +107,9 @@
          <el-table-column label="会员昵称" align="center" prop="nickname" />
          <el-table-column label="手机号" align="center" prop="phoneNumber" width="120" />
          <el-table-column label="邮箱" align="center" prop="email" width="180" />
-         <el-table-column label="当前套餐" align="center" prop="currentPackage" width="120">
+         <el-table-column label="当前套餐" align="center" prop="packageType" width="120">
             <template #default="scope">
-               <span>{{ getPackageLabel(scope.row.currentPackage, scope.row.currentPackageLevel) }}</span>
+               <span>{{ getPackageLabel(scope.row.packageType) }}</span>
             </template>
          </el-table-column>
          <el-table-column label="来源" align="center" prop="source" width="100">
@@ -201,11 +201,11 @@
                   </el-form-item>
                </el-col>
                <el-col :span="12">
-                  <el-form-item label="当前套餐" prop="currentPackage">
-                     <el-select v-model="form.currentPackage" placeholder="请选择当前套餐" style="width: 100%">
-                        <el-option label="一级" value="一级" />
-                        <el-option label="二级" value="二级" />
-                        <el-option label="三级" value="三级" />
+                  <el-form-item label="当前套餐" prop="packageType">
+                     <el-select v-model="form.packageType" placeholder="请选择当前套餐" style="width: 100%">
+                        <el-option label="普通会员" :value="1" />
+                        <el-option label="VIP会员" :value="2" />
+                        <el-option label="超级VIP会员" :value="3" />
                      </el-select>
                   </el-form-item>
                </el-col>
@@ -297,7 +297,7 @@
             </el-descriptions-item>
             <el-descriptions-item label="手机号" :span="1">{{ detailData.phoneNumber || '-' }}</el-descriptions-item>
             <el-descriptions-item label="邮箱" :span="1">{{ detailData.email || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="当前套餐" :span="1">{{ getPackageLabel(detailData.currentPackage, detailData.currentPackageLevel) }}</el-descriptions-item>
+            <el-descriptions-item label="当前套餐" :span="1">{{ getPackageLabel(detailData.packageType) }}</el-descriptions-item>
             <el-descriptions-item label="来源" :span="1">
                <el-tag v-if="detailData.source === 'email'" type="info">邮箱</el-tag>
                <el-tag v-else-if="detailData.source === 'x'" type="primary">X</el-tag>
@@ -368,13 +368,10 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data)
 
-function getPackageLabel(currentPackage, currentPackageLevel) {
-  if (currentPackage) {
-    return currentPackage
-  }
-  if (currentPackageLevel === 1) return '一级'
-  if (currentPackageLevel === 2) return '二级'
-  if (currentPackageLevel === 3) return '三级'
+function getPackageLabel(packageType) {
+  if (packageType === 1) return '普通会员'
+  if (packageType === 2) return 'VIP会员'
+  if (packageType === 3) return '超级VIP会员'
   return '-'
 }
 
@@ -411,7 +408,7 @@ function reset() {
     phoneNumber: undefined,
     email: undefined,
     avatar: undefined,
-    currentPackage: undefined,
+    packageType: undefined,
     source: undefined,
     sourceId: undefined,
     token: undefined,

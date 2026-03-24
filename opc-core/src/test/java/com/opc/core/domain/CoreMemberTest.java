@@ -19,7 +19,7 @@ public class CoreMemberTest
         member.setAvatar("https://example.com/avatar.jpg");
         member.setLastActiveTime(Instant.parse("2024-01-01T10:00:00Z"));
         member.setCurrentPackage("VIP");
-        member.setCurrentPackageLevel(3);
+        member.setPackageType(3);
         member.setSource("email");
         member.setSourceId("SRC001");
         member.setToken("token123");
@@ -34,7 +34,7 @@ public class CoreMemberTest
         assertEquals("https://example.com/avatar.jpg", member.getAvatar());
         assertEquals(Instant.parse("2024-01-01T10:00:00Z"), member.getLastActiveTime());
         assertEquals("VIP", member.getCurrentPackage());
-        assertEquals(Integer.valueOf(3), member.getCurrentPackageLevel());
+        assertEquals(Integer.valueOf(3), member.getPackageType());
         assertEquals("email", member.getSource());
         assertEquals("SRC001", member.getSourceId());
         assertEquals("token123", member.getToken());
@@ -69,7 +69,7 @@ public class CoreMemberTest
         assertNull(member.getPhoneNumber());
         assertNull(member.getEmail());
         assertNull(member.getAvatar());
-        assertNull(member.getCurrentPackageLevel());
+        assertNull(member.getPackageType());
         assertNull(member.getStatus());
     }
 
@@ -107,17 +107,17 @@ public class CoreMemberTest
     }
 
     @Test
-    public void testCoreMemberPackageLevel()
+    public void testCoreMemberPackageType()
     {
         CoreMember member = new CoreMember();
 
-        member.setCurrentPackageLevel(1);
-        assertEquals(Integer.valueOf(1), member.getCurrentPackageLevel());
+        member.setPackageType(1);
+        assertEquals(Integer.valueOf(1), member.getPackageType());
 
-        member.setCurrentPackageLevel(2);
-        assertEquals(Integer.valueOf(2), member.getCurrentPackageLevel());
+        member.setPackageType(2);
+        assertEquals(Integer.valueOf(2), member.getPackageType());
 
-        member.setCurrentPackageLevel(3);
-        assertEquals(Integer.valueOf(3), member.getCurrentPackageLevel());
+        member.setPackageType(3);
+        assertEquals(Integer.valueOf(3), member.getPackageType());
     }
 }

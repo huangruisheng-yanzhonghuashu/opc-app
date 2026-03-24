@@ -205,23 +205,17 @@ public class BaseController
     /**
      * 检查套餐权限
      *
-     * @param currentPackageLevel 当前会员套餐等级
+     * @param packageType 当前会员套餐分类
      * @param category 素材分类
      * @return 是否有权限
      */
-    protected boolean checkPackagePermission(Integer currentPackageLevel, String category)
+    protected boolean checkPackagePermission(Integer packageType, String category)
     {
-        // 如果会员没有套餐等级，则只能查看免费内容
-        if (currentPackageLevel == null)
-        {
-            currentPackageLevel = 0;
-        }
-
         // 获取分类所需的套餐等级
         Integer requiredLevel = getCategoryRequiredLevel(category);
 
-        // 判断当前套餐等级是否满足要求
-        return currentPackageLevel >= requiredLevel;
+        // 判断当前套餐类型是否满足要求（null表示无套餐，只能看免费内容）
+        return packageType != null && packageType >= requiredLevel;
     }
 
     /**

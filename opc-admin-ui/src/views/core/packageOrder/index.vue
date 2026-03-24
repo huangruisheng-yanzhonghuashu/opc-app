@@ -83,9 +83,9 @@
          <el-table-column label="套餐名称" align="center" prop="packageName" width="120" />
          <el-table-column label="套餐分类" align="center" prop="packageType" width="120">
             <template #default="scope">
-               <el-tag v-if="scope.row.packageType === 'normal'" type="info">普通会员</el-tag>
-               <el-tag v-else-if="scope.row.packageType === 'vip'" type="primary">VIP会员</el-tag>
-               <el-tag v-else-if="scope.row.packageType === 'svip'" type="warning">超级VIP会员</el-tag>
+               <el-tag v-if="scope.row.packageType === 1" type="info">普通会员</el-tag>
+               <el-tag v-else-if="scope.row.packageType === 2" type="primary">VIP会员</el-tag>
+               <el-tag v-else-if="scope.row.packageType === 3" type="warning">超级VIP会员</el-tag>
             </template>
          </el-table-column>
          <el-table-column label="价格" align="center" prop="price" width="100">
@@ -218,9 +218,9 @@ const total = ref(0)
 const title = ref("")
 
 const packageMap = {
-   1: { name: '普通会员', type: 'normal', price: 99.00 },
-   2: { name: 'VIP会员', type: 'vip', price: 199.00 },
-   3: { name: '超级VIP会员', type: 'svip', price: 299.00 }
+   1: { name: '普通会员', type: 1, price: 99.00 },
+   2: { name: 'VIP会员', type: 2, price: 199.00 },
+   3: { name: '超级VIP会员', type: 3, price: 299.00 }
 }
 
 const data = reactive({
