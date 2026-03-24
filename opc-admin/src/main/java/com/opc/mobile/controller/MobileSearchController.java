@@ -16,14 +16,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * 移动端搜索热词接口
+ * 移动端搜索接口
  *
  * @author opc
  */
-@Tag(name = "搜索热词", description = "移动端搜索热词相关接口")
+@Tag(name = "会员搜索", description = "移动端会员搜索相关接口")
 @RestController
-@RequestMapping("/mobile/searchHotword")
-public class MobileSearchHotwordController extends BaseController
+@RequestMapping("/mobile/search")
+public class MobileSearchController extends BaseController
 {
     @Autowired
     private ICoreSearchHotwordService searchHotwordService;
@@ -35,11 +35,12 @@ public class MobileSearchHotwordController extends BaseController
      * @return 分页数据
      */
     @Operation(summary = "获取搜索热词列表", description = "分页查询搜索热词列表，支持按名称模糊查询")
-    @PostMapping("/list")
-    public TableDataInfo list(@RequestBody SearchHotwordQueryDTO queryDTO)
+    @PostMapping("/hotword/list")
+    public TableDataInfo hotwordList(@RequestBody SearchHotwordQueryDTO queryDTO)
     {
         CoreSearchHotword searchHotword = new CoreSearchHotword();
         searchHotword.setKeyword(queryDTO.getKeyword());
+        searchHotword.setStatus("0");
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
         List<CoreSearchHotword> list = searchHotwordService.selectSearchHotwordList(searchHotword);
