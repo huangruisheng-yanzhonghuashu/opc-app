@@ -19,6 +19,7 @@ import com.opc.core.service.ICoreMaterialService;
 import com.opc.core.service.ICoreTagService;
 import com.opc.mobile.dto.BannerQueryDTO;
 import com.opc.mobile.dto.MaterialByTagQueryDTO;
+import com.opc.mobile.dto.MorningReportQueryDTO;
 import com.opc.mobile.dto.NormalMaterialQueryDTO;
 import com.opc.mobile.dto.TopMaterialQueryDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -141,5 +142,31 @@ public class MobileHomeController extends BaseController
         return getDataTable(list);
     }
 
+    /**
+     * 分页查询晨报素材列表
+     *
+     * @param queryDTO 查询参数
+     * @return 分页数据
+     */
+    @Operation(summary = "获取晨报内容列表", description = "查询当天创建的晨报素材列表，按发布时间倒序排序")
+    @Parameter(name = "queryDTO", description = "晨报素材查询参数")
+    @PostMapping("/material/morningReport/list")
+    public TableDataInfo morningReportList(@RequestBody MorningReportQueryDTO queryDTO)
+    {
+        CoreMaterial material = new CoreMaterial();
+        // 查询晨报类型的素材
+        material.setCategory("morning_report");
+        // 只查询上线的素材
+        material.setStatus("0");
+        // 设置查询当天创建的数据
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+        material.getParams().put("beginCreateTime", today + " 00:00:00");
+        material.getParams().put("endCreateTime", today + " 23:59:59");
+
+        PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
+        PageHelper.orderBy("publish_time desc");
+        List<CoreMaterial> list = materialService.selectMaterialList(material);
+        return getDataTable(list);
+    }
 
 }

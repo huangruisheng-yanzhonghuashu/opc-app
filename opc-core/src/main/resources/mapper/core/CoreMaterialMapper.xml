@@ -51,14 +51,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="status != null and status != ''">
 				AND status = #{status}
 			</if>
-		<if test="isTop != null and isTop != ''">
-			AND is_top = #{isTop}
-		</if>
-		<if test="category != null and category != ''">
+			<if test="isTop != null and isTop != ''">
+				AND is_top = #{isTop}
+			</if>
+			<if test="category != null and category != ''">
 				AND category = #{category}
 			</if>
 			<if test="source != null and source != ''">
 				AND source = #{source}
+			</if>
+			<if test="params.beginCreateTime != null and params.beginCreateTime != ''">
+				AND date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginCreateTime},'%y%m%d')
+			</if>
+			<if test="params.endCreateTime != null and params.endCreateTime != ''">
+				AND date_format(create_time,'%y%m%d') &lt;= date_format(#{params.endCreateTime},'%y%m%d')
 			</if>
 		</where>
 		order by is_top desc, create_time desc
