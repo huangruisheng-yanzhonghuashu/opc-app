@@ -143,6 +143,10 @@ member:
     secret: memberSecretKeyForJwtTokenGeneration2024
     # 会员令牌有效期（默认30分钟）
     expireTime: 30
+  # 会员注册配置
+  register:
+    # 是否跳过邮箱验证码验证（仅开发环境使用，生产环境必须设置为false）
+    skipEmailCode: true
 
 # MyBatis配置
 mybatis:

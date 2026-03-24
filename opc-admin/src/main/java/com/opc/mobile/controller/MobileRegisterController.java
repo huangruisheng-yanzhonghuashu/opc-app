@@ -59,6 +59,9 @@ public class MobileRegisterController extends MobileBaseController {
     @Value("${spring.mail.username:}")
     private String mailFrom;
 
+    @Value("${member.register.skipEmailCode:false}")
+    private boolean skipEmailCode;
+
     @Operation(summary = "发送邮箱验证码", description = "向指定邮箱发送注册验证码，验证码有效期5分钟")
     @PostMapping("/sendEmailCode")
     public AjaxResult sendEmailCode(@Validated @RequestBody EmailCodeRequestDTO requestDTO) {
@@ -151,22 +154,24 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("邮箱格式不正确");
         }
 
-        // 验证验证码
-        String cacheKey = CacheConstants.EMAIL_CODE_KEY + email;
-        String cacheCode = redisCache.getCacheObject(cacheKey);
-        if (cacheCode == null) {
-            return AjaxResult.error("验证码已过期，请重新获取");
-        }
-        if (!code.equals(cacheCode)) {
-            return AjaxResult.error("验证码错误");
+        // 验证验证码（开发环境可通过配置跳过）
+        if (!skipEmailCode) {
+            String cacheKey = CacheConstants.EMAIL_CODE_KEY + email;
+            String cacheCode = redisCache.getCacheObject(cacheKey);
+            if (cacheCode == null) {
+                return AjaxResult.error("验证码已过期，请重新获取");
+            }
+            if (!code.equals(cacheCode)) {
+                return AjaxResult.error("验证码错误");
+            }
         }
 
         // 检查用户名是否已存在（从会员表判断）
         CoreMember member = new CoreMember();
         member.setUsername(username);
-        if (!memberService.checkMemberNameUnique(member)) {
+     /*   if (!memberService.checkMemberNameUnique(member)) {
             return AjaxResult.error("用户名已存在");
-        }
+        }*/
 
         // 检查邮箱是否已存在（从会员表判断）
         member.setEmail(email);
@@ -189,8 +194,11 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("注册失败，请联系系统管理人员");
         }
 
-        // 删除已使用的验证码
-        redisCache.deleteObject(cacheKey);
+        // 删除已使用的验证码（仅在非跳过模式下）
+        if (!skipEmailCode) {
+            String cacheKey = CacheConstants.EMAIL_CODE_KEY + email;
+            redisCache.deleteObject(cacheKey);
+        }
 
         // 记录注册日志
         AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER,
@@ -206,7 +214,7 @@ public class MobileRegisterController extends MobileBaseController {
      * @return 验证码
      */
     private String generateCode() {
-        return "1234";
+        return String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
     }
 
     /**

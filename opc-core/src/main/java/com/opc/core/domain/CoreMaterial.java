@@ -1,6 +1,7 @@
 package com.opc.core.domain;
 
 import java.time.Instant;
+import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.opc.common.annotation.Excel;
@@ -67,6 +68,10 @@ public class CoreMaterial extends BaseEntity
 
     @Excel(name = "来源")
     private String source;
+
+    private List<Long> tagIds;
+
+    private List<CoreTag> tags;
 
     public Long getId()
     {
@@ -258,6 +263,26 @@ public class CoreMaterial extends BaseEntity
         this.source = source;
     }
 
+    public List<Long> getTagIds()
+    {
+        return tagIds;
+    }
+
+    public void setTagIds(List<Long> tagIds)
+    {
+        this.tagIds = tagIds;
+    }
+
+    public List<CoreTag> getTags()
+    {
+        return tags;
+    }
+
+    public void setTags(List<CoreTag> tags)
+    {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -280,6 +305,8 @@ public class CoreMaterial extends BaseEntity
             .append("status", getStatus())
             .append("isTop", getIsTop())
             .append("source", getSource())
+            .append("tagIds", getTagIds())
+            .append("tags", getTags())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())

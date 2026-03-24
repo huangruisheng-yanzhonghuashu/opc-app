@@ -33,6 +33,14 @@ echo.
 echo [Step 1/4] Cleaning and Building project...
 echo ----------------------------------------
 cd /d "%~dp0.."
+
+:: Kill process using port 8080
+echo [INFO] Checking for process using port 8080...
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8080') do (
+    echo [INFO] Killing process with PID: %%a
+    taskkill /F /PID %%a >nul 2>&1
+)
+
 :: Try to kill Java processes that might lock files
 taskkill /F /IM java.exe >nul 2>&1
 taskkill /F /IM javaw.exe >nul 2>&1
@@ -66,6 +74,8 @@ echo [OK] Upload completed!
 echo.
 echo [Step 3/4] Running run.sh on server...
 echo ----------------------------------------
+echo [INFO] Killing process using port 8080 on server...
+ssh -p %REMOTE_PORT% -i "%TEMP_KEY_FILE%" -o StrictHostKeyChecking=no "%REMOTE_USER%@%REMOTE_HOST%" "sudo lsof -ti:8080 | xargs -r sudo kill -9"
 ssh -p %REMOTE_PORT% -i "%TEMP_KEY_FILE%" -o StrictHostKeyChecking=no "%REMOTE_USER%@%REMOTE_HOST%" "cd %REMOTE_DIR% && sudo nohup ./run.sh > /dev/null 2>&1 &"
 if errorlevel 1 (
     echo [ERROR] Remote command failed!

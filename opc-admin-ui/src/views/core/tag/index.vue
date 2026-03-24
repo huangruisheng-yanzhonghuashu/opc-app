@@ -49,11 +49,11 @@
          <el-table-column type="selection" width="55" align="center" />
          <el-table-column label="标签ID" align="center" prop="id" width="80" />
          <el-table-column label="标签名称" align="center" prop="tagName" />
-         <el-table-column label="标签颜色" align="center" prop="tagColor" width="120">
+         <el-table-column label="标签颜色" align="center" prop="tagColor" width="150">
             <template #default="scope">
                <div v-if="scope.row.tagColor" class="color-preview">
                   <span class="color-block" :style="{ backgroundColor: scope.row.tagColor }"></span>
-                  <span>{{ scope.row.tagColor }}</span>
+                  <span class="color-text">{{ scope.row.tagColor }}</span>
                </div>
                <span v-else>-</span>
             </template>
@@ -270,14 +270,24 @@ getList()
   gap: 8px;
 }
 .color-block {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 4px;
   border: 1px solid #dcdfe6;
+  flex-shrink: 0;
+}
+.color-text {
+  font-family: monospace;
+  font-size: 12px;
+  color: #606266;
 }
 .color-value {
   margin-left: 10px;
   color: #606266;
   font-size: 14px;
+}
+:deep(.el-color-picker__trigger) {
+  width: 40px;
+  height: 40px;
 }
 </style>

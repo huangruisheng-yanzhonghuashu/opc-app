@@ -1,6 +1,7 @@
 package com.opc.core.mapper;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 import com.opc.core.domain.CoreMaterial;
 
 public interface CoreMaterialMapper
@@ -20,4 +21,6 @@ public interface CoreMaterialMapper
     public int changeStatus(CoreMaterial material);
 
     public int changeTop(CoreMaterial material);
+
+    public int insertMaterialTag(@Param("materialId") Long materialId, @Param("tagId") Long tagId);
 }

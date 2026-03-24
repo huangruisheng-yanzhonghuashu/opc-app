@@ -76,6 +76,23 @@
          <el-table-column label="素材ID" align="center" prop="id" width="80" />
          <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true" />
          <el-table-column label="作者" align="center" prop="author" width="120" />
+         <el-table-column label="标签" align="center" width="150">
+            <template #default="scope">
+               <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tag-list">
+                  <el-tag 
+                     v-for="tag in scope.row.tags.slice(0, 3)" 
+                     :key="tag.id"
+                     :style="{ backgroundColor: tag.tagColor, color: '#fff', borderColor: tag.tagColor }"
+                     size="small"
+                     class="material-tag"
+                  >
+                     {{ tag.tagName }}
+                  </el-tag>
+                  <el-tag v-if="scope.row.tags.length > 3" size="small" type="info">+{{ scope.row.tags.length - 3 }}</el-tag>
+               </div>
+               <span v-else>-</span>
+            </template>
+         </el-table-column>
          <el-table-column label="分类" align="center" prop="category" width="100">
             <template #default="scope">
                <span>{{ getCategoryLabel(scope.row.category) }}</span>
@@ -215,6 +232,28 @@
                   </el-form-item>
                </el-col>
             </el-row>
+            <el-form-item label="标签" prop="tagIds">
+               <el-select
+                  v-model="form.tagIds"
+                  multiple
+                  collapse-tags
+                  collapse-tags-tooltip
+                  placeholder="请选择标签"
+                  style="width: 100%"
+               >
+                  <el-option
+                     v-for="tag in tagOptions"
+                     :key="tag.id"
+                     :label="tag.tagName"
+                     :value="tag.id"
+                  >
+                     <span class="tag-option">
+                        <span class="tag-color-dot" :style="{ backgroundColor: tag.tagColor || '#909399' }"></span>
+                        <span>{{ tag.tagName }}</span>
+                     </span>
+                  </el-option>
+               </el-select>
+            </el-form-item>
             <el-form-item label="原链接" prop="originalUrl">
                <el-input v-model="form.originalUrl" placeholder="请输入原链接" />
             </el-form-item>
@@ -300,6 +339,19 @@
                   {{ detailData.isTop === '1' ? '是' : '否' }}
                </el-tag>
             </el-descriptions-item>
+            <el-descriptions-item label="标签" :span="2">
+               <div v-if="detailData.tags && detailData.tags.length > 0" class="detail-tag-list">
+                  <el-tag 
+                     v-for="tag in detailData.tags" 
+                     :key="tag.id"
+                     :style="{ backgroundColor: tag.tagColor, color: '#fff', borderColor: tag.tagColor }"
+                     class="detail-tag"
+                  >
+                     {{ tag.tagName }}
+                  </el-tag>
+               </div>
+               <span v-else>-</span>
+            </el-descriptions-item>
             <el-descriptions-item label="原链接" :span="2">
                <a v-if="detailData.originalUrl" :href="detailData.originalUrl" target="_blank">{{ detailData.originalUrl }}</a>
                <span v-else>-</span>
@@ -324,6 +376,7 @@
 
 <script setup name="Material">
 import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop } from "@/api/core/material"
+import { getAllActiveTags } from "@/api/core/tag"
 import { User, Star, Medal } from '@element-plus/icons-vue'
 import Editor from "@/components/Editor/index.vue"
 
@@ -341,6 +394,7 @@ const total = ref(0)
 const title = ref("")
 const activeTab = ref("1")
 const detailData = ref({})
+const tagOptions = ref([])
 
 const data = reactive({
   form: {},
@@ -388,6 +442,12 @@ function getList() {
   })
 }
 
+function getTagOptions() {
+  getAllActiveTags().then(response => {
+    tagOptions.value = response.data || []
+  })
+}
+
 function cancel() {
   open.value = false
   reset()
@@ -414,6 +474,7 @@ function reset() {
     status: '0',
     isTop: '0',
     source: 'manual',
+    tagIds: [],
     remark: undefined
   }
   proxy.resetForm("materialRef")
@@ -452,6 +513,7 @@ function handleAdd() {
   } else {
     form.value.category = 'svip'
   }
+  getTagOptions()
   open.value = true
   title.value = "添加素材"
 }
@@ -466,8 +528,15 @@ function handleView(row) {
 function handleUpdate(row) {
   reset()
   const id = row.id || ids.value
+  getTagOptions()
   getMaterial(id).then(response => {
     form.value = response.data
+    // 将标签转换为id数组
+    if (form.value.tags && form.value.tags.length > 0) {
+      form.value.tagIds = form.value.tags.map(tag => tag.id)
+    } else {
+      form.value.tagIds = []
+    }
     open.value = true
     title.value = "修改素材"
   })
@@ -542,5 +611,32 @@ getList()
 .tab-group :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-color: #667eea;
+}
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+.material-tag {
+  margin: 0;
+}
+.detail-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.detail-tag {
+  margin: 0;
+}
+.tag-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tag-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }
 </style>
