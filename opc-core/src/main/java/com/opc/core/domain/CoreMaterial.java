@@ -51,9 +51,6 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "发布时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Instant publishTime;
 
-    @Excel(name = "查看权限", cellType = ColumnType.NUMERIC)
-    private Integer viewPermission;
-
     @Excel(name = "内容类型")
     private String contentType;
 
@@ -68,6 +65,9 @@ public class CoreMaterial extends BaseEntity
 
     @Excel(name = "来源")
     private String source;
+
+    @Excel(name = "封面图")
+    private String coverImage;
 
     private List<Long> tagIds;
 
@@ -203,16 +203,6 @@ public class CoreMaterial extends BaseEntity
         this.publishTime = publishTime;
     }
 
-    public Integer getViewPermission()
-    {
-        return viewPermission;
-    }
-
-    public void setViewPermission(Integer viewPermission)
-    {
-        this.viewPermission = viewPermission;
-    }
-
     public String getContentType()
     {
         return contentType;
@@ -263,6 +253,16 @@ public class CoreMaterial extends BaseEntity
         this.source = source;
     }
 
+    public String getCoverImage()
+    {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage)
+    {
+        this.coverImage = coverImage;
+    }
+
     public List<Long> getTagIds()
     {
         return tagIds;
@@ -299,12 +299,12 @@ public class CoreMaterial extends BaseEntity
             .append("shareCount", getShareCount())
             .append("commentCount", getCommentCount())
             .append("publishTime", getPublishTime())
-            .append("viewPermission", getViewPermission())
             .append("contentType", getContentType())
             .append("category", getCategory())
             .append("status", getStatus())
             .append("isTop", getIsTop())
             .append("source", getSource())
+            .append("coverImage", getCoverImage())
             .append("tagIds", getTagIds())
             .append("tags", getTags())
             .append("createBy", getCreateBy())

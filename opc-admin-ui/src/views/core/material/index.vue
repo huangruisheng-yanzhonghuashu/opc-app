@@ -184,9 +184,9 @@
                   <el-form-item label="分类" prop="category">
                      <el-select v-model="form.category" placeholder="请选择分类" style="width: 100%">
                         <el-option label="普通素材" value="normal" />
-                        <el-option label="大咖专栏" value="vip_column" />
                         <el-option label="VIP素材" value="vip" />
                         <el-option label="超级VIP" value="svip" />
+                        <el-option label="晨报" value="morning_report" />
                      </el-select>
                   </el-form-item>
                </el-col>
@@ -202,15 +202,6 @@
                      />
                   </el-form-item>
                </el-col>
-               <el-col :span="12">
-                  <el-form-item label="查看权限" prop="viewPermission">
-                     <el-select v-model="form.viewPermission" placeholder="请选择查看权限" style="width: 100%">
-                        <el-option label="一级套餐" :value="1" />
-                        <el-option label="二级套餐" :value="2" />
-                        <el-option label="三级套餐" :value="3" />
-                     </el-select>
-                  </el-form-item>
-               </el-col>
             </el-row>
             <el-row>
                <el-col :span="12">
@@ -219,7 +210,6 @@
                         <el-option label="纯文本" value="text" />
                         <el-option label="图文" value="image" />
                         <el-option label="视频" value="video" />
-                        <el-option label="混合类型" value="mixed" />
                      </el-select>
                   </el-form-item>
                </el-col>
@@ -289,6 +279,9 @@
                   </el-form-item>
                </el-col>
             </el-row>
+            <el-form-item label="封面图" prop="coverImage">
+               <image-upload v-model="form.coverImage" :limit="1" />
+            </el-form-item>
             <el-form-item label="正文" prop="content">
                <Editor v-model="form.content" :min-height="300" />
             </el-form-item>
@@ -322,9 +315,6 @@
             <el-descriptions-item label="转发数" :span="1">{{ detailData.shareCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="评论数" :span="1">{{ detailData.commentCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="分类" :span="1">{{ getCategoryLabel(detailData.category) }}</el-descriptions-item>
-            <el-descriptions-item label="查看权限" :span="1">
-               <el-tag type="success">{{ detailData.viewPermission }}级套餐</el-tag>
-            </el-descriptions-item>
             <el-descriptions-item label="内容类型" :span="1">
                <span>{{ getContentTypeLabel(detailData.contentType) }}</span>
             </el-descriptions-item>
@@ -354,6 +344,10 @@
             </el-descriptions-item>
             <el-descriptions-item label="原链接" :span="2">
                <a v-if="detailData.originalUrl" :href="detailData.originalUrl" target="_blank">{{ detailData.originalUrl }}</a>
+               <span v-else>-</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="封面图" :span="2">
+               <el-image v-if="detailData.coverImage" :src="detailData.coverImage" style="max-width: 200px; max-height: 200px;" fit="cover" />
                <span v-else>-</span>
             </el-descriptions-item>
             <el-descriptions-item label="总结" :span="2">{{ detailData.summary || '-' }}</el-descriptions-item>
@@ -403,8 +397,7 @@ const data = reactive({
     pageSize: 10,
     title: undefined,
     author: undefined,
-    status: undefined,
-    viewPermission: 1
+    status: undefined
   },
   rules: {
     title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
@@ -416,9 +409,9 @@ const { queryParams, form, rules } = toRefs(data)
 function getCategoryLabel(category) {
   const map = {
     'normal': '普通素材',
-    'vip_column': '大咖专栏',
     'vip': 'VIP素材',
-    'svip': '超级VIP'
+    'svip': '超级VIP',
+    'morning_report': '晨报'
   }
   return map[category] || category || '-'
 }
@@ -427,8 +420,7 @@ function getContentTypeLabel(contentType) {
   const map = {
     'text': '纯文本',
     'image': '图文',
-    'video': '视频',
-    'mixed': '混合类型'
+    'video': '视频'
   }
   return map[contentType] || contentType || '-'
 }
@@ -468,12 +460,12 @@ function reset() {
     shareCount: 0,
     commentCount: 0,
     publishTime: undefined,
-    viewPermission: parseInt(activeTab.value),
     contentType: 'text',
     category: 'normal',
     status: '0',
     isTop: '0',
     source: 'manual',
+    coverImage: undefined,
     tagIds: [],
     remark: undefined
   }
@@ -498,18 +490,16 @@ function handleSelectionChange(selection) {
 }
 
 function handleTabChange(tabName) {
-  queryParams.value.viewPermission = parseInt(tabName)
   queryParams.value.pageNum = 1
   getList()
 }
 
 function handleAdd() {
   reset()
-  form.value.viewPermission = parseInt(activeTab.value)
   if (activeTab.value === '1') {
     form.value.category = 'normal'
   } else if (activeTab.value === '2') {
-    form.value.category = 'vip_column'
+    form.value.category = 'vip'
   } else {
     form.value.category = 'svip'
   }

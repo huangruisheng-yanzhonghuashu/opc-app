@@ -24,12 +24,12 @@ public class CoreMaterialTest
         material.setShareCount(50L);
         material.setCommentCount(20L);
         material.setPublishTime(Instant.parse("2024-01-01T10:00:00Z"));
-        material.setViewPermission(1);
         material.setContentType("article");
         material.setCategory("tech");
         material.setStatus("0");
         material.setIsTop("1");
         material.setSource("twitter");
+        material.setCoverImage("https://example.com/cover.jpg");
 
         assertEquals(1L, material.getId());
         assertEquals("Test Article", material.getTitle());
@@ -44,12 +44,12 @@ public class CoreMaterialTest
         assertEquals(Long.valueOf(50), material.getShareCount());
         assertEquals(Long.valueOf(20), material.getCommentCount());
         assertEquals(Instant.parse("2024-01-01T10:00:00Z"), material.getPublishTime());
-        assertEquals(Integer.valueOf(1), material.getViewPermission());
         assertEquals("article", material.getContentType());
         assertEquals("tech", material.getCategory());
         assertEquals("0", material.getStatus());
         assertEquals("1", material.getIsTop());
         assertEquals("twitter", material.getSource());
+        assertEquals("https://example.com/cover.jpg", material.getCoverImage());
     }
 
     @Test
@@ -99,15 +99,4 @@ public class CoreMaterialTest
         assertEquals("1", material.getIsTop());
     }
 
-    @Test
-    public void testCoreMaterialViewPermissionValues()
-    {
-        CoreMaterial material = new CoreMaterial();
-
-        material.setViewPermission(0);
-        assertEquals(Integer.valueOf(0), material.getViewPermission());
-
-        material.setViewPermission(1);
-        assertEquals(Integer.valueOf(1), material.getViewPermission());
-    }
 }

@@ -19,6 +19,7 @@ import com.opc.core.service.ICoreMaterialService;
 import com.opc.core.service.ICoreTagService;
 import com.opc.mobile.dto.BannerQueryDTO;
 import com.opc.mobile.dto.MaterialByTagQueryDTO;
+import com.opc.mobile.dto.NormalMaterialQueryDTO;
 import com.opc.mobile.dto.TopMaterialQueryDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -84,6 +85,30 @@ public class MobileHomeController extends BaseController
         return getDataTable(list);
     }
 
+
+    /**
+     * 分页查询普通素材（非置顶）列表
+     *
+     * @param queryDTO 查询参数
+     * @return 分页数据
+     */
+    @Operation(summary = "获取非置顶内容列表", description = "查询非置顶素材列表，按发布时间倒序排序")
+    @Parameter(name = "queryDTO", description = "普通素材查询参数")
+    @PostMapping("/material/normal/list")
+    public TableDataInfo normalMaterialList(@RequestBody NormalMaterialQueryDTO queryDTO)
+    {
+        CoreMaterial material = new CoreMaterial();
+        // 只查询非置顶的素材
+        material.setIsTop("0");
+        // 只查询上线的素材
+        material.setStatus("0");
+
+        PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
+        PageHelper.orderBy("publish_time desc");
+        List<CoreMaterial> list = materialService.selectMaterialList(material);
+        return getDataTable(list);
+    }
+
     /**
      * 查询标签列表
      *
@@ -115,4 +140,6 @@ public class MobileHomeController extends BaseController
         List<CoreMaterial> list = materialService.selectMaterialListByTagId(queryDTO.getTagId(), "0");
         return getDataTable(list);
     }
+
+
 }

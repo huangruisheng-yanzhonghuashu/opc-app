@@ -16,12 +16,12 @@ CREATE TABLE core_material (
     share_count        BIGINT(20)     DEFAULT 0                  COMMENT '转发数',
     comment_count      BIGINT(20)     DEFAULT 0                  COMMENT '评论数',
     publish_time        DATETIME        DEFAULT NULL               COMMENT '发布时间',
-    view_permission     INT             DEFAULT 1                  COMMENT '查看权限（1一级套餐 2二级套餐 3三级套餐）',
     content_type        VARCHAR(20)     DEFAULT 'text'             COMMENT '内容类型（text/image/video）',
     category            VARCHAR(50)     DEFAULT NULL               COMMENT '分类（normal/vip_column/vip/svip）',
     status              CHAR(1)         DEFAULT '0'                COMMENT '状态（0上线 1下线）',
     is_top              CHAR(1)         DEFAULT '0'                COMMENT '是否置顶（0否 1是）',
     source              VARCHAR(50)     DEFAULT NULL               COMMENT '来源（crawler爬取/manual手动）',
+    cover_image         VARCHAR(500)    DEFAULT NULL               COMMENT '封面图URL',
     create_by           VARCHAR(64)     DEFAULT ''                 COMMENT '创建者',
     create_time         DATETIME                                    COMMENT '创建时间',
     update_by           VARCHAR(64)     DEFAULT ''                 COMMENT '更新者',
@@ -30,7 +30,6 @@ CREATE TABLE core_material (
     PRIMARY KEY (id),
     KEY idx_status (status),
     KEY idx_is_top (is_top),
-    KEY idx_view_permission (view_permission),
     KEY idx_category (category),
     KEY idx_publish_time (publish_time)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='素材表';
