@@ -1,5 +1,6 @@
 package com.opc.mobile.controller;
 
+import com.opc.common.annotation.MemberLogin;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.core.domain.CoreMaterial;
@@ -46,15 +47,12 @@ public class MobileContentController extends BaseController
      */
     @Operation(summary = "获取内容详情", description = "根据内容ID获取详情，需要校验会员套餐权限")
     @Parameter(name = "id", description = "素材ID", required = true)
+    @MemberLogin
     @GetMapping("/material/{id}")
     public AjaxResult getMaterialDetail(@PathVariable Long id, HttpServletRequest request)
     {
-        // 获取当前登录会员
+        // 获取当前登录会员（已由拦截器验证）
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        if (loginUser == null)
-        {
-            return AjaxResult.error("请先登录");
-        }
 
         // 查询素材信息
         CoreMaterial material = materialService.selectMaterialById(id);

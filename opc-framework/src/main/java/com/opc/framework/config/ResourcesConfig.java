@@ -13,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.opc.common.config.RuoYiConfig;
 import com.opc.common.constant.Constants;
+import com.opc.framework.interceptor.MemberLoginInterceptor;
 import com.opc.framework.interceptor.RepeatSubmitInterceptor;
 
 /**
@@ -25,6 +26,9 @@ public class ResourcesConfig implements WebMvcConfigurer
 {
     @Autowired
     private RepeatSubmitInterceptor repeatSubmitInterceptor;
+
+    @Autowired
+    private MemberLoginInterceptor memberLoginInterceptor;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -53,7 +57,17 @@ public class ResourcesConfig implements WebMvcConfigurer
     @Override
     public void addInterceptors(InterceptorRegistry registry)
     {
+        // 防重复提交拦截器
         registry.addInterceptor(repeatSubmitInterceptor).addPathPatterns("/**");
+        
+        // 移动端会员登录拦截器 - 拦截 /mobile/** 路径，仅排除登录/登出/注册
+        registry.addInterceptor(memberLoginInterceptor)
+                .addPathPatterns("/mobile/**")
+                .excludePathPatterns(
+                    "/mobile/member/login",      // 登录接口
+                    "/mobile/member/logout",     // 登出接口
+                    "/mobile/register/**"        // 注册相关接口
+                );
     }
 
     /**

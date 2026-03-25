@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.opc.common.annotation.MemberLogin;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.core.page.TableDataInfo;
@@ -39,6 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Tag(name = "会员首页", description = "移动端首页相关接口")
 @RestController
 @RequestMapping("/mobile/home")
+@MemberLogin
 public class MobileHomeController extends BaseController
 {
     @Autowired
@@ -86,12 +88,8 @@ public class MobileHomeController extends BaseController
     @PostMapping("/material/top/list")
     public TableDataInfo topMaterialList(@RequestBody TopMaterialQueryDTO queryDTO, HttpServletRequest request)
     {
-        // 获取当前登录会员
+        // 获取当前登录会员（已由拦截器验证）
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        if (loginUser == null)
-        {
-            return getDataTable(List.of());
-        }
 
         // 查询会员信息
         CoreMember member = memberService.selectMemberById(loginUser.getMemberId());
@@ -129,12 +127,8 @@ public class MobileHomeController extends BaseController
     @PostMapping("/material/normal/list")
     public TableDataInfo normalMaterialList(@RequestBody NormalMaterialQueryDTO queryDTO, HttpServletRequest request)
     {
-        // 获取当前登录会员
+        // 获取当前登录会员（已由拦截器验证）
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        if (loginUser == null)
-        {
-            return getDataTable(List.of());
-        }
 
         // 查询会员信息
         CoreMember member = memberService.selectMemberById(loginUser.getMemberId());
@@ -187,12 +181,8 @@ public class MobileHomeController extends BaseController
     @PostMapping("/material/byTag/list")
     public TableDataInfo materialListByTag(@RequestBody MaterialByTagQueryDTO queryDTO, HttpServletRequest request)
     {
-        // 获取当前登录会员
+        // 获取当前登录会员（已由拦截器验证）
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        if (loginUser == null)
-        {
-            return getDataTable(List.of());
-        }
 
         // 查询会员信息
         CoreMember member = memberService.selectMemberById(loginUser.getMemberId());
@@ -221,12 +211,8 @@ public class MobileHomeController extends BaseController
     @PostMapping("/material/morningReport/list")
     public TableDataInfo morningReportList(@RequestBody MorningReportQueryDTO queryDTO, HttpServletRequest request)
     {
-        // 获取当前登录会员
+        // 获取当前登录会员（已由拦截器验证）
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        if (loginUser == null)
-        {
-            return getDataTable(List.of());
-        }
 
         // 查询会员信息
         CoreMember member = memberService.selectMemberById(loginUser.getMemberId());

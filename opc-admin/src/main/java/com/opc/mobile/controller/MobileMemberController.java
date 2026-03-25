@@ -1,5 +1,6 @@
 package com.opc.mobile.controller;
 
+import com.opc.common.annotation.MemberLogin;
 import com.opc.common.utils.StringUtils;
 import com.opc.core.service.IMemberLoginService;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 @Tag(name = "会员管理", description = "移动端会员信息、图片上传、购买记录、意见反馈管理接口")
 @RestController
 @RequestMapping("/mobile/member")
+@MemberLogin
 public class MobileMemberController
 {
     private static final Logger log = LoggerFactory.getLogger(MobileMemberController.class);

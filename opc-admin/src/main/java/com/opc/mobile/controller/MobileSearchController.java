@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.opc.common.annotation.MemberLogin;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.page.TableDataInfo;
 import com.opc.core.domain.CoreMaterial;
@@ -27,6 +28,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "会员搜索", description = "移动端会员搜索相关接口")
 @RestController
 @RequestMapping("/mobile/search")
+@MemberLogin
 public class MobileSearchController extends BaseController
 {
     @Autowired
