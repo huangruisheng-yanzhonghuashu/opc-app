@@ -5,6 +5,7 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,7 +31,8 @@ public class XAiConfig {
     /**
      * 创建 xAI ChatClient 实例
      */
-    @Bean
+    @Bean(name = "xAiChatClient")
+    @ConditionalOnProperty(name = "spring.ai.xai.api-key")
     public ChatClient xAiChatClient() {
         OpenAiApi openAiApi = OpenAiApi.builder()
                 .baseUrl(baseUrl)

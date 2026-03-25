@@ -32,7 +32,7 @@ public class MinimaxConfig {
      * 创建 Minimax ChatClient 实例
      * 仅在配置了 API key 时才创建
      */
-    @Bean
+    @Bean(name = "minimaxChatClient")
     @ConditionalOnProperty(name = "spring.ai.minimax.api-key")
     public ChatClient minimaxChatClient() {
         OpenAiApi openAiApi = OpenAiApi.builder()
