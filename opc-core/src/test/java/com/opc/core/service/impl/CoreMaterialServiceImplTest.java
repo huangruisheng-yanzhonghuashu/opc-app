@@ -1,7 +1,9 @@
 package com.opc.core.service.impl;
 
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreTag;
 import com.opc.core.mapper.CoreMaterialMapper;
+import com.opc.core.mapper.CoreMaterialTagMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +22,9 @@ public class CoreMaterialServiceImplTest
 {
     @Mock
     private CoreMaterialMapper materialMapper;
+
+    @Mock
+    private CoreMaterialTagMapper materialTagMapper;
 
     @InjectMocks
     private CoreMaterialServiceImpl materialService;
@@ -51,12 +56,36 @@ public class CoreMaterialServiceImplTest
         material.setTitle("Test Material");
 
         when(materialMapper.selectMaterialById(1L)).thenReturn(material);
+        when(materialTagMapper.selectTagsByMaterialId(1L)).thenReturn(Arrays.asList());
 
         CoreMaterial result = materialService.selectMaterialById(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Test Material", result.getTitle());
+    }
+
+    @Test
+    public void testSelectMaterialByIdWithTags()
+    {
+        CoreMaterial material = new CoreMaterial();
+        material.setId(1L);
+        material.setTitle("Test Material");
+
+        CoreTag tag = new CoreTag();
+        tag.setId(1L);
+        tag.setTagName("Test Tag");
+
+        when(materialMapper.selectMaterialById(1L)).thenReturn(material);
+        when(materialTagMapper.selectTagsByMaterialId(1L)).thenReturn(Arrays.asList(tag));
+
+        CoreMaterial result = materialService.selectMaterialById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertNotNull(result.getTags());
+        assertEquals(1, result.getTags().size());
+        assertEquals("Test Tag", result.getTags().get(0).getTagName());
     }
 
     @Test
@@ -74,6 +103,25 @@ public class CoreMaterialServiceImplTest
     }
 
     @Test
+    public void testInsertMaterialWithTags()
+    {
+        CoreMaterial material = new CoreMaterial();
+        material.setId(1L);
+        material.setTitle("New Material");
+        material.setTagIds(Arrays.asList(1L, 2L));
+
+        when(materialMapper.insertMaterial(any(CoreMaterial.class))).thenReturn(1);
+        when(materialTagMapper.deleteMaterialTagByMaterialId(1L)).thenReturn(1);
+        when(materialMapper.insertMaterialTag(anyLong(), anyLong())).thenReturn(1);
+
+        int result = materialService.insertMaterial(material);
+
+        assertEquals(1, result);
+        verify(materialTagMapper).deleteMaterialTagByMaterialId(1L);
+        verify(materialMapper, times(2)).insertMaterialTag(anyLong(), anyLong());
+    }
+
+    @Test
     public void testUpdateMaterial()
     {
         CoreMaterial material = new CoreMaterial();
@@ -88,24 +136,47 @@ public class CoreMaterialServiceImplTest
     }
 
     @Test
+    public void testUpdateMaterialWithTags()
+    {
+        CoreMaterial material = new CoreMaterial();
+        material.setId(1L);
+        material.setTitle("Updated Material");
+        material.setTagIds(Arrays.asList(1L, 2L));
+
+        when(materialMapper.updateMaterial(any(CoreMaterial.class))).thenReturn(1);
+        when(materialTagMapper.deleteMaterialTagByMaterialId(1L)).thenReturn(1);
+        when(materialMapper.insertMaterialTag(anyLong(), anyLong())).thenReturn(1);
+
+        int result = materialService.updateMaterial(material);
+
+        assertEquals(1, result);
+        verify(materialTagMapper).deleteMaterialTagByMaterialId(1L);
+        verify(materialMapper, times(2)).insertMaterialTag(anyLong(), anyLong());
+    }
+
+    @Test
     public void testDeleteMaterialById()
     {
+        when(materialTagMapper.deleteMaterialTagByMaterialId(1L)).thenReturn(1);
         when(materialMapper.deleteMaterialById(1L)).thenReturn(1);
 
         int result = materialService.deleteMaterialById(1L);
 
         assertEquals(1, result);
+        verify(materialTagMapper).deleteMaterialTagByMaterialId(1L);
     }
 
     @Test
     public void testDeleteMaterialByIds()
     {
         Long[] ids = {1L, 2L, 3L};
+        when(materialTagMapper.deleteMaterialTagByMaterialId(anyLong())).thenReturn(1);
         when(materialMapper.deleteMaterialByIds(ids)).thenReturn(3);
 
         int result = materialService.deleteMaterialByIds(ids);
 
         assertEquals(3, result);
+        verify(materialTagMapper, times(3)).deleteMaterialTagByMaterialId(anyLong());
     }
 
     @Test
@@ -132,5 +203,15 @@ public class CoreMaterialServiceImplTest
         verify(materialMapper).changeTop(argThat(material ->
             material.getId().equals(1L) && material.getIsTop().equals("1")
         ));
+    }
+
+    @Test
+    public void testSelectMaterialByIdNull()
+    {
+        when(materialMapper.selectMaterialById(999L)).thenReturn(null);
+
+        CoreMaterial result = materialService.selectMaterialById(999L);
+
+        assertNull(result);
     }
 }

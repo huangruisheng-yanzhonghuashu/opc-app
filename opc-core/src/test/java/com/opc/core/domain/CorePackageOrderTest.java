@@ -20,7 +20,7 @@ public class CorePackageOrderTest
         order.setNickname("Test User");
         order.setPackageId(10L);
         order.setPackageName("VIP Package");
-        order.setPackageType(0);
+        order.setPackageType(2);
         order.setPrice(new BigDecimal("99.99"));
         order.setPayTime(LocalDateTime.of(2024, 1, 1, 12, 0, 0));
         order.setPayStatus("1");
@@ -33,7 +33,7 @@ public class CorePackageOrderTest
         assertEquals("Test User", order.getNickname());
         assertEquals(10L, order.getPackageId());
         assertEquals("VIP Package", order.getPackageName());
-        assertEquals("vip", order.getPackageType());
+        assertEquals(2, order.getPackageType());
         assertEquals(new BigDecimal("99.99"), order.getPrice());
         assertEquals(LocalDateTime.of(2024, 1, 1, 12, 0, 0), order.getPayTime());
         assertEquals("1", order.getPayStatus());

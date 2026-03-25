@@ -18,11 +18,17 @@ import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.SecurityUtils;
 import com.opc.common.utils.file.FileUploadUtils;
 import com.opc.common.utils.file.FileUtils;
+import com.opc.core.domain.CoreBanner;
 import com.opc.core.domain.CoreMember;
+import com.opc.core.domain.CoreMemberConfig;
+import com.opc.core.domain.CorePackage;
 import com.opc.core.domain.vo.MemberLoginVO;
+import com.opc.core.service.ICoreBannerService;
 import com.opc.core.service.ICoreFeedbackService;
+import com.opc.core.service.ICoreMemberConfigService;
 import com.opc.core.service.ICoreMemberService;
 import com.opc.core.service.ICorePackageOrderService;
+import com.opc.core.service.ICorePackageService;
 import com.opc.core.service.MemberTokenService;
 import com.opc.framework.config.ServerConfig;
 import com.opc.mobile.dto.MemberUpdateUserNameDTO;
@@ -71,7 +77,16 @@ public class MobileMemberController
     private ICorePackageOrderService packageOrderService;
 
     @Autowired
+    private ICorePackageService packageService;
+
+    @Autowired
     private ICoreFeedbackService feedbackService;
+
+    @Autowired
+    private ICoreMemberConfigService memberConfigService;
+
+    @Autowired
+    private ICoreBannerService bannerService;
 
     @Autowired
     private ServerConfig serverConfig;
@@ -741,6 +756,50 @@ public class MobileMemberController
         log.info("会员查询反馈详情：memberId={}, feedbackId={}", memberLoginVO.getMemberId(), id);
 
         return AjaxResult.success(feedback);
+    }
+
+    /**
+     * 会员banner图列表（不需要分页）
+     */
+    @Operation(summary = "会员banner图列表", description = "获取会员页banner图列表，按sortOrder升序排序")
+    @PostMapping("/banner/list")
+    public AjaxResult memberBannerList()
+    {
+        CoreMemberConfig config = new CoreMemberConfig();
+        config.setConfigType("banner");
+        // 只查询启用的配置
+        config.setStatus("0");
+        List<CoreMemberConfig> list = memberConfigService.selectConfigList(config);
+        return AjaxResult.success(list);
+    }
+
+    /**
+     * VIP引导图片接口（不需要分页）
+     */
+    @Operation(summary = "VIP引导图片列表", description = "获取VIP引导图片配置列表")
+    @PostMapping("/vip/guide/list")
+    public AjaxResult vipGuideList()
+    {
+        CoreMemberConfig config = new CoreMemberConfig();
+        config.setConfigType("vip_guide");
+        // 只查询启用的配置
+        config.setStatus("0");
+        List<CoreMemberConfig> list = memberConfigService.selectConfigList(config);
+        return AjaxResult.success(list);
+    }
+
+    /**
+     * 套餐配置列表接口（不需要分页）
+     */
+    @Operation(summary = "套餐配置列表", description = "获取所有上架的套餐配置列表")
+    @PostMapping("/package/list")
+    public AjaxResult packageList()
+    {
+        CorePackage pkg = new CorePackage();
+        // 只查询上架的套餐
+        pkg.setStatus("0");
+        List<CorePackage> list = packageService.selectPackageList(pkg);
+        return AjaxResult.success(list);
     }
 
 }
