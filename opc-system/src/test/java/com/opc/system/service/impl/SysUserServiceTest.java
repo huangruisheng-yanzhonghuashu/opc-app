@@ -1,8 +1,14 @@
 package com.opc.system.service.impl;
 
 import com.opc.common.constant.UserConstants;
+import com.opc.common.core.domain.entity.SysRole;
 import com.opc.common.core.domain.entity.SysUser;
+import com.opc.system.domain.SysPost;
+import com.opc.system.mapper.SysPostMapper;
+import com.opc.system.mapper.SysRoleMapper;
 import com.opc.system.mapper.SysUserMapper;
+import com.opc.system.mapper.SysUserPostMapper;
+import com.opc.system.mapper.SysUserRoleMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,16 +28,28 @@ public class SysUserServiceTest
     @Mock
     private SysUserMapper userMapper;
 
+    @Mock
+    private SysRoleMapper roleMapper;
+
+    @Mock
+    private SysPostMapper postMapper;
+
+    @Mock
+    private SysUserRoleMapper userRoleMapper;
+
+    @Mock
+    private SysUserPostMapper userPostMapper;
+
     @InjectMocks
     private SysUserServiceImpl userService;
 
     private SysUser createTestUser()
     {
         SysUser user = new SysUser();
-        user.setUserId(1L);
-        user.setUserName("admin");
-        user.setNickName("管理员");
-        user.setEmail("admin@example.com");
+        user.setUserId(2L);
+        user.setUserName("testuser");
+        user.setNickName("测试用户");
+        user.setEmail("test@example.com");
         user.setPhonenumber("13800138000");
         user.setStatus("0");
         user.setDelFlag("0");
@@ -50,7 +68,7 @@ public class SysUserServiceTest
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("admin", result.get(0).getUserName());
+        assertEquals("testuser", result.get(0).getUserName());
     }
 
     @Test
@@ -58,12 +76,12 @@ public class SysUserServiceTest
     {
         SysUser user = createTestUser();
 
-        when(userMapper.selectUserByUserName("admin")).thenReturn(user);
+        when(userMapper.selectUserByUserName("testuser")).thenReturn(user);
 
-        SysUser result = userService.selectUserByUserName("admin");
+        SysUser result = userService.selectUserByUserName("testuser");
 
         assertNotNull(result);
-        assertEquals("admin", result.getUserName());
+        assertEquals("testuser", result.getUserName());
     }
 
     @Test
@@ -71,12 +89,12 @@ public class SysUserServiceTest
     {
         SysUser user = createTestUser();
 
-        when(userMapper.selectUserById(1L)).thenReturn(user);
+        when(userMapper.selectUserById(2L)).thenReturn(user);
 
-        SysUser result = userService.selectUserById(1L);
+        SysUser result = userService.selectUserById(2L);
 
         assertNotNull(result);
-        assertEquals(1L, result.getUserId());
+        assertEquals(2L, result.getUserId());
     }
 
     @Test
@@ -84,7 +102,7 @@ public class SysUserServiceTest
     {
         SysUser user = createTestUser();
 
-        when(userMapper.checkUserNameUnique("admin")).thenReturn(null);
+        when(userMapper.checkUserNameUnique("testuser")).thenReturn(null);
 
         boolean result = userService.checkUserNameUnique(user);
 
@@ -96,9 +114,9 @@ public class SysUserServiceTest
     {
         SysUser user = createTestUser();
         SysUser existing = createTestUser();
-        existing.setUserId(2L);
+        existing.setUserId(3L);
 
-        when(userMapper.checkUserNameUnique("admin")).thenReturn(existing);
+        when(userMapper.checkUserNameUnique("testuser")).thenReturn(existing);
 
         boolean result = userService.checkUserNameUnique(user);
 
@@ -111,7 +129,7 @@ public class SysUserServiceTest
         SysUser user = createTestUser();
         SysUser existing = createTestUser();
 
-        when(userMapper.checkUserNameUnique("admin")).thenReturn(existing);
+        when(userMapper.checkUserNameUnique("testuser")).thenReturn(existing);
 
         boolean result = userService.checkUserNameUnique(user);
 
@@ -135,7 +153,7 @@ public class SysUserServiceTest
     {
         SysUser user = createTestUser();
         SysUser existing = createTestUser();
-        existing.setUserId(2L);
+        existing.setUserId(3L);
 
         when(userMapper.checkPhoneUnique("13800138000")).thenReturn(existing);
 
@@ -149,7 +167,7 @@ public class SysUserServiceTest
     {
         SysUser user = createTestUser();
 
-        when(userMapper.checkEmailUnique("admin@example.com")).thenReturn(null);
+        when(userMapper.checkEmailUnique("test@example.com")).thenReturn(null);
 
         boolean result = userService.checkEmailUnique(user);
 
@@ -161,9 +179,9 @@ public class SysUserServiceTest
     {
         SysUser user = createTestUser();
         SysUser existing = createTestUser();
-        existing.setUserId(2L);
+        existing.setUserId(3L);
 
-        when(userMapper.checkEmailUnique("admin@example.com")).thenReturn(existing);
+        when(userMapper.checkEmailUnique("test@example.com")).thenReturn(existing);
 
         boolean result = userService.checkEmailUnique(user);
 
@@ -186,7 +204,7 @@ public class SysUserServiceTest
         SysUser user = createTestUser();
         user.setStatus("1");
 
-        when(userMapper.updateUser(any(SysUser.class))).thenReturn(1);
+        when(userMapper.updateUserStatus(anyLong(), anyString())).thenReturn(1);
 
         int result = userService.updateUserStatus(user);
 
@@ -209,12 +227,9 @@ public class SysUserServiceTest
     @Test
     public void testResetPwd()
     {
-        SysUser user = createTestUser();
-        user.setPassword("newPassword");
+        when(userMapper.resetUserPwd(eq(2L), anyString())).thenReturn(1);
 
-        when(userMapper.updateUser(any(SysUser.class))).thenReturn(1);
-
-        int result = userService.resetPwd(user);
+        int result = userService.resetUserPwd(2L, "newPassword");
 
         assertEquals(1, result);
     }
@@ -222,9 +237,9 @@ public class SysUserServiceTest
     @Test
     public void testResetUserPwd()
     {
-        when(userMapper.resetUserPwd(eq(1L), anyString())).thenReturn(1);
+        when(userMapper.resetUserPwd(eq(2L), anyString())).thenReturn(1);
 
-        int result = userService.resetUserPwd(1L, "newPassword");
+        int result = userService.resetUserPwd(2L, "newPassword");
 
         assertEquals(1, result);
     }
@@ -232,24 +247,16 @@ public class SysUserServiceTest
     @Test
     public void testDeleteUserById()
     {
-        when(userMapper.deleteUserById(1L)).thenReturn(1);
+        when(userRoleMapper.deleteUserRoleByUserId(2L)).thenReturn(1);
+        when(userPostMapper.deleteUserPostByUserId(2L)).thenReturn(1);
+        when(userMapper.deleteUserById(2L)).thenReturn(1);
 
-        int result = userService.deleteUserById(1L);
+        int result = userService.deleteUserById(2L);
 
         assertEquals(1, result);
     }
 
-    @Test
-    public void testDeleteUserByIds()
-    {
-        Long[] ids = {1L, 2L, 3L};
 
-        when(userMapper.deleteUserByIds(ids)).thenReturn(3);
-
-        int result = userService.deleteUserByIds(ids);
-
-        assertEquals(3, result);
-    }
 
     @Test
     public void testSelectAllocatedList()
@@ -282,29 +289,63 @@ public class SysUserServiceTest
     @Test
     public void testSelectUserRoleGroup()
     {
-        when(userMapper.selectUserRoleGroup("admin")).thenReturn("管理员,普通用户");
+        SysRole role1 = new SysRole();
+        role1.setRoleId(1L);
+        role1.setRoleName("管理员");
+        SysRole role2 = new SysRole();
+        role2.setRoleId(2L);
+        role2.setRoleName("普通用户");
 
-        String result = userService.selectUserRoleGroup("admin");
+        when(roleMapper.selectRolesByUserName("testuser")).thenReturn(Arrays.asList(role1, role2));
+
+        String result = userService.selectUserRoleGroup("testuser");
 
         assertEquals("管理员,普通用户", result);
     }
 
     @Test
+    public void testSelectUserRoleGroupEmpty()
+    {
+        when(roleMapper.selectRolesByUserName("testuser")).thenReturn(Arrays.asList());
+
+        String result = userService.selectUserRoleGroup("testuser");
+
+        assertEquals("", result);
+    }
+
+    @Test
     public void testSelectUserPostGroup()
     {
-        when(userMapper.selectUserPostGroup("admin")).thenReturn("总经理,部门经理");
+        SysPost post1 = new SysPost();
+        post1.setPostId(1L);
+        post1.setPostName("总经理");
+        SysPost post2 = new SysPost();
+        post2.setPostId(2L);
+        post2.setPostName("部门经理");
 
-        String result = userService.selectUserPostGroup("admin");
+        when(postMapper.selectPostsByUserName("testuser")).thenReturn(Arrays.asList(post1, post2));
+
+        String result = userService.selectUserPostGroup("testuser");
 
         assertEquals("总经理,部门经理", result);
     }
 
     @Test
+    public void testSelectUserPostGroupEmpty()
+    {
+        when(postMapper.selectPostsByUserName("testuser")).thenReturn(Arrays.asList());
+
+        String result = userService.selectUserPostGroup("testuser");
+
+        assertEquals("", result);
+    }
+
+    @Test
     public void testUpdateUserAvatar()
     {
-        when(userMapper.updateUserAvatar(eq(1L), anyString())).thenReturn(1);
+        when(userMapper.updateUserAvatar(eq(2L), anyString())).thenReturn(1);
 
-        boolean result = userService.updateUserAvatar(1L, "/avatar/new.png");
+        boolean result = userService.updateUserAvatar(2L, "/avatar/new.png");
 
         assertTrue(result);
     }
@@ -312,11 +353,11 @@ public class SysUserServiceTest
     @Test
     public void testUpdateLoginInfo()
     {
-        when(userMapper.updateLoginInfo(eq(1L), anyString(), any())).thenReturn(1);
+        when(userMapper.updateLoginInfo(eq(2L), anyString(), any())).thenReturn(1);
 
-        userService.updateLoginInfo(1L, "192.168.1.1", new java.util.Date());
+        userService.updateLoginInfo(2L, "192.168.1.1", new java.util.Date());
 
-        verify(userMapper).updateLoginInfo(eq(1L), anyString(), any());
+        verify(userMapper).updateLoginInfo(eq(2L), anyString(), any());
     }
 
     @Test

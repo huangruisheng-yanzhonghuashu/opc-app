@@ -1,21 +1,16 @@
 package com.opc.ai.service;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.List;
-
 /**
- * AI 对话服务
+ * Minimax AI 对话服务
  */
 @Service
-public class AiChatService {
+public class MinimaxChatService {
 
     @Autowired
     @Qualifier("minimaxChatClient")

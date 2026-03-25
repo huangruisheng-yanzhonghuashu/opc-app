@@ -53,8 +53,7 @@ public class SwaggerConfig
     {
         return GroupedOpenApi.builder()
             .group("default")
-            .displayName("管理后台")
-            .pathsToMatch("/web/**", "/tool/**", "/dev-api/**")
+            .displayName("管理后台").pathsToMatch("/system/**", "/monitor/**", "/core/**", "/tool/**", "/common/**")
             .build();
     }
 
@@ -68,6 +67,19 @@ public class SwaggerConfig
             .group("openapi")
             .displayName("OpenAPI")
             .pathsToMatch("/mobile/**")
+            .build();
+    }
+
+    /**
+     * AI 接口分组
+     */
+    @Bean
+    public GroupedOpenApi aiApi()
+    {
+        return GroupedOpenApi.builder()
+            .group("ai")
+            .displayName("AI接口")
+            .pathsToMatch("/ai/**")
             .build();
     }
 

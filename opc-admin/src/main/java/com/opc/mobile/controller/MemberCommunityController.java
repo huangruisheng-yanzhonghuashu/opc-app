@@ -3,6 +3,7 @@ package com.opc.mobile.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.github.pagehelper.PageHelper;
 import com.opc.mobile.vo.CoreCommunityVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class MemberCommunityController extends BaseController
     @PostMapping("/list")
     public TableDataInfo list(@RequestBody CommunityQueryDTO dto)
     {
-        startPage();
+        PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
         CoreCommunity community = new CoreCommunity();
         if (dto != null) {
             BeanUtils.copyProperties(dto, community);

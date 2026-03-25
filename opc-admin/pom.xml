@@ -17,6 +17,12 @@
 
     <dependencies>
 
+        <!-- 通用工具模块 -->
+        <dependency>
+            <groupId>com.opc</groupId>
+            <artifactId>opc-common</artifactId>
+        </dependency>
+
         <!-- spring-boot-devtools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
