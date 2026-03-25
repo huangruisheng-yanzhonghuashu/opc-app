@@ -93,9 +93,12 @@ public class MemberCommunityController extends BaseController
         CoreCommunityVO vo = new CoreCommunityVO();
         BeanUtils.copyProperties(community, vo);
 
-        // 设置会员关联状态
-        vo.setWantToGo(wantToGoService.selectByCommunityAndMember(id, memberId) != null);
-        vo.setVisited(visitedService.selectByCommunityAndMember(id, memberId) != null);
+        // 设置会员关联状态（需要判断状态是否为0）
+        CoreCommunityWantToGo wantToGoRecord = wantToGoService.selectByCommunityAndMember(id, memberId);
+        vo.setWantToGo(wantToGoRecord != null && "0".equals(wantToGoRecord.getStatus()));
+
+        CoreCommunityVisited visitedRecord = visitedService.selectByCommunityAndMember(id, memberId);
+        vo.setVisited(visitedRecord != null && "0".equals(visitedRecord.getStatus()));
 
         // 查询会员评价
         CoreCommunityReview reviewParam = new CoreCommunityReview();
@@ -170,14 +173,14 @@ public class MemberCommunityController extends BaseController
     }
 
     /**
-     * 提交评价
-     * 会员对社区进行评价（1-5分）
+     * 提交/修改评价
+     * 会员对社区进行评价（1-5分），已评价则修改，未评价则新增
      *
      * @param dto 评价信息
      * @param request HTTP请求
      * @return 操作结果
      */
-    @Operation(summary = "提交评价", description = "会员对社区进行评价（1-5分），需要会员登录")
+    @Operation(summary = "提交/修改评价", description = "会员对社区进行评价（1-5分），已评价则修改，未评价则新增，需要会员登录")
     @MemberLogin
     @PostMapping("/review")
     public AjaxResult saveReview(@RequestBody CommunityReviewDTO dto, HttpServletRequest request)
@@ -198,13 +201,30 @@ public class MemberCommunityController extends BaseController
 
         // 获取当前登录会员
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
+        Long memberId = loginUser.getMemberId();
+
+        // 查询是否已存在评价
+        CoreCommunityReview queryParam = new CoreCommunityReview();
+        queryParam.setCommunityId(dto.getCommunityId());
+        queryParam.setMemberId(memberId);
+        List<CoreCommunityReview> existingReviews = reviewService.selectReviewList(queryParam);
 
         CoreCommunityReview review = new CoreCommunityReview();
         BeanUtils.copyProperties(dto, review);
-        review.setMemberId(loginUser.getMemberId());
-        review.setStatus("0");
+        review.setMemberId(memberId);
 
-        int result = reviewService.insertReview(review);
-        return result > 0 ? success("提交评价成功") : error("提交评价失败");
+        if (existingReviews != null && !existingReviews.isEmpty()) {
+            // 已存在评价，进行修改
+            CoreCommunityReview existingReview = existingReviews.get(0);
+            review.setId(existingReview.getId());
+            review.setStatus(existingReview.getStatus());
+            int result = reviewService.updateReview(review);
+            return result > 0 ? success("修改评价成功") : error("修改评价失败");
+        } else {
+            // 未评价，新增
+            review.setStatus("0");
+            int result = reviewService.insertReview(review);
+            return result > 0 ? success("提交评价成功") : error("提交评价失败");
+        }
     }
 }
