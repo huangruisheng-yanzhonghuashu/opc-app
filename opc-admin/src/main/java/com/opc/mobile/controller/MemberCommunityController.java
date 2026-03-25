@@ -180,7 +180,7 @@ public class MemberCommunityController extends BaseController
      * @param request HTTP请求
      * @return 操作结果
      */
-    @Operation(summary = "提交/修改评价", description = "会员对社区进行评价（1-5分），已评价则修改，未评价则新增，需要会员登录")
+    @Operation(summary = "评价提交或修改", description = "会员对社区进行评价（1-5分），已评价则修改，未评价则新增，需要会员登录")
     @MemberLogin
     @PostMapping("/review")
     public AjaxResult saveReview(@RequestBody CommunityReviewDTO dto, HttpServletRequest request)
