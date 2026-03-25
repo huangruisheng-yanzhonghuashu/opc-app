@@ -71,7 +71,7 @@ public class MorningReportTask {
 
             // 调用AI生成晨报内容
             String content = aiChatService.chatWithSystemPrompt(
-                    "你是一位专业的新闻编辑，擅长撰写简洁明了的晨报。",
+                    "你是一位专业的新闻编辑，擅长撰写简洁明了的晨报。生成的格式是HTML格式",
                     MORNING_REPORT_PROMPT
             );
 
