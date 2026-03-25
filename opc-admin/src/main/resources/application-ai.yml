@@ -1,0 +1,12 @@
+# Spring AI xAI (Grok) 配置
+spring:
+  ai:
+    xai:
+      # xAI API Key (建议通过环境变量传入)
+      api-key: xai-Mu1EVXMbfeiEPToexIUcnaoaIlvpm4xmwc8apW2FuZbBiYAB14UFUA0Gya30jG6bzqCQVF5xmJorsPJR
+      # xAI API 基础地址
+      base-url: https://api.x.ai/v1
+      # 默认模型
+      model: grok-2-latest
+      # 温度参数 (0.0-1.0，越高越创意)
+      temperature: 0.7

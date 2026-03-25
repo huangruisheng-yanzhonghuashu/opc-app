@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CoreCommunityMapper">
+
+	<resultMap type="CoreCommunity" id="CoreCommunityResult">
+		<id     property="id"                  column="id"                   />
+		<result property="name"                column="name"                 />
+		<result property="image"               column="image"                />
+		<result property="address"             column="address"              />
+		<result property="longitude"           column="longitude"            />
+		<result property="latitude"            column="latitude"             />
+		<result property="details"             column="details"              />
+		<result property="wantToGoCount"       column="want_to_go_count"     />
+		<result property="visitedCount"        column="visited_count"        />
+		<result property="reviewCount"         column="review_count"         />
+		<result property="rating"              column="rating"               />
+		<result property="status"              column="status"               />
+		<result property="sortOrder"           column="sort_order"           />
+		<result property="createBy"            column="create_by"            />
+		<result property="createTime"          column="create_time"          />
+		<result property="updateBy"            column="update_by"            />
+		<result property="updateTime"          column="update_time"          />
+		<result property="remark"              column="remark"               />
+	</resultMap>
+
+	<sql id="selectCommunityVo">
+        select id, name, image, address, longitude, latitude, details,
+               want_to_go_count, visited_count, review_count, rating,
+               status, sort_order, create_by, create_time, update_by, update_time, remark
+		from core_community
+    </sql>
+
+	<select id="selectCommunityList" parameterType="CoreCommunity" resultMap="CoreCommunityResult">
+		<include refid="selectCommunityVo"/>
+		<where>
+			<if test="name != null and name != ''">
+				AND name like concat('%', #{name}, '%')
+			</if>
+			<if test="address != null and address != ''">
+				AND address like concat('%', #{address}, '%')
+			</if>
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+		</where>
+		order by sort_order asc, create_time desc
+	</select>
+
+	<select id="selectCommunityById" parameterType="Long" resultMap="CoreCommunityResult">
+		<include refid="selectCommunityVo"/>
+		where id = #{id}
+	</select>
+
+	<select id="checkCommunityNameUnique" parameterType="String" resultMap="CoreCommunityResult">
+		<include refid="selectCommunityVo"/>
+		where name = #{name} limit 1
+	</select>
+
+	<insert id="insertCommunity" parameterType="CoreCommunity" useGeneratedKeys="true" keyProperty="id">
+		insert into core_community(
+			<if test="id != null and id != 0">id,</if>
+			<if test="name != null and name != ''">name,</if>
+			<if test="image != null">image,</if>
+			<if test="address != null">address,</if>
+			<if test="longitude != null">longitude,</if>
+			<if test="latitude != null">latitude,</if>
+			<if test="details != null">details,</if>
+			<if test="wantToGoCount != null">want_to_go_count,</if>
+			<if test="visitedCount != null">visited_count,</if>
+			<if test="reviewCount != null">review_count,</if>
+			<if test="rating != null">rating,</if>
+			<if test="status != null and status != ''">status,</if>
+			<if test="sortOrder != null">sort_order,</if>
+			<if test="remark != null">remark,</if>
+			<if test="createBy != null and createBy != ''">create_by,</if>
+			create_time
+		)values(
+			<if test="id != null and id != 0">#{id},</if>
+			<if test="name != null and name != ''">#{name},</if>
+			<if test="image != null">#{image},</if>
+			<if test="address != null">#{address},</if>
+			<if test="longitude != null">#{longitude},</if>
+			<if test="latitude != null">#{latitude},</if>
+			<if test="details != null">#{details},</if>
+			<if test="wantToGoCount != null">#{wantToGoCount},</if>
+			<if test="visitedCount != null">#{visitedCount},</if>
+			<if test="reviewCount != null">#{reviewCount},</if>
+			<if test="rating != null">#{rating},</if>
+			<if test="status != null and status != ''">#{status},</if>
+			<if test="sortOrder != null">#{sortOrder},</if>
+			<if test="remark != null">#{remark},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			sysdate()
+		)
+	</insert>
+
+	<update id="updateCommunity" parameterType="CoreCommunity">
+ 		update core_community
+ 		<set>
+ 			<if test="name != null and name != ''">name = #{name},</if>
+ 			<if test="image != null">image = #{image},</if>
+ 			<if test="address != null">address = #{address},</if>
+ 			<if test="longitude != null">longitude = #{longitude},</if>
+ 			<if test="latitude != null">latitude = #{latitude},</if>
+ 			<if test="details != null">details = #{details},</if>
+ 			<if test="wantToGoCount != null">want_to_go_count = #{wantToGoCount},</if>
+ 			<if test="visitedCount != null">visited_count = #{visitedCount},</if>
+ 			<if test="reviewCount != null">review_count = #{reviewCount},</if>
+ 			<if test="rating != null">rating = #{rating},</if>
+ 			<if test="status != null and status != ''">status = #{status},</if>
+ 			<if test="sortOrder != null">sort_order = #{sortOrder},</if>
+ 			<if test="remark != null">remark = #{remark},</if>
+ 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+ 			update_time = sysdate()
+ 		</set>
+ 		where id = #{id}
+	</update>
+
+	<delete id="deleteCommunityById" parameterType="Long">
+ 		delete from core_community where id = #{id}
+	</delete>
+
+	<delete id="deleteCommunityByIds" parameterType="Long">
+ 		delete from core_community where id in
+ 		<foreach collection="array" item="id" open="(" separator="," close=")">
+  			#{id}
+ 		</foreach>
+	</delete>
+
+</mapper>

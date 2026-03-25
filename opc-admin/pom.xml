@@ -66,6 +66,12 @@
             <artifactId>opc-generator</artifactId>
         </dependency>
 
+        <!-- AI模块 -->
+        <dependency>
+            <groupId>com.opc</groupId>
+            <artifactId>opc-ai</artifactId>
+        </dependency>
+
         <!-- Playwright -->
         <dependency>
             <groupId>com.microsoft.playwright</groupId>

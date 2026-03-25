@@ -18,6 +18,7 @@ import com.opc.core.service.MemberTokenService;
 import com.opc.mobile.dto.MemberLoginDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Tag(name = "会员登录", description = "移动端会员邮箱密码登录相关接口")
 @RestController
@@ -33,9 +34,11 @@ public class MemberLoginController
     @Operation(summary = "会员登录", description = "会员使用邮箱和密码登录，成功返回JWT令牌")
     @Log(title = "会员登录", businessType = BusinessType.OTHER)
     @PostMapping("/login")
-    public AjaxResult login(@Validated @RequestBody MemberLoginDTO loginDTO)
+    public AjaxResult login(@Validated @RequestBody MemberLoginDTO loginDTO, HttpServletResponse response)
     {
         String token = memberLoginService.login(loginDTO.getEmail(), loginDTO.getPassword());
+        // 登录成功，设置 Member-Authorization header
+        response.setHeader(memberTokenService.getHeader(), Constants.TOKEN_PREFIX + token);
         AjaxResult ajax = AjaxResult.success();
         ajax.put(Constants.TOKEN, token);
         return ajax;
