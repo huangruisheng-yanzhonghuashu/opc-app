@@ -57,9 +57,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="selectByCommunityAndMember" resultMap="CoreCommunityWantToGoResult">
 		<include refid="selectVo"/>
-		where community_id = #{communityId} 
+		where community_id = #{communityId}
 		  and member_id = #{memberId}
-		  and status = '0'
 	</select>
 
 	<insert id="insert" parameterType="CoreCommunityWantToGo" useGeneratedKeys="true" keyProperty="id">

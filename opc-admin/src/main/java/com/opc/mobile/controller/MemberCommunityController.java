@@ -16,6 +16,8 @@ import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.core.page.TableDataInfo;
 import com.opc.core.domain.CoreCommunity;
 import com.opc.core.domain.CoreCommunityReview;
+import com.opc.core.domain.CoreCommunityVisited;
+import com.opc.core.domain.CoreCommunityWantToGo;
 import com.opc.core.domain.vo.MemberLoginVO;
 import com.opc.core.service.ICoreCommunityService;
 import com.opc.core.service.ICoreCommunityReviewService;
@@ -128,21 +130,14 @@ public class MemberCommunityController extends BaseController
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
         Long memberId = loginUser.getMemberId();
 
-        boolean isMarked = wantToGoService.selectByCommunityAndMember(dto.getCommunityId(), memberId) != null;
+        CoreCommunityWantToGo existing = wantToGoService.selectByCommunityAndMember(dto.getCommunityId(), memberId);
+        boolean isMarked = existing != null && "0".equals(existing.getStatus());
         if (isMarked) {
             int result = wantToGoService.unmarkWantToGo(dto.getCommunityId(), memberId);
-            if (result > 0) {
-                wantToGoService.updateCommunityWantToGoCount(dto.getCommunityId());
-                return success("取消想去成功");
-            }
-            return error("取消想去失败");
+            return result > 0 ? success("取消想去成功") : error("取消想去失败");
         } else {
             int result = wantToGoService.markWantToGo(dto.getCommunityId(), memberId);
-            if (result > 0) {
-                wantToGoService.updateCommunityWantToGoCount(dto.getCommunityId());
-                return success("标记想去成功");
-            }
-            return error("标记想去失败");
+            return result > 0 ? success("标记想去成功") : error("标记想去失败");
         }
     }
 
@@ -163,21 +158,14 @@ public class MemberCommunityController extends BaseController
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
         Long memberId = loginUser.getMemberId();
 
-        boolean isMarked = visitedService.selectByCommunityAndMember(dto.getCommunityId(), memberId) != null;
+        CoreCommunityVisited existing = visitedService.selectByCommunityAndMember(dto.getCommunityId(), memberId);
+        boolean isMarked = existing != null && "0".equals(existing.getStatus());
         if (isMarked) {
             int result = visitedService.unmarkVisited(dto.getCommunityId(), memberId);
-            if (result > 0) {
-                visitedService.updateCommunityVisitedCount(dto.getCommunityId());
-                return success("取消去过成功");
-            }
-            return error("取消去过失败");
+            return result > 0 ? success("取消去过成功") : error("取消去过失败");
         } else {
             int result = visitedService.markVisited(dto.getCommunityId(), memberId);
-            if (result > 0) {
-                visitedService.updateCommunityVisitedCount(dto.getCommunityId());
-                return success("标记去过成功");
-            }
-            return error("标记去过失败");
+            return result > 0 ? success("标记去过成功") : error("标记去过失败");
         }
     }
 

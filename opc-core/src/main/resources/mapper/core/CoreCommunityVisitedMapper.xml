@@ -58,9 +58,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="selectByCommunityAndMember" resultMap="CoreCommunityVisitedResult">
 		<include refid="selectVo"/>
-		where community_id = #{communityId} 
+		where community_id = #{communityId}
 		  and member_id = #{memberId}
-		  and status = '0'
 	</select>
 
 	<insert id="insert" parameterType="CoreCommunityVisited" useGeneratedKeys="true" keyProperty="id">
