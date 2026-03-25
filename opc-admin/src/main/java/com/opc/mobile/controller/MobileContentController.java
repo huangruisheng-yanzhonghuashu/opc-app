@@ -9,13 +9,13 @@ import com.opc.core.domain.vo.MemberLoginVO;
 import com.opc.core.service.ICoreMaterialService;
 import com.opc.core.service.ICoreMemberService;
 import com.opc.core.service.MemberTokenService;
+import com.opc.mobile.dto.MaterialIdDTO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,16 +41,16 @@ public class MobileContentController extends BaseController
     /**
      * 获取素材详情
      *
-     * @param id 素材ID
+     * @param dto 素材ID
      * @param request HTTP请求
      * @return 素材详情
      */
     @Operation(summary = "获取内容详情", description = "根据内容ID获取详情，需要校验会员套餐权限")
-    @Parameter(name = "id", description = "素材ID", required = true)
     @MemberLogin
-    @GetMapping("/material/{id}")
-    public AjaxResult getMaterialDetail(@PathVariable Long id, HttpServletRequest request)
+    @PostMapping("/material/detail")
+    public AjaxResult getMaterialDetail(@RequestBody MaterialIdDTO dto, HttpServletRequest request)
     {
+        Long id = dto.getId();
         // 获取当前登录会员（已由拦截器验证）
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
 
