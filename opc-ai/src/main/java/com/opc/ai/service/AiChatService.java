@@ -13,8 +13,8 @@ import reactor.core.publisher.Flux;
 public class AiChatService {
 
     @Autowired(required = false)
-    //@Qualifier("xAiChatClient")
-    @Qualifier("minimaxChatClient")
+    @Qualifier("xAiChatClient")
+    //@Qualifier("minimaxChatClient")
     private ChatClient chatClient;
 
 
