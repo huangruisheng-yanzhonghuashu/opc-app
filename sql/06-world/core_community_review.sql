@@ -20,20 +20,6 @@ create table core_community_review
     primary key (id),
     key idx_community_id (community_id),
     key idx_member_id (member_id),
-    key idx_status (status),
     key idx_create_time (create_time)
 ) engine=innodb auto_increment=1 comment = '社区评价表';
 
--- ----------------------------
--- 社区评价菜单
--- ----------------------------
--- 三级菜单：社区评价管理
-insert into sys_menu values('70002', '社区评价', '70000', '2', 'review', 'core/world/review/index', '', '', 1, 0, 'C', '0', '0', 'core:community:review:list', 'rate', 'admin', sysdate(), '', null, '社区评价管理菜单');
-
--- 社区评价按钮权限
-insert into sys_menu values('70020', '评价查询', '70002', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:community:review:query', '', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('70021', '评价新增', '70002', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:community:review:add', '', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('70022', '评价修改', '70002', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:community:review:edit', '', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('70023', '评价删除', '70002', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:community:review:remove', '', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('70024', '评价导出', '70002', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:community:review:export', '', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('70025', '评价审核', '70002', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'core:community:review:audit', '', 'admin', sysdate(), '', null, '');

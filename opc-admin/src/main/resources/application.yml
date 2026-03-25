@@ -141,8 +141,8 @@ member:
     header: Member-Authorization
     # 会员令牌密钥（与系统用户密钥隔离）
     secret: memberSecretKeyForJwtTokenGeneration2024
-    # 会员令牌有效期（默认30分钟）
-    expireTime: 30
+    # 会员令牌有效期（默认7天，单位：分钟）
+    expireTime: 10080
   # 会员注册配置
   register:
     # 是否跳过邮箱验证码验证（仅开发环境使用，生产环境必须设置为false）
