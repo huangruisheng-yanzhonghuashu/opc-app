@@ -25,6 +25,9 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     @Autowired
     private CoreMaterialUserActionMapper userActionMapper;
 
+    @Autowired
+    private CoreMaterialAsyncService asyncService;
+
     @Override
     public List<CoreMaterial> selectMaterialList(CoreMaterial material)
     {
@@ -144,7 +147,9 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     @Override
     public int incrementViewCount(Long id)
     {
-        return materialMapper.incrementViewCount(id);
+        // 异步增加查看数
+        asyncService.incrementViewCount(id);
+        return 1;
     }
 
     @Override
@@ -173,7 +178,13 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             if (hasDisliked > 0)
             {
                 userActionMapper.deleteUserAction(materialId, userId, "dislike");
-                material.setDislikeCount(Math.max(0, (material.getDislikeCount() == null ? 0 : material.getDislikeCount()) - 1));
+                // 异步切换：减少不喜欢数，增加点赞数
+                asyncService.switchToLike(materialId);
+            }
+            else
+            {
+                // 异步增加点赞数
+                asyncService.incrementLikeCount(materialId);
             }
 
             // 添加点赞记录
@@ -182,10 +193,6 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             action.setUserId(userId);
             action.setActionType("like");
             userActionMapper.insertUserAction(action);
-
-            // 增加点赞数
-            material.setLikeCount((material.getLikeCount() == null ? 0 : material.getLikeCount()) + 1);
-            materialMapper.updateMaterial(material);
             return true;
         }
         else
@@ -200,9 +207,8 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             // 取消点赞
             userActionMapper.deleteUserAction(materialId, userId, "like");
 
-            // 减少点赞数
-            material.setLikeCount(Math.max(0, (material.getLikeCount() == null ? 0 : material.getLikeCount()) - 1));
-            materialMapper.updateMaterial(material);
+            // 异步减少点赞数
+            asyncService.decrementLikeCount(materialId);
             return true;
         }
     }
@@ -233,7 +239,13 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             if (hasLiked > 0)
             {
                 userActionMapper.deleteUserAction(materialId, userId, "like");
-                material.setLikeCount(Math.max(0, (material.getLikeCount() == null ? 0 : material.getLikeCount()) - 1));
+                // 异步切换：减少点赞数，增加不喜欢数
+                asyncService.switchToDislike(materialId);
+            }
+            else
+            {
+                // 异步增加不喜欢数
+                asyncService.incrementDislikeCount(materialId);
             }
 
             // 添加不喜欢记录
@@ -242,10 +254,6 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             action.setUserId(userId);
             action.setActionType("dislike");
             userActionMapper.insertUserAction(action);
-
-            // 增加不喜欢数
-            material.setDislikeCount((material.getDislikeCount() == null ? 0 : material.getDislikeCount()) + 1);
-            materialMapper.updateMaterial(material);
             return true;
         }
         else
@@ -260,9 +268,8 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             // 取消不喜欢
             userActionMapper.deleteUserAction(materialId, userId, "dislike");
 
-            // 减少不喜欢数
-            material.setDislikeCount(Math.max(0, (material.getDislikeCount() == null ? 0 : material.getDislikeCount()) - 1));
-            materialMapper.updateMaterial(material);
+            // 异步减少不喜欢数
+            asyncService.decrementDislikeCount(materialId);
             return true;
         }
     }

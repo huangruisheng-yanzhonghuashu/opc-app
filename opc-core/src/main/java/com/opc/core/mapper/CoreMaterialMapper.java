@@ -41,4 +41,36 @@ public interface CoreMaterialMapper
      * @return 影响行数
      */
     int incrementViewCount(@Param("id") Long id);
+
+    /**
+     * 原子增加点赞数
+     *
+     * @param id 素材ID
+     * @return 影响行数
+     */
+    int incrementLikeCount(@Param("id") Long id);
+
+    /**
+     * 原子减少点赞数
+     *
+     * @param id 素材ID
+     * @return 影响行数
+     */
+    int decrementLikeCount(@Param("id") Long id);
+
+    /**
+     * 原子增加不喜欢数
+     *
+     * @param id 素材ID
+     * @return 影响行数
+     */
+    int incrementDislikeCount(@Param("id") Long id);
+
+    /**
+     * 原子减少不喜欢数
+     *
+     * @param id 素材ID
+     * @return 影响行数
+     */
+    int decrementDislikeCount(@Param("id") Long id);
 }

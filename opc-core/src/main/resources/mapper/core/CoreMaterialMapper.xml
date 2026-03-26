@@ -264,4 +264,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		WHERE id = #{id}
 	</update>
 
+	<!-- 原子增加点赞数 -->
+	<update id="incrementLikeCount">
+		UPDATE core_material
+		SET like_count = IFNULL(like_count, 0) + 1
+		WHERE id = #{id}
+	</update>
+
+	<!-- 原子减少点赞数（最小为0） -->
+	<update id="decrementLikeCount">
+		UPDATE core_material
+		SET like_count = CASE WHEN IFNULL(like_count, 0) > 0 THEN like_count - 1 ELSE 0 END
+		WHERE id = #{id}
+	</update>
+
+	<!-- 原子增加不喜欢数 -->
+	<update id="incrementDislikeCount">
+		UPDATE core_material
+		SET dislike_count = IFNULL(dislike_count, 0) + 1
+		WHERE id = #{id}
+	</update>
+
+	<!-- 原子减少不喜欢数（最小为0） -->
+	<update id="decrementDislikeCount">
+		UPDATE core_material
+		SET dislike_count = CASE WHEN IFNULL(dislike_count, 0) > 0 THEN dislike_count - 1 ELSE 0 END
+		WHERE id = #{id}
+	</update>
+
 </mapper>

@@ -87,12 +87,8 @@ public class MobileContentController extends BaseController
         // 增加查看数
         materialService.incrementViewCount(id);
 
-        // 获取用户对该素材的行为状态
-        String userAction = materialService.getUserActionStatus(id, loginUser.getMemberId());
-
         Map<String, Object> result = new HashMap<>();
         result.put("material", material);
-        result.put("userAction", userAction);
 
         return AjaxResult.success(result);
     }
