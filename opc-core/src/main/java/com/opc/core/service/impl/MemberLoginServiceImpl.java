@@ -49,17 +49,20 @@ public class MemberLoginServiceImpl implements IMemberLoginService
             throw new ServiceException("会员已被禁用");
         }
 
-        Set<String> permissions = new HashSet<>();
-        permissions.add("member:user");
-
         MemberLoginVO memberLoginVO = new MemberLoginVO();
         memberLoginVO.setMemberId(member.getId());
         memberLoginVO.setEmail(member.getEmail());
         memberLoginVO.setUsername(member.getUsername());
         memberLoginVO.setNickname(member.getNickname());
+        memberLoginVO.setPhoneNumber(member.getPhoneNumber());
         memberLoginVO.setAvatar(member.getAvatar());
         memberLoginVO.setStatus(member.getStatus());
-        memberLoginVO.setPermissions(permissions);
+        memberLoginVO.setCurrentPackage(member.getCurrentPackage());
+        memberLoginVO.setPackageType(member.getPackageType());
+        memberLoginVO.setSource(member.getSource());
+        memberLoginVO.setLoginTime(member.getLastActiveTime());
+        memberLoginVO.setToken(memberTokenService.createToken(memberLoginVO));
+
 
         memberService.updateLoginInfo(member.getId(), IpUtils.getIpAddr());
 
