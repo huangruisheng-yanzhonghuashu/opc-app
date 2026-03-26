@@ -11,7 +11,7 @@ import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.opc.common.config.RuoYiConfig;
+import com.opc.common.config.SopConfig;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class SwaggerConfig
 {
     /** 系统基础配置 */
     @Autowired
-    private RuoYiConfig ruoyiConfig;
+    private SopConfig ruoyiConfig;
 
     /**
      * 自定义的 OpenAPI 对象

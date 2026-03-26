@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import com.opc.common.config.RuoYiConfig;
+import com.opc.common.config.SopConfig;
 import com.opc.common.constant.Constants;
 import com.opc.common.utils.DateUtils;
 import com.opc.common.utils.StringUtils;
@@ -74,7 +74,7 @@ public class FileUtils
      */
     public static String writeImportBytes(byte[] data) throws IOException
     {
-        return writeBytes(data, RuoYiConfig.getImportPath());
+        return writeBytes(data, SopConfig.getImportPath());
     }
 
     /**

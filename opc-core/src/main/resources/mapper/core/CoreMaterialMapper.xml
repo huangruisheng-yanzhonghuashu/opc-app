@@ -40,11 +40,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="selectMaterialVo">
-        select id, title, author, summary, content, original_url, original_id, reply_count,
-               like_count, view_count, share_count, comment_count, publish_time,
-               content_type, package_type, status, is_top, source, cover_image, video_url,
-               create_by, create_time, update_by, update_time, remark
-		from core_material
+        select m.id, m.title, m.author, m.summary, m.content, m.original_url, m.original_id, m.reply_count,
+               m.like_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
+               m.content_type, m.package_type, m.status, m.is_top, m.source, m.cover_image, m.video_url,
+               m.create_by, m.create_time, m.update_by, m.update_time, m.remark
+		from core_material m
     </sql>
 
 	<select id="selectMaterialList" parameterType="CoreMaterial" resultMap="CoreMaterialResult">
@@ -71,16 +71,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="source != null and source != ''">
 				AND source = #{source}
 			</if>
-			<if test="tagIds != null and tagIds.size > 0">
-				AND exists (
-					select 1 from core_material_tag mt 
-					where mt.material_id = id 
-					and mt.tag_id in
-					<foreach item="tagId" collection="tagIds" open="(" separator="," close=")">
-						#{tagId}
-					</foreach>
-				)
-			</if>
+		<if test="tagIds != null and tagIds.size > 0">
+			AND exists (
+				select 1 from core_material_tag mt
+				where mt.material_id = m.id
+				and mt.tag_id in
+				<foreach item="tagId" collection="tagIds" open="(" separator="," close=")">
+					#{tagId}
+				</foreach>
+			)
+		</if>
 			<if test="params.beginCreateTime != null and params.beginCreateTime != ''">
 				AND date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginCreateTime},'%y%m%d')
 			</if>

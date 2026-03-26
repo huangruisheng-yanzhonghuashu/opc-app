@@ -1,5 +1,5 @@
 # 项目相关配置
-ruoyi:
+sop:
   # 名称
   name: SOP
   # 版本
@@ -10,6 +10,9 @@ ruoyi:
   profile: /home/ubuntu/uploadPath
   # 获取ip地址开关
   addressEnabled: false
+  # 服务器域名（用于生成文件访问URL，为空则自动获取请求域名）
+  # serverUrl: https://vps-sg-aws-opc.43046721.xyz
+  serverUrl: http://localhost:8080
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 

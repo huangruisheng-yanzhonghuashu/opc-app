@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.opc.common.annotation.Log;
-import com.opc.common.config.RuoYiConfig;
+import com.opc.common.config.SopConfig;
 import com.opc.common.constant.CacheConstants;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.core.redis.RedisCache;
@@ -18,7 +18,6 @@ import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.SecurityUtils;
 import com.opc.common.utils.file.FileUploadUtils;
 import com.opc.common.utils.file.FileUtils;
-import com.opc.core.domain.CoreBanner;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.domain.CoreMemberConfig;
 import com.opc.core.domain.CorePackage;
@@ -123,7 +122,7 @@ public class MobileMemberController
             }
 
             // 上传文件路径
-            String filePath = RuoYiConfig.getUploadPath();
+            String filePath = SopConfig.getUploadPath();
             // 上传并返回新文件名称
             String fileName = FileUploadUtils.upload(filePath, file);
             String url = serverConfig.getUrl() + fileName;
@@ -167,7 +166,7 @@ public class MobileMemberController
             }
 
             // 上传文件路径
-            String filePath = RuoYiConfig.getUploadPath();
+            String filePath = SopConfig.getUploadPath();
             // 上传并返回新文件名称
             String fileName = FileUploadUtils.upload(filePath, file);
             String url = serverConfig.getUrl() + fileName;

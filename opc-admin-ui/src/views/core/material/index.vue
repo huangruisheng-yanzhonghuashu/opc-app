@@ -2,6 +2,10 @@
    <div class="app-container">
       <div class="material-tab">
          <el-radio-group v-model="activeTab" @change="handleTabChange" class="tab-group">
+            <el-radio-button value="0">
+               <el-icon><Sunrise /></el-icon>
+               晨报
+            </el-radio-button>
             <el-radio-button value="1">
                <el-icon><User /></el-icon>
                普通素材
@@ -375,7 +379,7 @@
 <script setup name="Material">
 import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop } from "@/api/core/material"
 import { getAllActiveTags } from "@/api/core/tag"
-import { User, Star, Medal } from '@element-plus/icons-vue'
+import { User, Star, Medal, Sunrise } from '@element-plus/icons-vue'
 import Editor from "@/components/Editor/index.vue"
 import FileUpload from "@/components/FileUpload/index.vue"
 
@@ -391,7 +395,7 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
-const activeTab = ref("1")
+const activeTab = ref("0")
 const detailData = ref({})
 const tagOptions = ref([])
 
@@ -497,12 +501,15 @@ function handleSelectionChange(selection) {
 
 function handleTabChange(tabName) {
   queryParams.value.pageNum = 1
+  queryParams.value.packageType = parseInt(tabName)
   getList()
 }
 
 function handleAdd() {
   reset()
-  if (activeTab.value === '1') {
+  if (activeTab.value === '0') {
+    form.value.packageType = 0
+  } else if (activeTab.value === '1') {
     form.value.packageType = 1
   } else if (activeTab.value === '2') {
     form.value.packageType = 2
@@ -591,6 +598,7 @@ function submitForm() {
 }
 
 getTagOptions()
+queryParams.value.packageType = 0
 getList()
 </script>
 

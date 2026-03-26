@@ -74,7 +74,7 @@ import com.opc.common.annotation.Excel;
 import com.opc.common.annotation.Excel.ColumnType;
 import com.opc.common.annotation.Excel.Type;
 import com.opc.common.annotation.Excels;
-import com.opc.common.config.RuoYiConfig;
+import com.opc.common.config.SopConfig;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.core.text.Convert;
 import com.opc.common.exception.UtilException;
@@ -1510,7 +1510,7 @@ public class ExcelUtil<T>
      */
     public String getAbsoluteFile(String filename)
     {
-        String downloadPath = RuoYiConfig.getDownloadPath() + filename;
+        String downloadPath = SopConfig.getDownloadPath() + filename;
         File desc = new File(downloadPath);
         if (!desc.getParentFile().exists())
         {
