@@ -222,6 +222,9 @@
                   </el-form-item>
                </el-col>
             </el-row>
+            <el-form-item label="视频URL" prop="videoUrl" v-if="form.contentType === 'video'">
+               <el-input v-model="form.videoUrl" placeholder="请输入视频URL" />
+            </el-form-item>
             <el-form-item label="标签" prop="tagIds">
                <el-select
                   v-model="form.tagIds"
@@ -282,8 +285,11 @@
             <el-form-item label="封面图" prop="coverImage">
                <image-upload v-model="form.coverImage" :limit="1" />
             </el-form-item>
-            <el-form-item label="正文" prop="content">
+            <el-form-item label="正文" prop="content" v-if="form.contentType !== 'video'">
                <Editor v-model="form.content" :min-height="300" />
+            </el-form-item>
+            <el-form-item label="视频上传" prop="videoUrl" v-if="form.contentType === 'video'">
+               <file-upload v-model="form.videoUrl" :limit="1" :file-type="['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv']" />
             </el-form-item>
             <el-form-item label="总结" prop="summary">
                <el-input v-model="form.summary" type="textarea" placeholder="请输入总结" :rows="2" />
@@ -346,6 +352,10 @@
                <a v-if="detailData.originalUrl" :href="detailData.originalUrl" target="_blank">{{ detailData.originalUrl }}</a>
                <span v-else>-</span>
             </el-descriptions-item>
+            <el-descriptions-item label="视频URL" :span="2" v-if="detailData.contentType === 'video'">
+               <a v-if="detailData.videoUrl" :href="detailData.videoUrl" target="_blank">{{ detailData.videoUrl }}</a>
+               <span v-else>-</span>
+            </el-descriptions-item>
             <el-descriptions-item label="封面图" :span="2">
                <el-image v-if="detailData.coverImage" :src="detailData.coverImage" style="max-width: 200px; max-height: 200px;" fit="cover" />
                <span v-else>-</span>
@@ -373,6 +383,7 @@ import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, ch
 import { getAllActiveTags } from "@/api/core/tag"
 import { User, Star, Medal } from '@element-plus/icons-vue'
 import Editor from "@/components/Editor/index.vue"
+import FileUpload from "@/components/FileUpload/index.vue"
 
 const { proxy } = getCurrentInstance()
 
@@ -464,6 +475,7 @@ function reset() {
     isTop: '0',
     source: 'manual',
     coverImage: undefined,
+    videoUrl: undefined,
     tagIds: [],
     remark: undefined
   }

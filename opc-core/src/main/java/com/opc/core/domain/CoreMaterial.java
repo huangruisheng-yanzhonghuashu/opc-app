@@ -69,6 +69,9 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "封面图")
     private String coverImage;
 
+    @Excel(name = "视频URL")
+    private String videoUrl;
+
     private List<Long> tagIds;
 
     private List<CoreTag> tags;
@@ -263,6 +266,16 @@ public class CoreMaterial extends BaseEntity
         this.coverImage = coverImage;
     }
 
+    public String getVideoUrl()
+    {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl)
+    {
+        this.videoUrl = videoUrl;
+    }
+
     public List<Long> getTagIds()
     {
         return tagIds;
@@ -305,6 +318,7 @@ public class CoreMaterial extends BaseEntity
             .append("isTop", getIsTop())
             .append("source", getSource())
             .append("coverImage", getCoverImage())
+            .append("videoUrl", getVideoUrl())
             .append("tagIds", getTagIds())
             .append("tags", getTags())
             .append("createBy", getCreateBy())

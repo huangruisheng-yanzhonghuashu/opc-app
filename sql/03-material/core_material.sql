@@ -22,6 +22,7 @@ CREATE TABLE core_material (
     is_top              CHAR(1)         DEFAULT '0'                COMMENT '是否置顶（0否 1是）',
     source              VARCHAR(50)     DEFAULT NULL               COMMENT '来源（crawler爬取/manual手动）',
     cover_image         VARCHAR(500)    DEFAULT NULL               COMMENT '封面图URL',
+    video_url           VARCHAR(1000)   DEFAULT NULL               COMMENT '视频URL',
     create_by           VARCHAR(64)     DEFAULT ''                 COMMENT '创建者',
     create_time         DATETIME                                    COMMENT '创建时间',
     update_by           VARCHAR(64)     DEFAULT ''                 COMMENT '更新者',
