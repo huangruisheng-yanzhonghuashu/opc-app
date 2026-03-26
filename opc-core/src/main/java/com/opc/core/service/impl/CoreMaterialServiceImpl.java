@@ -1,5 +1,6 @@
 package com.opc.core.service.impl;
 
+import java.time.Instant;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,11 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     @Transactional
     public int insertMaterial(CoreMaterial material)
     {
+        // 上线时间默认为创建时间（当前时间）
+        if (material.getOnlineTime() == null)
+        {
+            material.setOnlineTime(Instant.now());
+        }
         int result = materialMapper.insertMaterial(material);
         if (result > 0 && material.getTagIds() != null && !material.getTagIds().isEmpty())
         {
@@ -94,6 +100,15 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         CoreMaterial material = new CoreMaterial();
         material.setId(id);
         material.setStatus(status);
+        // 上线时记录上线时间，下线时记录下线时间
+        if ("0".equals(status))
+        {
+            material.setOnlineTime(Instant.now());
+        }
+        else if ("1".equals(status))
+        {
+            material.setOfflineTime(Instant.now());
+        }
         return materialMapper.changeStatus(material);
     }
 
@@ -103,6 +118,15 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         CoreMaterial material = new CoreMaterial();
         material.setId(id);
         material.setIsTop(isTop);
+        // 置顶时记录置顶时间，取消置顶时记录取消置顶时间
+        if ("1".equals(isTop))
+        {
+            material.setTopTime(Instant.now());
+        }
+        else if ("0".equals(isTop))
+        {
+            material.setUntopTime(Instant.now());
+        }
         return materialMapper.changeTop(material);
     }
 

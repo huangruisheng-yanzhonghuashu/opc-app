@@ -72,6 +72,18 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "视频URL")
     private String videoUrl;
 
+    @Excel(name = "上线时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private java.time.Instant onlineTime;
+
+    @Excel(name = "下线时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private java.time.Instant offlineTime;
+
+    @Excel(name = "置顶时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private java.time.Instant topTime;
+
+    @Excel(name = "取消置顶时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private java.time.Instant untopTime;
+
     private List<Long> tagIds;
 
     private List<CoreTag> tags;
@@ -276,6 +288,46 @@ public class CoreMaterial extends BaseEntity
         this.videoUrl = videoUrl;
     }
 
+    public java.time.Instant getOnlineTime()
+    {
+        return onlineTime;
+    }
+
+    public void setOnlineTime(java.time.Instant onlineTime)
+    {
+        this.onlineTime = onlineTime;
+    }
+
+    public java.time.Instant getOfflineTime()
+    {
+        return offlineTime;
+    }
+
+    public void setOfflineTime(java.time.Instant offlineTime)
+    {
+        this.offlineTime = offlineTime;
+    }
+
+    public java.time.Instant getTopTime()
+    {
+        return topTime;
+    }
+
+    public void setTopTime(java.time.Instant topTime)
+    {
+        this.topTime = topTime;
+    }
+
+    public java.time.Instant getUntopTime()
+    {
+        return untopTime;
+    }
+
+    public void setUntopTime(java.time.Instant untopTime)
+    {
+        this.untopTime = untopTime;
+    }
+
     public List<Long> getTagIds()
     {
         return tagIds;
@@ -319,6 +371,10 @@ public class CoreMaterial extends BaseEntity
             .append("source", getSource())
             .append("coverImage", getCoverImage())
             .append("videoUrl", getVideoUrl())
+            .append("onlineTime", getOnlineTime())
+            .append("offlineTime", getOfflineTime())
+            .append("topTime", getTopTime())
+            .append("untopTime", getUntopTime())
             .append("tagIds", getTagIds())
             .append("tags", getTags())
             .append("createBy", getCreateBy())

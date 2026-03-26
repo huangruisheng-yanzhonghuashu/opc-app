@@ -6,7 +6,7 @@
 insert into sys_menu values('30000', '公共配置', '5', '2', 'publicConfig', '', '', '', 1, 0, 'M', '0', '0', '', 'cog', 'admin', sysdate(), '', null, '公共配置目录');
 
 -- 菜单：banner配置（上级：公共配置）
-insert into sys_menu values('30001', 'banner配置', '30000', '1', 'banner', 'core/banner/index', '', '', 1, 0, 'C', '0', '0', 'core:banner:list', 'image', 'admin', sysdate(), '', null, '资讯页banner配置菜单');
+insert into sys_menu values('30001', 'Banner配置', '30000', '1', 'banner', 'core/banner/index', '', '', 1, 0, 'C', '0', '0', 'core:banner:list', 'image', 'admin', sysdate(), '', null, '资讯页banner配置菜单');
 
 -- 菜单：采集信息源（上级：公共配置）
 insert into sys_menu values('30002', '采集信息源', '30000', '2', 'collectSource', 'core/collectSource/index', '', '', 1, 0, 'C', '0', '0', 'core:collect:list', 'source', 'admin', sysdate(), '', null, '采集信息源配置菜单');

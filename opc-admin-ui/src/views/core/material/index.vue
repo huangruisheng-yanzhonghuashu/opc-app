@@ -130,11 +130,31 @@
                <span>{{ scope.row.source === 'crawler' ? '爬取' : '手动' }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="回复数" align="center" prop="replyCount" width="80" />
-         <el-table-column label="点赞数" align="center" prop="likeCount" width="80" />
-         <el-table-column label="查看数" align="center" prop="viewCount" width="80" />
-         <el-table-column label="转发数" align="center" prop="shareCount" width="80" />
-         <el-table-column label="评论数" align="center" prop="commentCount" width="80" />
+         <el-table-column label="回复数" align="center" prop="replyCount" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.replyCount || 0 }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="点赞数" align="center" prop="likeCount" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.likeCount || 0 }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="查看数" align="center" prop="viewCount" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.viewCount || 0 }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="转发数" align="center" prop="shareCount" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.shareCount || 0 }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="评论数" align="center" prop="commentCount" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.commentCount || 0 }}</span>
+            </template>
+         </el-table-column>
          <el-table-column label="发布时间" align="center" prop="publishTime" width="160">
             <template #default="scope">
                <span>{{ parseTime(scope.row.publishTime) }}</span>
@@ -152,6 +172,26 @@
                <el-tag :type="scope.row.isTop === '1' ? 'warning' : 'info'">
                   {{ scope.row.isTop === '1' ? '是' : '否' }}
                </el-tag>
+            </template>
+         </el-table-column>
+         <el-table-column label="上线时间" align="center" prop="onlineTime" width="160">
+            <template #default="scope">
+               <span>{{ parseTime(scope.row.onlineTime) || '-' }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="下线时间" align="center" prop="offlineTime" width="160">
+            <template #default="scope">
+               <span>{{ parseTime(scope.row.offlineTime) || '-' }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="置顶时间" align="center" prop="topTime" width="160">
+            <template #default="scope">
+               <span>{{ parseTime(scope.row.topTime) || '-' }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="取消置顶时间" align="center" prop="untopTime" width="160">
+            <template #default="scope">
+               <span>{{ parseTime(scope.row.untopTime) || '-' }}</span>
             </template>
          </el-table-column>
          <el-table-column label="操作" width="280" align="center" class-name="small-padding fixed-width">
