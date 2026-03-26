@@ -33,4 +33,12 @@ public interface CoreMaterialMapper
      * @return 素材列表
      */
     public List<CoreMaterial> selectMaterialListByTagId(@Param("tagId") Long tagId, @Param("status") String status, @Param("maxPackageType") Integer maxPackageType);
+
+    /**
+     * 原子增加查看数
+     *
+     * @param id 素材ID
+     * @return 影响行数
+     */
+    int incrementViewCount(@Param("id") Long id);
 }

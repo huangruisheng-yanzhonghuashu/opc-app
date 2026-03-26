@@ -12,6 +12,7 @@ CREATE TABLE core_material (
     original_id        VARCHAR(100)    DEFAULT NULL               COMMENT '原ID',
     reply_count        BIGINT(20)     DEFAULT 0                  COMMENT '回复数',
     like_count         BIGINT(20)     DEFAULT 0                  COMMENT '点赞数',
+    dislike_count      BIGINT(20)     DEFAULT 0                  COMMENT '不喜欢数',
     view_count         BIGINT(20)     DEFAULT 0                  COMMENT '查看数',
     share_count        BIGINT(20)     DEFAULT 0                  COMMENT '转发数',
     comment_count      BIGINT(20)     DEFAULT 0                  COMMENT '评论数',

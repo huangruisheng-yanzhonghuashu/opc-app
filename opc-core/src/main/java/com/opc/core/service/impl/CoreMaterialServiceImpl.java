@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreMaterialUserAction;
 import com.opc.core.domain.CoreTag;
 import com.opc.core.mapper.CoreMaterialMapper;
 import com.opc.core.mapper.CoreMaterialTagMapper;
+import com.opc.core.mapper.CoreMaterialUserActionMapper;
 import com.opc.core.service.ICoreMaterialService;
 
 @Service
@@ -19,6 +21,9 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
 
     @Autowired
     private CoreMaterialTagMapper materialTagMapper;
+
+    @Autowired
+    private CoreMaterialUserActionMapper userActionMapper;
 
     @Override
     public List<CoreMaterial> selectMaterialList(CoreMaterial material)
@@ -134,5 +139,119 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status, Integer maxPackageType)
     {
         return materialMapper.selectMaterialListByTagId(tagId, status, maxPackageType);
+    }
+
+    @Override
+    public int incrementViewCount(Long id)
+    {
+        return materialMapper.incrementViewCount(id);
+    }
+
+    @Override
+    @Transactional
+    public boolean likeMaterial(Long materialId, Long userId, boolean isLike)
+    {
+        CoreMaterial material = materialMapper.selectMaterialById(materialId);
+        if (material == null)
+        {
+            return false;
+        }
+
+        int hasLiked = userActionMapper.checkUserAction(materialId, userId, "like");
+
+        if (isLike && hasLiked == 0)
+        {
+            // 先删除可能的不喜欢记录
+            int hasDisliked = userActionMapper.checkUserAction(materialId, userId, "dislike");
+            if (hasDisliked > 0)
+            {
+                userActionMapper.deleteUserAction(materialId, userId, "dislike");
+                material.setDislikeCount(Math.max(0, (material.getDislikeCount() == null ? 0 : material.getDislikeCount()) - 1));
+            }
+
+            // 添加点赞记录
+            CoreMaterialUserAction action = new CoreMaterialUserAction();
+            action.setMaterialId(materialId);
+            action.setUserId(userId);
+            action.setActionType("like");
+            userActionMapper.insertUserAction(action);
+
+            // 增加点赞数
+            material.setLikeCount((material.getLikeCount() == null ? 0 : material.getLikeCount()) + 1);
+            materialMapper.updateMaterial(material);
+            return true;
+        }
+        else if (!isLike && hasLiked > 0)
+        {
+            // 取消点赞
+            userActionMapper.deleteUserAction(materialId, userId, "like");
+
+            // 减少点赞数
+            material.setLikeCount(Math.max(0, (material.getLikeCount() == null ? 0 : material.getLikeCount()) - 1));
+            materialMapper.updateMaterial(material);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public boolean dislikeMaterial(Long materialId, Long userId, boolean isDislike)
+    {
+        CoreMaterial material = materialMapper.selectMaterialById(materialId);
+        if (material == null)
+        {
+            return false;
+        }
+
+        int hasDisliked = userActionMapper.checkUserAction(materialId, userId, "dislike");
+
+        if (isDislike && hasDisliked == 0)
+        {
+            // 先删除可能的点赞记录
+            int hasLiked = userActionMapper.checkUserAction(materialId, userId, "like");
+            if (hasLiked > 0)
+            {
+                userActionMapper.deleteUserAction(materialId, userId, "like");
+                material.setLikeCount(Math.max(0, (material.getLikeCount() == null ? 0 : material.getLikeCount()) - 1));
+            }
+
+            // 添加不喜欢记录
+            CoreMaterialUserAction action = new CoreMaterialUserAction();
+            action.setMaterialId(materialId);
+            action.setUserId(userId);
+            action.setActionType("dislike");
+            userActionMapper.insertUserAction(action);
+
+            // 增加不喜欢数
+            material.setDislikeCount((material.getDislikeCount() == null ? 0 : material.getDislikeCount()) + 1);
+            materialMapper.updateMaterial(material);
+            return true;
+        }
+        else if (!isDislike && hasDisliked > 0)
+        {
+            // 取消不喜欢
+            userActionMapper.deleteUserAction(materialId, userId, "dislike");
+
+            // 减少不喜欢数
+            material.setDislikeCount(Math.max(0, (material.getDislikeCount() == null ? 0 : material.getDislikeCount()) - 1));
+            materialMapper.updateMaterial(material);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public String getUserActionStatus(Long materialId, Long userId)
+    {
+        if (userActionMapper.checkUserAction(materialId, userId, "like") > 0)
+        {
+            return "like";
+        }
+        if (userActionMapper.checkUserAction(materialId, userId, "dislike") > 0)
+        {
+            return "dislike";
+        }
+        return "none";
     }
 }

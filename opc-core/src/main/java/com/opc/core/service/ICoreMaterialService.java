@@ -30,4 +30,41 @@ public interface ICoreMaterialService
      * @return 素材列表
      */
     public List<CoreMaterial> selectMaterialListByTagId(Long tagId, String status, Integer maxPackageType);
+
+    /**
+     * 原子增加查看数
+     *
+     * @param id 素材ID
+     * @return 影响行数
+     */
+    int incrementViewCount(Long id);
+
+    /**
+     * 点赞/取消点赞
+     *
+     * @param materialId 素材ID
+     * @param userId 用户ID
+     * @param isLike true-点赞, false-取消点赞
+     * @return 是否操作成功
+     */
+    boolean likeMaterial(Long materialId, Long userId, boolean isLike);
+
+    /**
+     * 不喜欢/取消不喜欢
+     *
+     * @param materialId 素材ID
+     * @param userId 用户ID
+     * @param isDislike true-不喜欢, false-取消不喜欢
+     * @return 是否操作成功
+     */
+    boolean dislikeMaterial(Long materialId, Long userId, boolean isDislike);
+
+    /**
+     * 获取用户对素材的行为状态
+     *
+     * @param materialId 素材ID
+     * @param userId 用户ID
+     * @return actionType: like/dislike/none
+     */
+    String getUserActionStatus(Long materialId, Long userId);
 }

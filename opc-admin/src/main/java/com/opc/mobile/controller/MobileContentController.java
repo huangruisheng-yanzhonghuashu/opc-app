@@ -1,5 +1,8 @@
 package com.opc.mobile.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.opc.common.annotation.MemberLogin;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
@@ -9,6 +12,7 @@ import com.opc.core.domain.vo.MemberLoginVO;
 import com.opc.core.service.ICoreMaterialService;
 import com.opc.core.service.ICoreMemberService;
 import com.opc.core.service.MemberTokenService;
+import com.opc.mobile.dto.MaterialActionDTO;
 import com.opc.mobile.dto.MaterialIdDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,7 +49,7 @@ public class MobileContentController extends BaseController
      * @param request HTTP请求
      * @return 素材详情
      */
-    @Operation(summary = "获取内容详情", description = "根据内容ID获取详情，需要校验会员套餐权限")
+    @Operation(summary = "获取内容详情", description = "根据内容ID获取详情，需要校验会员套餐权限，同时增加查看数")
     @MemberLogin
     @PostMapping("/material/detail")
     public AjaxResult getMaterialDetail(@RequestBody MaterialIdDTO dto, HttpServletRequest request)
@@ -80,6 +84,50 @@ public class MobileContentController extends BaseController
             return AjaxResult.error("当前套餐无权限查看该内容");
         }
 
-        return AjaxResult.success(material);
+        // 增加查看数
+        materialService.incrementViewCount(id);
+
+        // 获取用户对该素材的行为状态
+        String userAction = materialService.getUserActionStatus(id, loginUser.getMemberId());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("material", material);
+        result.put("userAction", userAction);
+
+        return AjaxResult.success(result);
+    }
+
+    /**
+     * 点赞/取消点赞
+     *
+     * @param dto 素材ID和操作类型
+     * @param request HTTP请求
+     * @return 操作结果
+     */
+    @Operation(summary = "喜欢/取消喜欢", description = "对素材进行喜欢或取消喜欢操作")
+    @MemberLogin
+    @PostMapping("/material/like")
+    public AjaxResult likeMaterial(@RequestBody MaterialActionDTO dto, HttpServletRequest request)
+    {
+        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
+        boolean success = materialService.likeMaterial(dto.getMaterialId(), loginUser.getMemberId(), dto.getIsAction());
+        return success ? AjaxResult.success() : AjaxResult.error("操作失败");
+    }
+
+    /**
+     * 不喜欢/取消不喜欢
+     *
+     * @param dto 素材ID和操作类型
+     * @param request HTTP请求
+     * @return 操作结果
+     */
+    @Operation(summary = "不喜欢/取消不喜欢", description = "对素材进行不喜欢或取消不喜欢操作")
+    @MemberLogin
+    @PostMapping("/material/dislike")
+    public AjaxResult dislikeMaterial(@RequestBody MaterialActionDTO dto, HttpServletRequest request)
+    {
+        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
+        boolean success = materialService.dislikeMaterial(dto.getMaterialId(), loginUser.getMemberId(), dto.getIsAction());
+        return success ? AjaxResult.success() : AjaxResult.error("操作失败");
     }
 }

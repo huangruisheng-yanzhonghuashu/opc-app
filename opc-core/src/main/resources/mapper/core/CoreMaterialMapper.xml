@@ -14,6 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="originalId"        column="original_id"         />
 		<result property="replyCount"        column="reply_count"         />
 		<result property="likeCount"         column="like_count"          />
+		<result property="dislikeCount"      column="dislike_count"       />
 		<result property="viewCount"         column="view_count"          />
 		<result property="shareCount"         column="share_count"         />
 		<result property="commentCount"       column="comment_count"       />
@@ -45,7 +46,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<sql id="selectMaterialVo">
         select m.id, m.title, m.author, m.summary, m.content, m.original_url, m.original_id, m.reply_count,
-               m.like_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
+               m.like_count, m.dislike_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
                m.content_type, m.package_type, m.status, m.is_top, m.source, m.cover_image, m.video_url,
                m.online_time, m.offline_time, m.top_time, m.untop_time,
                m.create_by, m.create_time, m.update_by, m.update_time, m.remark
@@ -118,8 +119,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="originalUrl != null">original_url = #{originalUrl},</if>
  			<if test="originalId != null">original_id = #{originalId},</if>
  			<if test="replyCount != null">reply_count = #{replyCount},</if>
- 			<if test="likeCount != null">like_count = #{likeCount},</if>
- 			<if test="viewCount != null">view_count = #{viewCount},</if>
+		<if test="likeCount != null">like_count = #{likeCount},</if>
+			<if test="dislikeCount != null">dislike_count = #{dislikeCount},</if>
+			<if test="viewCount != null">view_count = #{viewCount},</if>
  			<if test="shareCount != null">share_count = #{shareCount},</if>
  			<if test="commentCount != null">comment_count = #{commentCount},</if>
 			<if test="publishTime != null"> publish_time = #{publishTime},</if>
@@ -151,8 +153,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="originalUrl != null">original_url,</if>
  			<if test="originalId != null">original_id,</if>
  			<if test="replyCount != null">reply_count,</if>
- 			<if test="likeCount != null">like_count,</if>
- 			<if test="viewCount != null">view_count,</if>
+		<if test="likeCount != null">like_count,</if>
+			<if test="dislikeCount != null">dislike_count,</if>
+			<if test="viewCount != null">view_count,</if>
  			<if test="shareCount != null">share_count,</if>
  			<if test="commentCount != null">comment_count,</if>
 			<if test="publishTime != null">publish_time,</if>
@@ -179,8 +182,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="originalUrl != null">#{originalUrl},</if>
  			<if test="originalId != null">#{originalId},</if>
  			<if test="replyCount != null">#{replyCount},</if>
- 			<if test="likeCount != null">#{likeCount},</if>
- 			<if test="viewCount != null">#{viewCount},</if>
+		<if test="likeCount != null">#{likeCount},</if>
+			<if test="dislikeCount != null">#{dislikeCount},</if>
+			<if test="viewCount != null">#{viewCount},</if>
  			<if test="shareCount != null">#{shareCount},</if>
  			<if test="commentCount != null">#{commentCount},</if>
 			<if test="publishTime != null">#{publishTime},</if>
@@ -237,7 +241,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="selectMaterialListByTagId" resultMap="CoreMaterialResult">
 		select m.id, m.title, m.author, m.summary, m.content, m.original_url, m.original_id, m.reply_count,
-		       m.like_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
+		       m.like_count, m.dislike_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
 		       m.content_type, m.package_type, m.status, m.is_top, m.source, m.cover_image, m.video_url,
 		       m.online_time, m.offline_time, m.top_time, m.untop_time,
 		       m.create_by, m.create_time, m.update_by, m.update_time, m.remark
@@ -252,5 +256,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</if>
 		order by m.is_top desc, m.publish_time desc
 	</select>
+
+	<!-- 原子增加查看数 -->
+	<update id="incrementViewCount">
+		UPDATE core_material
+		SET view_count = IFNULL(view_count, 0) + 1
+		WHERE id = #{id}
+	</update>
 
 </mapper>

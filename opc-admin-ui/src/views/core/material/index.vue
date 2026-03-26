@@ -144,6 +144,21 @@
                </el-tag>
             </template>
          </el-table-column>
+         <el-table-column label="查看数" align="center" prop="viewCount" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.viewCount || 0 }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="点赞数" align="center" prop="likeCount" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.likeCount || 0 }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="不喜欢数" align="center" prop="dislikeCount" width="90">
+            <template #default="scope">
+               <span>{{ scope.row.dislikeCount || 0 }}</span>
+            </template>
+         </el-table-column>
          <el-table-column label="上线时间" align="center" prop="onlineTime" width="160">
             <template #default="scope">
                <span>{{ parseTime(scope.row.onlineTime) || '-' }}</span>
@@ -361,8 +376,9 @@
             <el-descriptions-item label="回复数" :span="1">{{ detailData.replyCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="点赞数" :span="1">{{ detailData.likeCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="查看数" :span="1">{{ detailData.viewCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="不喜欢数" :span="1">{{ detailData.dislikeCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="转发数" :span="1">{{ detailData.shareCount || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="评论数" :span="2">{{ detailData.commentCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="评论数" :span="1">{{ detailData.commentCount || 0 }}</el-descriptions-item>
          </el-descriptions>
          <template #footer>
             <div class="dialog-footer">
@@ -461,6 +477,7 @@ function reset() {
     originalId: undefined,
     replyCount: 0,
     likeCount: 0,
+    dislikeCount: 0,
     viewCount: 0,
     shareCount: 0,
     commentCount: 0,

@@ -39,6 +39,9 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "点赞数", cellType = ColumnType.NUMERIC)
     private Long likeCount;
 
+    @Excel(name = "不喜欢数", cellType = ColumnType.NUMERIC)
+    private Long dislikeCount;
+
     @Excel(name = "查看数", cellType = ColumnType.NUMERIC)
     private Long viewCount;
 
@@ -176,6 +179,16 @@ public class CoreMaterial extends BaseEntity
     public void setLikeCount(Long likeCount)
     {
         this.likeCount = likeCount;
+    }
+
+    public Long getDislikeCount()
+    {
+        return dislikeCount;
+    }
+
+    public void setDislikeCount(Long dislikeCount)
+    {
+        this.dislikeCount = dislikeCount;
     }
 
     public Long getViewCount()
@@ -360,6 +373,7 @@ public class CoreMaterial extends BaseEntity
             .append("originalId", getOriginalId())
             .append("replyCount", getReplyCount())
             .append("likeCount", getLikeCount())
+            .append("dislikeCount", getDislikeCount())
             .append("viewCount", getViewCount())
             .append("shareCount", getShareCount())
             .append("commentCount", getCommentCount())
