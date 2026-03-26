@@ -130,36 +130,6 @@
                <span>{{ scope.row.source === 'crawler' ? '爬取' : '手动' }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="回复数" align="center" prop="replyCount" width="80">
-            <template #default="scope">
-               <span>{{ scope.row.replyCount || 0 }}</span>
-            </template>
-         </el-table-column>
-         <el-table-column label="点赞数" align="center" prop="likeCount" width="80">
-            <template #default="scope">
-               <span>{{ scope.row.likeCount || 0 }}</span>
-            </template>
-         </el-table-column>
-         <el-table-column label="查看数" align="center" prop="viewCount" width="80">
-            <template #default="scope">
-               <span>{{ scope.row.viewCount || 0 }}</span>
-            </template>
-         </el-table-column>
-         <el-table-column label="转发数" align="center" prop="shareCount" width="80">
-            <template #default="scope">
-               <span>{{ scope.row.shareCount || 0 }}</span>
-            </template>
-         </el-table-column>
-         <el-table-column label="评论数" align="center" prop="commentCount" width="80">
-            <template #default="scope">
-               <span>{{ scope.row.commentCount || 0 }}</span>
-            </template>
-         </el-table-column>
-         <el-table-column label="发布时间" align="center" prop="publishTime" width="160">
-            <template #default="scope">
-               <span>{{ parseTime(scope.row.publishTime) }}</span>
-            </template>
-         </el-table-column>
          <el-table-column label="状态" align="center" prop="status" width="80">
             <template #default="scope">
                <el-tag :type="scope.row.status === '0' ? 'success' : 'danger'">
@@ -260,18 +230,6 @@
             </el-row>
             <el-row>
                <el-col :span="12">
-                  <el-form-item label="发布时间" prop="publishTime">
-                     <el-date-picker
-                        v-model="form.publishTime"
-                        type="datetime"
-                        placeholder="选择发布时间"
-                        style="width: 100%"
-                     />
-                  </el-form-item>
-               </el-col>
-            </el-row>
-            <el-row>
-               <el-col :span="12">
                   <el-form-item label="内容类型" prop="contentType">
                      <el-select v-model="form.contentType" placeholder="请选择内容类型" style="width: 100%">
                         <el-option label="纯文本" value="text" />
@@ -359,7 +317,6 @@
                   {{ detailData.status === '0' ? '上线' : '下线' }}
                </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="发布时间" :span="1">{{ parseTime(detailData.publishTime) || '-' }}</el-descriptions-item>
             <el-descriptions-item label="置顶" :span="1">
                <el-tag :type="detailData.isTop === '1' ? 'warning' : 'info'">
                   {{ detailData.isTop === '1' ? '是' : '否' }}
@@ -507,7 +464,6 @@ function reset() {
     viewCount: 0,
     shareCount: 0,
     commentCount: 0,
-    publishTime: undefined,
     contentType: 'text',
     packageType: 1,
     status: '0',
