@@ -202,7 +202,7 @@ function getImageUrl(url) {
 function getList() {
   loading.value = true
   listPackage(queryParams.value).then(response => {
-    packageList.value = response.rows
+    packageList.value = response.data
     total.value = response.total
     loading.value = false
   })

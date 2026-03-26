@@ -182,7 +182,7 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listPost(queryParams.value).then(response => {
-    postList.value = response.rows
+    postList.value = response.data
     total.value = response.total
     loading.value = false
   })

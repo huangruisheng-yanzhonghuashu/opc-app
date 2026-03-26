@@ -189,7 +189,7 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listSearchHotword(queryParams.value).then(response => {
-    searchHotwordList.value = response.rows
+    searchHotwordList.value = response.data
     total.value = response.total
     loading.value = false
   })

@@ -432,7 +432,7 @@ function getContentTypeLabel(contentType) {
 function getList() {
   loading.value = true
   listMaterial(queryParams.value).then(response => {
-    materialList.value = response.rows
+    materialList.value = response.data
     total.value = response.total
     loading.value = false
   })

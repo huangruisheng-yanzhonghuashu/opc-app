@@ -289,7 +289,7 @@ const { queryParams, form, replyForm, rules, replyRules } = toRefs(data)
 function getList() {
   loading.value = true
   listFeedback(queryParams.value).then(response => {
-    feedbackList.value = response.rows
+    feedbackList.value = response.data
     total.value = response.total
     loading.value = false
   })

@@ -255,7 +255,7 @@ function handlePackageChange(packageId) {
 function getList() {
    loading.value = true
    listPackageOrder(queryParams.value).then(response => {
-      orderList.value = response.rows
+      orderList.value = response.data
       total.value = response.total
       loading.value = false
    })

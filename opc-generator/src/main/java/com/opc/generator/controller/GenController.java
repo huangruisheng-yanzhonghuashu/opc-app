@@ -102,7 +102,7 @@ public class GenController extends BaseController
     {
         TableDataInfo dataInfo = new TableDataInfo();
         List<GenTableColumn> list = genTableColumnService.selectGenTableColumnListByTableId(tableId);
-        dataInfo.setRows(list);
+        dataInfo.setData(list);
         dataInfo.setTotal(list.size());
         return dataInfo;
     }

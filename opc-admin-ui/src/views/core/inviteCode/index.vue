@@ -325,7 +325,7 @@ function getList() {
   delete params.useTimeRange
   
   listInviteCode(params).then(response => {
-    inviteCodeList.value = response.rows
+    inviteCodeList.value = response.data
     total.value = response.total
     loading.value = false
   })

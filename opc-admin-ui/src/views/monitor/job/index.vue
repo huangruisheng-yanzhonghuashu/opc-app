@@ -327,7 +327,7 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listJob(queryParams.value).then(response => {
-    jobList.value = response.rows
+    jobList.value = response.data
     total.value = response.total
     loading.value = false
   })

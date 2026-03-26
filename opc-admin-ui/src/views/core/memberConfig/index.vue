@@ -180,7 +180,7 @@ function getImageUrl(url) {
 function getList() {
   loading.value = true
   listMemberConfig(queryParams.value).then(response => {
-    configList.value = response.rows
+    configList.value = response.data
     total.value = response.total
     loading.value = false
   })

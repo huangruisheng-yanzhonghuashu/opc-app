@@ -386,7 +386,7 @@ function getAvatarUrl(avatar) {
 function getList() {
   loading.value = true
   listMember(queryParams.value).then(response => {
-    memberList.value = response.rows
+    memberList.value = response.data
     total.value = response.total
     loading.value = false
   })

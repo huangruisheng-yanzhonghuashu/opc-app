@@ -326,7 +326,7 @@ function getImageUrl(image) {
 function getList() {
   loading.value = true
   listCommunity(queryParams.value).then(response => {
-    communityList.value = response.rows
+    communityList.value = response.data
     total.value = response.total
     loading.value = false
   })

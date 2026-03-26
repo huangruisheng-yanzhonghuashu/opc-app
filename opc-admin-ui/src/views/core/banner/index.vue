@@ -256,7 +256,7 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listBanner(queryParams.value).then(response => {
-    bannerList.value = response.rows
+    bannerList.value = response.data
     total.value = response.total
     loading.value = false
   })

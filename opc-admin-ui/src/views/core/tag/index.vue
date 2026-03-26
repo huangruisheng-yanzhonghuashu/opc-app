@@ -173,7 +173,7 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listTag(queryParams.value).then(response => {
-    tagList.value = response.rows
+    tagList.value = response.data
     total.value = response.total
     loading.value = false
   })

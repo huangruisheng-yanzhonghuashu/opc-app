@@ -237,7 +237,7 @@ const { queryParams, form, rules } = toRefs(data)
 function getList() {
   loading.value = true
   listCollectSource(queryParams.value).then(response => {
-    collectSourceList.value = response.rows
+    collectSourceList.value = response.data
     total.value = response.total
     loading.value = false
   })
