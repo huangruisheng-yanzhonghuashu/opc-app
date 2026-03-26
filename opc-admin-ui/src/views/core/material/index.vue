@@ -222,9 +222,6 @@
                   </el-form-item>
                </el-col>
             </el-row>
-            <el-form-item label="视频URL" prop="videoUrl" v-if="form.contentType === 'video'">
-               <el-input v-model="form.videoUrl" placeholder="请输入视频URL" />
-            </el-form-item>
             <el-form-item label="标签" prop="tagIds">
                <el-select
                   v-model="form.tagIds"
@@ -253,35 +250,6 @@
             <el-form-item label="原ID" prop="originalId">
                <el-input v-model="form.originalId" placeholder="请输入原ID" />
             </el-form-item>
-            <el-row>
-               <el-col :span="8">
-                  <el-form-item label="回复数" prop="replyCount">
-                     <el-input-number v-model="form.replyCount" :min="0" placeholder="请输入回复数" style="width: 100%" />
-                  </el-form-item>
-               </el-col>
-               <el-col :span="8">
-                  <el-form-item label="点赞数" prop="likeCount">
-                     <el-input-number v-model="form.likeCount" :min="0" placeholder="请输入点赞数" style="width: 100%" />
-                  </el-form-item>
-               </el-col>
-               <el-col :span="8">
-                  <el-form-item label="查看数" prop="viewCount">
-                     <el-input-number v-model="form.viewCount" :min="0" placeholder="请输入查看数" style="width: 100%" />
-                  </el-form-item>
-               </el-col>
-            </el-row>
-            <el-row>
-               <el-col :span="12">
-                  <el-form-item label="转发数" prop="shareCount">
-                     <el-input-number v-model="form.shareCount" :min="0" placeholder="请输入转发数" style="width: 100%" />
-                  </el-form-item>
-               </el-col>
-               <el-col :span="12">
-                  <el-form-item label="评论数" prop="commentCount">
-                     <el-input-number v-model="form.commentCount" :min="0" placeholder="请输入评论数" style="width: 100%" />
-                  </el-form-item>
-               </el-col>
-            </el-row>
             <el-form-item label="封面图" prop="coverImage">
                <image-upload v-model="form.coverImage" :limit="1" />
             </el-form-item>
@@ -289,7 +257,7 @@
                <Editor v-model="form.content" :min-height="300" />
             </el-form-item>
             <el-form-item label="视频上传" prop="videoUrl" v-if="form.contentType === 'video'">
-               <file-upload v-model="form.videoUrl" :limit="1" :file-type="['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv']" />
+               <file-upload v-model="form.videoUrl" :limit="1" :file-size="500" :file-type="['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv']" :is-full-url="true" />
             </el-form-item>
             <el-form-item label="总结" prop="summary">
                <el-input v-model="form.summary" type="textarea" placeholder="请输入总结" :rows="2" />
@@ -315,11 +283,6 @@
                <span>{{ detailData.source === 'crawler' ? '爬取' : '手动' }}</span>
             </el-descriptions-item>
             <el-descriptions-item label="原ID" :span="1">{{ detailData.originalId || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="回复数" :span="1">{{ detailData.replyCount || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="点赞数" :span="1">{{ detailData.likeCount || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="查看数" :span="1">{{ detailData.viewCount || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="转发数" :span="1">{{ detailData.shareCount || 0 }}</el-descriptions-item>
-            <el-descriptions-item label="评论数" :span="1">{{ detailData.commentCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="套餐分类" :span="1">{{ getPackageTypeLabel(detailData.packageType) }}</el-descriptions-item>
             <el-descriptions-item label="内容类型" :span="1">
                <span>{{ getContentTypeLabel(detailData.contentType) }}</span>
@@ -352,8 +315,11 @@
                <a v-if="detailData.originalUrl" :href="detailData.originalUrl" target="_blank">{{ detailData.originalUrl }}</a>
                <span v-else>-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="视频URL" :span="2" v-if="detailData.contentType === 'video'">
-               <a v-if="detailData.videoUrl" :href="detailData.videoUrl" target="_blank">{{ detailData.videoUrl }}</a>
+            <el-descriptions-item label="视频" :span="2" v-if="detailData.contentType === 'video'">
+               <video v-if="detailData.videoUrl" controls style="max-width: 100%; max-height: 400px;">
+                  <source :src="detailData.videoUrl" type="video/mp4">
+                  您的浏览器不支持视频播放
+               </video>
                <span v-else>-</span>
             </el-descriptions-item>
             <el-descriptions-item label="封面图" :span="2">
@@ -368,6 +334,11 @@
             <el-descriptions-item label="创建时间" :span="1">{{ parseTime(detailData.createTime) || '-' }}</el-descriptions-item>
             <el-descriptions-item label="更新时间" :span="1">{{ parseTime(detailData.updateTime) || '-' }}</el-descriptions-item>
             <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="回复数" :span="1">{{ detailData.replyCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="点赞数" :span="1">{{ detailData.likeCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="查看数" :span="1">{{ detailData.viewCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="转发数" :span="1">{{ detailData.shareCount || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="评论数" :span="2">{{ detailData.commentCount || 0 }}</el-descriptions-item>
          </el-descriptions>
          <template #footer>
             <div class="dialog-footer">

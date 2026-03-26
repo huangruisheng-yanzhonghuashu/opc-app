@@ -84,6 +84,11 @@ const props = defineProps({
   drag: {
     type: Boolean,
     default: true
+  },
+  // 是否存储完整URL（类似图片上传）
+  isFullUrl: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -107,7 +112,12 @@ watch(() => props.modelValue, val => {
     // 然后将数组转为对象数组
     fileList.value = list.map(item => {
       if (typeof item === "string") {
-        item = { name: item, url: item }
+        // 如果不是完整URL且不是外部链接，拼接baseUrl
+        if (props.isFullUrl && item.indexOf(baseUrl) === -1 && !item.startsWith('http')) {
+          item = { name: baseUrl + item, url: baseUrl + item }
+        } else {
+          item = { name: item, url: item }
+        }
       }
       item.uid = item.uid || new Date().getTime() + temp++
       return item
@@ -162,7 +172,9 @@ function handleUploadError(err) {
 // 上传成功回调
 function handleUploadSuccess(res, file) {
   if (res.code === 200) {
-    uploadList.value.push({ name: res.fileName, url: res.fileName })
+    // 如果 isFullUrl 为 true，存储完整URL，否则存储 fileName
+    const fileUrl = props.isFullUrl ? res.url : res.fileName
+    uploadList.value.push({ name: fileUrl, url: fileUrl })
     uploadedSuccessfully()
   } else {
     number.value--
@@ -206,7 +218,12 @@ function listToString(list, separator) {
   separator = separator || ","
   for (let i in list) {
     if (list[i].url) {
-      strs += list[i].url + separator
+      // 如果 isFullUrl 为 true，去掉 baseUrl 存储相对路径
+      let url = list[i].url
+      if (props.isFullUrl && url.indexOf(baseUrl) === 0) {
+        url = url.replace(baseUrl, "")
+      }
+      strs += url + separator
     }
   }
   return strs != '' ? strs.substr(0, strs.length - 1) : ''
