@@ -42,6 +42,29 @@
                <el-option label="下线" value="1" />
             </el-select>
          </el-form-item>
+         <el-form-item label="标签" prop="tagIds">
+            <el-select
+               v-model="queryParams.tagIds"
+               multiple
+               collapse-tags
+               collapse-tags-tooltip
+               placeholder="请选择标签"
+               clearable
+               style="width: 200px"
+            >
+               <el-option
+                  v-for="tag in tagOptions"
+                  :key="tag.id"
+                  :label="tag.tagName"
+                  :value="tag.id"
+               >
+                  <span class="tag-option">
+                     <span class="tag-color-dot" :style="{ backgroundColor: tag.tagColor || '#909399' }"></span>
+                     <span>{{ tag.tagName }}</span>
+                  </span>
+               </el-option>
+            </el-select>
+         </el-form-item>
          <el-form-item>
             <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -379,7 +402,8 @@ const data = reactive({
     pageSize: 10,
     title: undefined,
     author: undefined,
-    status: undefined
+    status: undefined,
+    tagIds: []
   },
   rules: {
     title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
@@ -461,6 +485,7 @@ function handleQuery() {
 function resetQuery() {
   proxy.resetForm("queryRef")
   queryParams.value.status = undefined
+  queryParams.value.tagIds = []
   handleQuery()
 }
 
@@ -565,6 +590,7 @@ function submitForm() {
   })
 }
 
+getTagOptions()
 getList()
 </script>
 

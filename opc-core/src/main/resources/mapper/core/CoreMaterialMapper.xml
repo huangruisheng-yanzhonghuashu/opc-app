@@ -30,6 +30,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="updateBy"          column="update_by"           />
 		<result property="updateTime"        column="update_time"         />
 		<result property="remark"            column="remark"              />
+		<collection property="tags" ofType="CoreTag" column="id" select="selectTagsByMaterialId"/>
+	</resultMap>
+
+	<resultMap type="CoreTag" id="CoreTagResult">
+		<id     property="id"                column="tag_id"              />
+		<result property="tagName"            column="tag_name"            />
+		<result property="tagColor"           column="tag_color"           />
 	</resultMap>
 
 	<sql id="selectMaterialVo">
@@ -64,6 +71,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="source != null and source != ''">
 				AND source = #{source}
 			</if>
+			<if test="tagIds != null and tagIds.size > 0">
+				AND exists (
+					select 1 from core_material_tag mt 
+					where mt.material_id = id 
+					and mt.tag_id in
+					<foreach item="tagId" collection="tagIds" open="(" separator="," close=")">
+						#{tagId}
+					</foreach>
+				)
+			</if>
 			<if test="params.beginCreateTime != null and params.beginCreateTime != ''">
 				AND date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginCreateTime},'%y%m%d')
 			</if>
@@ -72,6 +89,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			</if>
 		</where>
 		order by is_top desc, create_time desc
+	</select>
+
+	<select id="selectTagsByMaterialId" resultMap="CoreTagResult">
+		select t.id as tag_id, t.tag_name, t.tag_color
+		from core_tag t
+		inner join core_material_tag mt on t.id = mt.tag_id
+		where mt.material_id = #{materialId}
 	</select>
 
 	<select id="selectMaterialById" parameterType="Long" resultMap="CoreMaterialResult">
