@@ -159,7 +159,7 @@ public class MobileHomeController extends BaseController
      * @return 标签列表
      */
     @Operation(summary = "获取标签列表", description = "查询启用的标签列表，按sortOrder升序排序")
-    @GetMapping("/tag/list")
+    @PostMapping("/tag/list")
     public AjaxResult tagList()
     {
         CoreTag tag = new CoreTag();
