@@ -7,7 +7,7 @@ spring:
       # xAI API 基础地址 (不要带 /v1 后缀，Spring AI 会自动添加)
       base-url: https://api.x.ai
       # 默认模型
-      model: grok-4.20-fast
+      model: grok-4.20-non-reasoning
       # 温度参数 (0.0-1.0，越高越创意)
       temperature: 0.7
     minimax:
