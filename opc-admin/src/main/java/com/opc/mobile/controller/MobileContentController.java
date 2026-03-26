@@ -104,14 +104,15 @@ public class MobileContentController extends BaseController
      * @param request HTTP请求
      * @return 操作结果
      */
-    @Operation(summary = "喜欢/取消喜欢", description = "对素材进行喜欢或取消喜欢操作")
+    @Operation(summary = "喜欢/取消喜欢", description = "对素材进行喜欢或取消喜欢操作（幂等接口）")
     @MemberLogin
     @PostMapping("/material/like")
     public AjaxResult likeMaterial(@RequestBody MaterialActionDTO dto, HttpServletRequest request)
     {
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
         boolean success = materialService.likeMaterial(dto.getMaterialId(), loginUser.getMemberId(), dto.getIsAction());
-        return success ? AjaxResult.success() : AjaxResult.error("操作失败");
+        // 幂等接口：只有素材不存在才返回失败，其他情况都返回成功
+        return success ? AjaxResult.success() : AjaxResult.error("素材不存在");
     }
 
     /**
@@ -121,13 +122,14 @@ public class MobileContentController extends BaseController
      * @param request HTTP请求
      * @return 操作结果
      */
-    @Operation(summary = "不喜欢/取消不喜欢", description = "对素材进行不喜欢或取消不喜欢操作")
+    @Operation(summary = "不喜欢/取消不喜欢", description = "对素材进行不喜欢或取消不喜欢操作（幂等接口）")
     @MemberLogin
     @PostMapping("/material/dislike")
     public AjaxResult dislikeMaterial(@RequestBody MaterialActionDTO dto, HttpServletRequest request)
     {
         MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
         boolean success = materialService.dislikeMaterial(dto.getMaterialId(), loginUser.getMemberId(), dto.getIsAction());
-        return success ? AjaxResult.success() : AjaxResult.error("操作失败");
+        // 幂等接口：只有素材不存在才返回失败，其他情况都返回成功
+        return success ? AjaxResult.success() : AjaxResult.error("素材不存在");
     }
 }

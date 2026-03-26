@@ -13,7 +13,7 @@ public class MaterialActionDTO
     @Schema(description = "素材ID", required = true)
     private Long materialId;
 
-    @Schema(description = "操作类型：true-执行操作(点赞/不喜欢), false-取消操作", required = true)
+    @Schema(description = "操作类型：true-执行操作(喜欢/不喜欢), false-取消操作", required = true)
     private Boolean isAction;
 
     public Long getMaterialId()

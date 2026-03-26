@@ -159,8 +159,15 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
 
         int hasLiked = userActionMapper.checkUserAction(materialId, userId, "like");
 
-        if (isLike && hasLiked == 0)
+        if (isLike)
         {
+            // 目标是点赞状态
+            if (hasLiked > 0)
+            {
+                // 已经点赞了，幂等返回成功
+                return true;
+            }
+
             // 先删除可能的不喜欢记录
             int hasDisliked = userActionMapper.checkUserAction(materialId, userId, "dislike");
             if (hasDisliked > 0)
@@ -181,8 +188,15 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             materialMapper.updateMaterial(material);
             return true;
         }
-        else if (!isLike && hasLiked > 0)
+        else
         {
+            // 目标是取消点赞状态
+            if (hasLiked == 0)
+            {
+                // 已经取消点赞了，幂等返回成功
+                return true;
+            }
+
             // 取消点赞
             userActionMapper.deleteUserAction(materialId, userId, "like");
 
@@ -191,7 +205,6 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             materialMapper.updateMaterial(material);
             return true;
         }
-        return false;
     }
 
     @Override
@@ -206,8 +219,15 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
 
         int hasDisliked = userActionMapper.checkUserAction(materialId, userId, "dislike");
 
-        if (isDislike && hasDisliked == 0)
+        if (isDislike)
         {
+            // 目标是不喜欢状态
+            if (hasDisliked > 0)
+            {
+                // 已经不喜欢了，幂等返回成功
+                return true;
+            }
+
             // 先删除可能的点赞记录
             int hasLiked = userActionMapper.checkUserAction(materialId, userId, "like");
             if (hasLiked > 0)
@@ -228,8 +248,15 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             materialMapper.updateMaterial(material);
             return true;
         }
-        else if (!isDislike && hasDisliked > 0)
+        else
         {
+            // 目标是取消不喜欢状态
+            if (hasDisliked == 0)
+            {
+                // 已经取消不喜欢了，幂等返回成功
+                return true;
+            }
+
             // 取消不喜欢
             userActionMapper.deleteUserAction(materialId, userId, "dislike");
 
@@ -238,7 +265,6 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             materialMapper.updateMaterial(material);
             return true;
         }
-        return false;
     }
 
     @Override
