@@ -46,7 +46,7 @@ public class DeepLxTranslationServiceTest {
         restTemplateField.set(translationService, restTemplate);
 
         // 配置默认属性
-        when(properties.getUrl()).thenReturn("https://vps-sg-aws-opc.43046721.xyz/deeplx");
+        when(properties.getUrl()).thenReturn("https://vps-sg-aws-opc.43046721.xyz/translate");
         when(properties.getToken()).thenReturn(null);
     }
 
@@ -66,7 +66,7 @@ public class DeepLxTranslationServiceTest {
         ResponseEntity<String> response = new ResponseEntity<>(jsonResponse, HttpStatus.OK);
 
         when(restTemplate.exchange(
-                eq("https://vps-sg-aws-opc.43046721.xyz/deeplx/translate"),
+                eq("https://vps-sg-aws-opc.43046721.xyz/translate/translate"),
                 eq(HttpMethod.POST),
                 any(HttpEntity.class),
                 eq(String.class)
