@@ -21,7 +21,7 @@ CREATE TABLE core_material (
     package_type        INT             DEFAULT NULL               COMMENT '套餐分类（0晨报 1普通会员 2VIP会员 3超级VIP会员）',
     status              CHAR(1)         DEFAULT '0'                COMMENT '状态（0上线 1下线）',
     is_top              CHAR(1)         DEFAULT '0'                COMMENT '是否置顶（0否 1是）',
-    source              VARCHAR(50)     DEFAULT NULL               COMMENT '来源（crawler爬取/manual手动）',
+    source              VARCHAR(50)     DEFAULT NULL               COMMENT '来源（对应core_collect_source表的source_type：twitter/telegram/youtube等，manual表示手动添加）',
     cover_image         VARCHAR(500)    DEFAULT NULL               COMMENT '封面图URL',
     video_url           VARCHAR(1000)   DEFAULT NULL               COMMENT '视频URL',
     online_time         DATETIME        DEFAULT NULL               COMMENT '上线时间',

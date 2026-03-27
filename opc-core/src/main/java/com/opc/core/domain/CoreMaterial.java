@@ -54,7 +54,7 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "发布时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Instant publishTime;
 
-    @Excel(name = "内容类型")
+    @Excel(name = "内容类型" , readConverterExp = "text/image/video")
     private String contentType;
 
     @Excel(name = "套餐分类", readConverterExp = "0=晨报,1=普通会员,2=VIP会员,3=超级VIP会员")

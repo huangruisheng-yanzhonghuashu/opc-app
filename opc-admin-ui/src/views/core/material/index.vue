@@ -127,7 +127,7 @@
          </el-table-column>
          <el-table-column label="来源" align="center" prop="source" width="80">
             <template #default="scope">
-               <span>{{ scope.row.source === 'crawler' ? '爬取' : '手动' }}</span>
+               <span>{{ getSourceLabel(scope.row.source) }}</span>
             </template>
          </el-table-column>
          <el-table-column label="状态" align="center" prop="status" width="80">
@@ -227,8 +227,8 @@
                <el-col :span="12">
                   <el-form-item label="来源" prop="source">
                      <el-select v-model="form.source" placeholder="请选择来源" style="width: 100%">
-                        <el-option label="爬取" value="crawler" />
                         <el-option label="手动" value="manual" />
+                        <el-option label="推特" value="twitter" />
                      </el-select>
                   </el-form-item>
                </el-col>
@@ -320,7 +320,7 @@
             <el-descriptions-item label="标题" :span="1">{{ detailData.title }}</el-descriptions-item>
             <el-descriptions-item label="作者" :span="1">{{ detailData.author || '-' }}</el-descriptions-item>
             <el-descriptions-item label="来源" :span="1">
-               <span>{{ detailData.source === 'crawler' ? '爬取' : '手动' }}</span>
+               <span>{{ getSourceLabel(detailData.source) }}</span>
             </el-descriptions-item>
             <el-descriptions-item label="原ID" :span="1">{{ detailData.originalId || '-' }}</el-descriptions-item>
             <el-descriptions-item label="套餐分类" :span="1">{{ getPackageTypeLabel(detailData.packageType) }}</el-descriptions-item>
@@ -444,6 +444,15 @@ function getContentTypeLabel(contentType) {
     'video': '视频'
   }
   return map[contentType] || contentType || '-'
+}
+
+function getSourceLabel(source) {
+  const map = {
+    'crawler': '爬取',
+    'manual': '手动',
+    'twitter': '推特'
+  }
+  return map[source] || source || '-'
 }
 
 function getList() {
