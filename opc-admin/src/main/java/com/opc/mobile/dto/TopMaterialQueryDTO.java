@@ -19,8 +19,8 @@ public class TopMaterialQueryDTO {
     private Integer pageSize = 10;
 
     /** 排序字段 */
-    @Schema(description = "排序字段，可选值：create_time(创建时间),  view_count(查看数)，默认create_time", example = "create_time")
-    private String orderByColumn = "create_time";
+    @Schema(description = "排序字段，可选值：top_time(置顶时间), view_count(查看数)，默认top_time", example = "top_time")
+    private String orderByColumn = "top_time";
 
     /** 是否升序 */
     @Schema(description = "是否升序，true=升序，false=降序，默认false", example = "false")
