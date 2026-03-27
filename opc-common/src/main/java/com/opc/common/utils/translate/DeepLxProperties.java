@@ -15,7 +15,7 @@ public class DeepLxProperties {
     /**
      * DeepLX 服务地址，默认为本地服务
      */
-    private String url = "http://localhost:1188";
+    private String url = "https://vps-sg-aws-opc.43046721.xyz/deeplx";
 
     /**
      * 访问令牌（可选，如果 DeepLX 服务配置了访问控制）
