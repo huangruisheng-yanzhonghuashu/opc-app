@@ -6,6 +6,7 @@ import com.opc.common.annotation.Log;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.enums.BusinessType;
+import com.opc.common.utils.translate.TranslateUtils;
 import com.opc.core.domain.CoreCollectSource;
 import com.opc.core.domain.CoreMaterial;
 import com.opc.core.service.ICoreCollectSourceService;
@@ -127,6 +128,7 @@ public class TwitterImportController extends BaseController {
 
             for (CoreMaterial material : materials) {
                 try {
+
                     materialService.insertMaterial(material);
                     successIds.add(material.getOriginalId());
 
@@ -294,12 +296,15 @@ public class TwitterImportController extends BaseController {
         // 设置原ID
         material.setOriginalId(getTextValue(node, "id"));
 
-        // 设置内容（text字段）- 将换行符转为HTML换行
-        String text = convertNewLineToBr(getTextValue(node, "text"));
-        material.setContent(text);
+        // 设置内容（text字段）- 将换行符转为HTML换行并翻译为中文
+        String originalText = getTextValue(node, "text");
+        String text = convertNewLineToBr(originalText);
+        // 自动检测语言并翻译为中文
+        String translatedText = TranslateUtils.toChinese(originalText);
+        material.setContent(translatedText != null ? convertNewLineToBr(translatedText) : text);
 
-        // 设置标题（取text前50字符，去掉HTML标签）
-        String plainText = text != null ? text.replaceAll("<[^>]+>", "") : "";
+        // 设置标题（取翻译后text前15字符，去掉HTML标签）
+        String plainText = translatedText != null ? translatedText.replaceAll("<[^>]+>", "") : "";
         String title = !plainText.isEmpty()
                 ? (plainText.length() > 15 ? plainText.substring(0, 15) + "..." : plainText)
                 : "Twitter 内容";
