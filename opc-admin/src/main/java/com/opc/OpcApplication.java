@@ -14,7 +14,7 @@ import java.net.UnknownHostException;
  *
  * @author opc
  */
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class }, scanBasePackages = { "com.opc" })
 @EnableScheduling
 public class OpcApplication
 {

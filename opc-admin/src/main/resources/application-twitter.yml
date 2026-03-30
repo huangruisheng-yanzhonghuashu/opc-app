@@ -1,0 +1,6 @@
+# Twitter API v2 配置
+twitter:
+  api:
+    bearer-token: AAAAAAAAAAAAAAAAAAAAAPqP8gEAAAAA9kijiLWK2xqUVSFZibEFfna2gGs%3DWilvmCsBgPNAnVtDGB1Oi1scjnvIu7W3AcNYqzdn6NJVVrajC2
+    base-url: https://api.x.com/2
+    timeout: 30000
