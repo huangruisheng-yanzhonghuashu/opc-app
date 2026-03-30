@@ -45,3 +45,10 @@ export function changeCollectSourceStatus(id, status) {
     data: { id: id, status: status }
   })
 }
+
+export function fetchCollectSourceData(id) {
+  return request({
+    url: '/core/collect/fetch/' + id,
+    method: 'post'
+  })
+}

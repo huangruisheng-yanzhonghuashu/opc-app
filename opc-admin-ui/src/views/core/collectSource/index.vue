@@ -13,6 +13,7 @@
          <el-form-item label="来源类型" prop="sourceType">
             <el-select v-model="queryParams.sourceType" placeholder="请选择来源类型" clearable style="width: 200px">
                <el-option label="Twitter" value="twitter" />
+               <el-option label="Reddit" value="reddit" />
                <el-option label="Telegram" value="telegram" />
                <el-option label="YouTube" value="youtube" />
             </el-select>
@@ -79,6 +80,7 @@
          <el-table-column label="来源类型" align="center" prop="sourceType" width="120">
             <template #default="scope">
                <el-tag v-if="scope.row.sourceType === 'twitter'" type="primary">Twitter</el-tag>
+               <el-tag v-else-if="scope.row.sourceType === 'reddit'" color="#FF4500" style="color: white">Reddit</el-tag>
                <el-tag v-else-if="scope.row.sourceType === 'telegram'" type="success">Telegram</el-tag>
                <el-tag v-else-if="scope.row.sourceType === 'youtube'" type="danger">YouTube</el-tag>
                <span v-else>{{ scope.row.sourceType }}</span>
@@ -100,11 +102,12 @@
                <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="操作" width="180" align="center" class-name="small-padding fixed-width">
+         <el-table-column label="操作" width="240" align="center" class-name="small-padding fixed-width">
             <template #default="scope">
                <el-button link type="primary" icon="View" @click="handleView(scope.row)" v-hasPermi="['core:collect:query']">详情</el-button>
+               <el-button link type="success" icon="Download" @click="handleFetch(scope.row)" v-hasPermi="['core:collect:query']">获取数据</el-button>
                <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['core:collect:edit']">修改</el-button>
-               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['core:collect:remove']">删除</el-button>
+               <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['core:collect:remove']">删除</el-button>
             </template>
          </el-table-column>
       </el-table>
@@ -129,6 +132,7 @@
             <el-form-item label="来源类型" prop="sourceType">
                <el-select v-model="form.sourceType" placeholder="请选择来源类型" style="width: 100%">
                   <el-option label="Twitter" value="twitter" />
+                  <el-option label="Reddit" value="reddit" />
                   <el-option label="Telegram" value="telegram" />
                   <el-option label="YouTube" value="youtube" />
                </el-select>
@@ -159,6 +163,7 @@
             <el-descriptions-item label="信息源链接" :span="2">{{ detailData.sourceUrl || '-' }}</el-descriptions-item>
             <el-descriptions-item label="来源类型" :span="1">
                <el-tag v-if="detailData.sourceType === 'twitter'" type="primary">Twitter</el-tag>
+               <el-tag v-else-if="detailData.sourceType === 'reddit'" color="#FF4500" style="color: white">Reddit</el-tag>
                <el-tag v-else-if="detailData.sourceType === 'telegram'" type="success">Telegram</el-tag>
                <el-tag v-else-if="detailData.sourceType === 'youtube'" type="danger">YouTube</el-tag>
                <span v-else>{{ detailData.sourceType || '-' }}</span>
@@ -182,7 +187,7 @@
 </template>
 
 <script setup name="CollectSource">
-import { listCollectSource, getCollectSource, addCollectSource, updateCollectSource, delCollectSource, changeCollectSourceStatus } from "@/api/core/collectSource"
+import { listCollectSource, getCollectSource, addCollectSource, updateCollectSource, delCollectSource, changeCollectSourceStatus, fetchCollectSourceData } from "@/api/core/collectSource"
 
 const { proxy } = getCurrentInstance()
 
@@ -305,6 +310,26 @@ function handleView(row) {
   getCollectSource(id).then(response => {
     detailData.value = response.data
     detailOpen.value = true
+  })
+}
+
+/** 获取数据按钮操作 */
+function handleFetch(row) {
+  const id = row.id
+  const sourceType = row.sourceType
+  const keyword = row.keyword
+  proxy.$modal.confirm('确认要获取 "' + keyword + '" 的 ' + sourceType + ' 数据吗？').then(() => {
+    return fetchCollectSourceData(id)
+  }).then(response => {
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess("获取数据成功")
+    } else {
+      proxy.$modal.msgError(response.msg || "获取数据失败")
+    }
+  }).catch(error => {
+    if (error && error.msg) {
+      proxy.$modal.msgError(error.msg)
+    }
   })
 }
 

@@ -21,6 +21,7 @@ import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.poi.ExcelUtil;
 import com.opc.core.domain.CoreCollectSource;
 import com.opc.core.service.ICoreCollectSourceService;
+import com.opc.web.service.core.CollectSourceFetchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,12 @@ public class CoreCollectSourceController extends BaseController
 {
     @Autowired
     private ICoreCollectSourceService collectSourceService;
+
+    @Autowired
+    private CollectSourceFetchService collectSourceFetchService;
+
+    private static final String SOURCE_TWITTER = "twitter";
+    private static final String SOURCE_REDDIT = "reddit";
 
     @Operation(summary = "获取采集信息源列表", description = "分页查询采集信息源列表")
     @PreAuthorize("@ss.hasPermi('core:collect:list')")
@@ -99,5 +106,41 @@ public class CoreCollectSourceController extends BaseController
     public AjaxResult changeStatus(@RequestBody CoreCollectSource collectSource)
     {
         return toAjax(collectSourceService.changeStatus(collectSource.getId(), collectSource.getStatus()));
+    }
+
+    @Operation(summary = "获取数据", description = "根据来源类型调用对应接口获取数据")
+    @Parameter(name = "id", description = "配置ID", required = true)
+    @PreAuthorize("@ss.hasPermi('core:collect:query')")
+    @Log(title = "采集信息源获取数据", businessType = BusinessType.OTHER)
+    @PostMapping("/fetch/{id}")
+    public AjaxResult fetchData(@PathVariable Long id)
+    {
+        CoreCollectSource collectSource = collectSourceService.selectCollectSourceById(id);
+        if (collectSource == null)
+        {
+            return AjaxResult.error("采集信息源不存在");
+        }
+
+        String sourceType = collectSource.getSourceType();
+        String keyword = collectSource.getKeyword();
+
+        if (sourceType == null || sourceType.isEmpty())
+        {
+            return AjaxResult.error("来源类型不能为空");
+        }
+
+        // 根据来源类型调用不同服务方法
+        if (SOURCE_TWITTER.equalsIgnoreCase(sourceType))
+        {
+            return collectSourceFetchService.fetchTwitterData(keyword);
+        }
+        else if (SOURCE_REDDIT.equalsIgnoreCase(sourceType))
+        {
+            return collectSourceFetchService.fetchRedditData(keyword);
+        }
+        else
+        {
+            return AjaxResult.error("该来源类型暂且不支持：" + sourceType);
+        }
     }
 }

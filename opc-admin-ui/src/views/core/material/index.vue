@@ -101,7 +101,11 @@
       <el-table v-loading="loading" :data="materialList" @selection-change="handleSelectionChange">
          <el-table-column type="selection" width="55" align="center" />
          <el-table-column label="素材ID" align="center" prop="id" width="80" />
-         <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true" />
+         <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true">
+            <template #default="scope">
+               <el-button link type="primary" @click="handleView(scope.row)">{{ scope.row.title }}</el-button>
+            </template>
+         </el-table-column>
          <el-table-column label="作者" align="center" prop="author" width="120" />
          <el-table-column label="标签" align="center" width="150">
             <template #default="scope">
