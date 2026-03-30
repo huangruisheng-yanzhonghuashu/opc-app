@@ -113,10 +113,20 @@ public class CollectSourceFetchService {
     private ImportResult importMaterials(List<CoreMaterial> materials) {
         int successCount = 0;
         int failCount = 0;
+        int skipCount = 0;
 
         for (CoreMaterial material : materials) {
             String originalId = material.getOriginalId();
             try {
+                // 根据 originId 判断数据是否已存在
+                if (originalId != null && !originalId.isEmpty()) {
+                    CoreMaterial existingMaterial = materialService.selectMaterialByOriginalId(originalId);
+                    if (existingMaterial != null) {
+                        log.info("素材已存在，跳过导入, originalId: {}", originalId);
+                        skipCount++;
+                        continue;
+                    }
+                }
                 materialService.insertMaterial(material);
                 successCount++;
             } catch (Exception e) {
@@ -125,7 +135,8 @@ public class CollectSourceFetchService {
             }
         }
 
-        return new ImportResult(materials.size(), successCount, failCount);
+        log.info("导入完成: 总计={}, 成功={}, 跳过={}, 失败={}", materials.size(), successCount, skipCount, failCount);
+        return new ImportResult(materials.size(), successCount, failCount, skipCount);
     }
 
     /**
@@ -415,11 +426,13 @@ public class CollectSourceFetchService {
         final int total;
         final int successCount;
         final int failCount;
+        final int skipCount;
 
-        ImportResult(int total, int successCount, int failCount) {
+        ImportResult(int total, int successCount, int failCount, int skipCount) {
             this.total = total;
             this.successCount = successCount;
             this.failCount = failCount;
+            this.skipCount = skipCount;
         }
     }
 }

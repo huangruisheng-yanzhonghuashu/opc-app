@@ -306,4 +306,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		WHERE id = #{id}
 	</update>
 
+	<!-- 根据 originalId 查询素材 -->
+	<select id="selectMaterialByOriginalId" parameterType="String" resultMap="CoreMaterialResult">
+		<include refid="selectMaterialVo"/>
+		where original_id = #{originalId}
+		limit 1
+	</select>
+
 </mapper>

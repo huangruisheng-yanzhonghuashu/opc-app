@@ -67,4 +67,12 @@ public interface ICoreMaterialService
      * @return actionType: like/dislike/none
      */
     String getUserActionStatus(Long materialId, Long userId);
+
+    /**
+     * 根据 originalId 查询素材
+     *
+     * @param originalId 原ID
+     * @return 素材对象
+     */
+    CoreMaterial selectMaterialByOriginalId(String originalId);
 }

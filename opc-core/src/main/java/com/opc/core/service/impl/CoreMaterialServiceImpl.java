@@ -315,6 +315,12 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         return "none";
     }
 
+    @Override
+    public CoreMaterial selectMaterialByOriginalId(String originalId)
+    {
+        return materialMapper.selectMaterialByOriginalId(originalId);
+    }
+
     /**
      * 自动匹配内容中的标签并建立关联
      * 

@@ -76,4 +76,12 @@ public interface CoreMaterialMapper
      * @return 影响行数
      */
     int decrementDislikeCount(@Param("id") Long id);
+
+    /**
+     * 根据 originalId 查询素材
+     *
+     * @param originalId 原ID
+     * @return 素材对象
+     */
+    CoreMaterial selectMaterialByOriginalId(@Param("originalId") String originalId);
 }
