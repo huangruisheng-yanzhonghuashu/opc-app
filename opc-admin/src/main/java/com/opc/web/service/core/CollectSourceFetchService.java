@@ -323,9 +323,10 @@ public class CollectSourceFetchService {
             // 获取详细内容
             String detailText = fetchRedditDetailContent(url);
             String content = detailText != null && !detailText.isEmpty() ? detailText : (title != null ? title : "");
-            material.setContent(content);
+            // 将换行符转换为 HTML <br> 标签
+            material.setContent(convertNewLineToBr(content));
         } else {
-            material.setContent(title != null ? title : "");
+            material.setContent(convertNewLineToBr(title != null ? title : ""));
         }
 
         // 设置点赞数
