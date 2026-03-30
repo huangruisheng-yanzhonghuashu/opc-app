@@ -120,6 +120,24 @@
                <span v-else>-</span>
             </template>
          </el-table-column>
+         <el-table-column label="自动标签" align="center" width="150">
+            <template #default="scope">
+               <div v-if="scope.row.tags2 && scope.row.tags2.length > 0" class="tag-list">
+                  <el-tag 
+                     v-for="tag in scope.row.tags2.slice(0, 3)" 
+                     :key="tag.id"
+                     :style="{ backgroundColor: tag.tagColor || '#409EFF', color: '#fff', borderColor: tag.tagColor || '#409EFF' }"
+                     size="small"
+                     class="material-tag"
+                     type="success"
+                  >
+                     {{ tag.tagName }}
+                  </el-tag>
+                  <el-tag v-if="scope.row.tags2.length > 3" size="small" type="info">+{{ scope.row.tags2.length - 3 }}</el-tag>
+               </div>
+               <span v-else>-</span>
+            </template>
+         </el-table-column>
          <el-table-column label="套餐分类" align="center" prop="packageType" width="100">
             <template #default="scope">
                <span>{{ getPackageTypeLabel(scope.row.packageType) }}</span>
@@ -344,6 +362,20 @@
                      :key="tag.id"
                      :style="{ backgroundColor: tag.tagColor, color: '#fff', borderColor: tag.tagColor }"
                      class="detail-tag"
+                  >
+                     {{ tag.tagName }}
+                  </el-tag>
+               </div>
+               <span v-else>-</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="自动标签" :span="2">
+               <div v-if="detailData.tags2 && detailData.tags2.length > 0" class="detail-tag-list">
+                  <el-tag 
+                     v-for="tag in detailData.tags2" 
+                     :key="tag.id"
+                     :style="{ backgroundColor: tag.tagColor || '#409EFF', color: '#fff', borderColor: tag.tagColor || '#409EFF' }"
+                     class="detail-tag"
+                     type="success"
                   >
                      {{ tag.tagName }}
                   </el-tag>

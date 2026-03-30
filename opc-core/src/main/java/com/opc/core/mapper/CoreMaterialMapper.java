@@ -3,6 +3,7 @@ package com.opc.core.mapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreTag2;
 
 public interface CoreMaterialMapper
 {
@@ -23,6 +24,8 @@ public interface CoreMaterialMapper
     public int changeTop(CoreMaterial material);
 
     public int insertMaterialTag(@Param("materialId") Long materialId, @Param("tagId") Long tagId);
+
+    public List<CoreTag2> selectTags2ByMaterialId(Long materialId);
 
     /**
      * 根据标签ID查询素材列表

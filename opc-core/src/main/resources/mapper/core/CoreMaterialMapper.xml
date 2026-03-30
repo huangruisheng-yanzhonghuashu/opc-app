@@ -36,9 +36,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="updateTime"        column="update_time"         />
 		<result property="remark"            column="remark"              />
 		<collection property="tags" ofType="CoreTag" column="id" select="selectTagsByMaterialId"/>
+		<collection property="tags2" ofType="CoreTag2" column="id" select="selectTags2ByMaterialId"/>
 	</resultMap>
 
 	<resultMap type="CoreTag" id="CoreTagResult">
+		<id     property="id"                column="tag_id"              />
+		<result property="tagName"            column="tag_name"            />
+		<result property="tagColor"           column="tag_color"           />
+	</resultMap>
+
+	<resultMap type="CoreTag2" id="CoreTag2Result">
 		<id     property="id"                column="tag_id"              />
 		<result property="tagName"            column="tag_name"            />
 		<result property="tagColor"           column="tag_color"           />
@@ -101,6 +108,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select t.id as tag_id, t.tag_name, t.tag_color
 		from core_tag t
 		inner join core_material_tag mt on t.id = mt.tag_id
+		where mt.material_id = #{materialId}
+	</select>
+
+	<select id="selectTags2ByMaterialId" resultMap="CoreTag2Result">
+		select t.id as tag_id, t.tag_name, t.tag_color
+		from core_tag2 t
+		inner join core_material_tag2 mt on t.id = mt.tag_id
 		where mt.material_id = #{materialId}
 	</select>
 
