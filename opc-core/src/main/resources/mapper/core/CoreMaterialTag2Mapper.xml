@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CoreMaterialTag2Mapper">
+
+	<resultMap type="CoreMaterialTag2" id="CoreMaterialTag2Result">
+		<id     property="id"                column="id"                  />
+		<result property="materialId"        column="material_id"         />
+		<result property="tagId"             column="tag_id"              />
+		<result property="createBy"          column="create_by"           />
+		<result property="createTime"        column="create_time"         />
+	</resultMap>
+
+	<resultMap type="CoreTag2" id="CoreTag2Result">
+		<id     property="id"                column="tag_id"              />
+		<result property="tagName"           column="tag_name"            />
+		<result property="tagColor"          column="tag_color"           />
+		<result property="sortOrder"         column="sort_order"          />
+		<result property="status"            column="status"              />
+	</resultMap>
+
+	<sql id="selectMaterialTag2Vo">
+        select id, material_id, tag_id, create_by, create_time
+		from core_material_tag2
+    </sql>
+
+	<select id="selectMaterialTag2List" parameterType="CoreMaterialTag2" resultMap="CoreMaterialTag2Result">
+		<include refid="selectMaterialTag2Vo"/>
+		<where>
+			<if test="materialId != null">
+				AND material_id = #{materialId}
+			</if>
+			<if test="tagId != null">
+				AND tag_id = #{tagId}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectTags2ByMaterialId" parameterType="Long" resultMap="CoreTag2Result">
+		select t.id as tag_id, t.tag_name, t.tag_color, t.sort_order, t.status
+		from core_tag2 t
+		inner join core_material_tag2 mt on t.id = mt.tag_id
+		where mt.material_id = #{materialId}
+		order by t.sort_order asc
+	</select>
+
+	<select id="checkMaterialTag2Exists" resultType="boolean">
+		select count(*) > 0
+		from core_material_tag2
+		where material_id = #{materialId} and tag_id = #{tagId}
+	</select>
+
+	<insert id="insertMaterialTag2" parameterType="CoreMaterialTag2" useGeneratedKeys="true" keyProperty="id">
+ 		insert into core_material_tag2(
+ 			<if test="id != null and id != 0">id,</if>
+ 			<if test="materialId != null">material_id,</if>
+ 			<if test="tagId != null">tag_id,</if>
+ 			<if test="createBy != null and createBy != ''">create_by,</if>
+ 			create_time
+ 		)values(
+ 			<if test="id != null and id != 0">#{id},</if>
+ 			<if test="materialId != null">#{materialId},</if>
+ 			<if test="tagId != null">#{tagId},</if>
+ 			<if test="createBy != null and createBy != ''">#{createBy},</if>
+ 			sysdate()
+ 		)
+	</insert>
+
+	<insert id="batchInsertMaterialTag2">
+		insert into core_material_tag2(material_id, tag_id, create_by, create_time)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.materialId}, #{item.tagId}, #{item.createBy}, sysdate())
+		</foreach>
+	</insert>
+
+	<delete id="deleteMaterialTag2ById" parameterType="Long">
+		delete from core_material_tag2 where id = #{id}
+	</delete>
+
+	<delete id="deleteMaterialTag2ByMaterialId" parameterType="Long">
+		delete from core_material_tag2 where material_id = #{materialId}
+	</delete>
+
+	<delete id="deleteMaterialTag2ByTagId" parameterType="Long">
+		delete from core_material_tag2 where tag_id = #{tagId}
+	</delete>
+
+	<delete id="deleteMaterialTag2s" parameterType="Long">
+		delete from core_material_tag2 where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

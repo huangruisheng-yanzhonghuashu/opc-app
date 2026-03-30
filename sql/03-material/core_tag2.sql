@@ -14,9 +14,7 @@ CREATE TABLE core_tag2 (
     update_time         DATETIME                                   COMMENT '更新时间',
     remark              VARCHAR(500)    DEFAULT NULL               COMMENT '备注',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_tag_name (tag_name),
-    KEY idx_status (status),
-    KEY idx_sort_order (sort_order)
+    UNIQUE KEY uk_tag_name (tag_name)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='内容标签表';
 
 -- ----------------------------

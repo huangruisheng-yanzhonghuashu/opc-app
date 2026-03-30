@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CoreTag2Mapper">
+
+	<resultMap type="CoreTag2" id="CoreTag2Result">
+		<id     property="id"                column="id"                  />
+		<result property="tagName"           column="tag_name"            />
+		<result property="tagColor"          column="tag_color"           />
+		<result property="sortOrder"         column="sort_order"          />
+		<result property="status"            column="status"              />
+		<result property="createBy"          column="create_by"           />
+		<result property="createTime"        column="create_time"         />
+		<result property="updateBy"          column="update_by"           />
+		<result property="updateTime"        column="update_time"         />
+		<result property="remark"            column="remark"              />
+	</resultMap>
+
+	<sql id="selectTag2Vo">
+        select id, tag_name, tag_color, sort_order, status,
+               create_by, create_time, update_by, update_time, remark
+		from core_tag2
+    </sql>
+
+	<select id="selectTag2List" parameterType="CoreTag2" resultMap="CoreTag2Result">
+		<include refid="selectTag2Vo"/>
+		<where>
+			<if test="tagName != null and tagName != ''">
+				AND tag_name like concat('%', #{tagName}, '%')
+			</if>
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+		</where>
+		order by sort_order asc, create_time desc
+	</select>
+
+	<select id="selectTag2ById" parameterType="Long" resultMap="CoreTag2Result">
+		<include refid="selectTag2Vo"/>
+		where id = #{id}
+	</select>
+
+	<select id="selectTag2ByName" parameterType="String" resultMap="CoreTag2Result">
+		<include refid="selectTag2Vo"/>
+		where tag_name = #{tagName}
+	</select>
+
+	<select id="selectAllActiveTags" resultMap="CoreTag2Result">
+		<include refid="selectTag2Vo"/>
+		where status = '0'
+		order by sort_order asc, create_time desc
+	</select>
+
+	<update id="updateTag2" parameterType="CoreTag2">
+ 		update core_tag2
+ 		<set>
+ 			<if test="tagName != null and tagName != ''">tag_name = #{tagName},</if>
+ 			<if test="tagColor != null">tag_color = #{tagColor},</if>
+ 			<if test="sortOrder != null">sort_order = #{sortOrder},</if>
+ 			<if test="status != null and status != ''">status = #{status},</if>
+ 			<if test="remark != null">remark = #{remark},</if>
+ 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+ 			update_time = sysdate()
+ 		</set>
+ 		where id = #{id}
+	</update>
+
+ 	<insert id="insertTag2" parameterType="CoreTag2" useGeneratedKeys="true" keyProperty="id">
+ 		insert into core_tag2(
+ 			<if test="id != null and id != 0">id,</if>
+ 			<if test="tagName != null and tagName != ''">tag_name,</if>
+ 			<if test="tagColor != null">tag_color,</if>
+ 			<if test="sortOrder != null">sort_order,</if>
+ 			<if test="status != null and status != ''">status,</if>
+ 			<if test="remark != null">remark,</if>
+ 			<if test="createBy != null and createBy != ''">create_by,</if>
+ 			create_time
+ 		)values(
+ 			<if test="id != null and id != 0">#{id},</if>
+ 			<if test="tagName != null and tagName != ''">#{tagName},</if>
+ 			<if test="tagColor != null">#{tagColor},</if>
+ 			<if test="sortOrder != null">#{sortOrder},</if>
+ 			<if test="status != null and status != ''">#{status},</if>
+ 			<if test="remark != null">#{remark},</if>
+ 			<if test="createBy != null and createBy != ''">#{createBy},</if>
+ 			sysdate()
+ 		)
+	</insert>
+
+	<delete id="deleteTag2ById" parameterType="Long">
+		delete from core_tag2 where id = #{id}
+	</delete>
+
+	<delete id="deleteTag2ByIds" parameterType="Long">
+		delete from core_tag2 where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

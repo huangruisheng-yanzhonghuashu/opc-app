@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.opc.common.annotation.Excel;
 import com.opc.common.annotation.Excel.ColumnType;
 import com.opc.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class CoreMaterial extends BaseEntity
 {
@@ -90,6 +91,12 @@ public class CoreMaterial extends BaseEntity
     private List<Long> tagIds;
 
     private List<CoreTag> tags;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Long> tag2Ids;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<CoreTag2> tags2;
 
     public Long getId()
     {
@@ -361,6 +368,26 @@ public class CoreMaterial extends BaseEntity
         this.tags = tags;
     }
 
+    public List<Long> getTag2Ids()
+    {
+        return tag2Ids;
+    }
+
+    public void setTag2Ids(List<Long> tag2Ids)
+    {
+        this.tag2Ids = tag2Ids;
+    }
+
+    public List<CoreTag2> getTags2()
+    {
+        return tags2;
+    }
+
+    public void setTags2(List<CoreTag2> tags2)
+    {
+        this.tags2 = tags2;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -391,6 +418,8 @@ public class CoreMaterial extends BaseEntity
             .append("untopTime", getUntopTime())
             .append("tagIds", getTagIds())
             .append("tags", getTags())
+            .append("tag2Ids", getTag2Ids())
+            .append("tags2", getTags2())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())

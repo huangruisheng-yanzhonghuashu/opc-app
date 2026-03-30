@@ -1,16 +1,23 @@
 package com.opc.core.service.impl;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreMaterialTag2;
 import com.opc.core.domain.CoreMaterialUserAction;
 import com.opc.core.domain.CoreTag;
+import com.opc.core.domain.CoreTag2;
 import com.opc.core.mapper.CoreMaterialMapper;
+import com.opc.core.mapper.CoreMaterialTag2Mapper;
 import com.opc.core.mapper.CoreMaterialTagMapper;
 import com.opc.core.mapper.CoreMaterialUserActionMapper;
+import com.opc.core.mapper.CoreTag2Mapper;
 import com.opc.core.service.ICoreMaterialService;
 
 @Service
@@ -23,7 +30,13 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     private CoreMaterialTagMapper materialTagMapper;
 
     @Autowired
+    private CoreMaterialTag2Mapper materialTag2Mapper;
+
+    @Autowired
     private CoreMaterialUserActionMapper userActionMapper;
+
+    @Autowired
+    private CoreTag2Mapper tag2Mapper;
 
     @Autowired
     private CoreMaterialAsyncService asyncService;
@@ -42,6 +55,8 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         {
             List<CoreTag> tags = materialTagMapper.selectTagsByMaterialId(id);
             material.setTags(tags);
+            List<CoreTag2> tags2 = materialTag2Mapper.selectTags2ByMaterialId(id);
+            material.setTags2(tags2);
         }
         return material;
     }
@@ -56,13 +71,19 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             material.setOnlineTime(Instant.now());
         }
         int result = materialMapper.insertMaterial(material);
-        if (result > 0 && material.getTagIds() != null && !material.getTagIds().isEmpty())
+        if (result > 0)
         {
-            materialTagMapper.deleteMaterialTagByMaterialId(material.getId());
-            for (Long tagId : material.getTagIds())
+            // 处理原有标签关联
+            if (material.getTagIds() != null && !material.getTagIds().isEmpty())
             {
-                materialMapper.insertMaterialTag(material.getId(), tagId);
+                materialTagMapper.deleteMaterialTagByMaterialId(material.getId());
+                for (Long tagId : material.getTagIds())
+                {
+                    materialMapper.insertMaterialTag(material.getId(), tagId);
+                }
             }
+            // 自动匹配内容中的标签
+            autoMatchTagsForMaterial(material);
         }
         return result;
     }
@@ -72,13 +93,19 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     public int updateMaterial(CoreMaterial material)
     {
         int result = materialMapper.updateMaterial(material);
-        if (result > 0 && material.getTagIds() != null)
+        if (result > 0)
         {
-            materialTagMapper.deleteMaterialTagByMaterialId(material.getId());
-            for (Long tagId : material.getTagIds())
+            // 处理原有标签关联
+            if (material.getTagIds() != null)
             {
-                materialMapper.insertMaterialTag(material.getId(), tagId);
+                materialTagMapper.deleteMaterialTagByMaterialId(material.getId());
+                for (Long tagId : material.getTagIds())
+                {
+                    materialMapper.insertMaterialTag(material.getId(), tagId);
+                }
             }
+            // 自动匹配内容中的标签
+            autoMatchTagsForMaterial(material);
         }
         return result;
     }
@@ -286,5 +313,83 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
             return "dislike";
         }
         return "none";
+    }
+
+    /**
+     * 自动匹配内容中的标签并建立关联
+     * 
+     * @param material 素材对象
+     */
+    private void autoMatchTagsForMaterial(CoreMaterial material)
+    {
+        if (material.getId() == null)
+        {
+            return;
+        }
+
+        // 获取所有启用的标签
+        List<CoreTag2> allTags = tag2Mapper.selectAllActiveTags();
+        if (allTags == null || allTags.isEmpty())
+        {
+            return;
+        }
+
+        // 构建需要匹配的内容文本（标题 + 正文 + 总结）
+        StringBuilder contentBuilder = new StringBuilder();
+        if (material.getTitle() != null)
+        {
+            contentBuilder.append(material.getTitle()).append(" ");
+        }
+        if (material.getContent() != null)
+        {
+            contentBuilder.append(material.getContent()).append(" ");
+        }
+        if (material.getSummary() != null)
+        {
+            contentBuilder.append(material.getSummary());
+        }
+        String contentText = contentBuilder.toString();
+
+        if (contentText.trim().isEmpty())
+        {
+            return;
+        }
+
+        // 查找匹配的标签
+        Set<Long> matchedTagIds = new HashSet<>();
+        for (CoreTag2 tag : allTags)
+        {
+            if (tag.getTagName() != null && !tag.getTagName().trim().isEmpty())
+            {
+                // 检查内容中是否包含标签名称（不区分大小写）
+                if (contentText.toLowerCase().contains(tag.getTagName().toLowerCase()))
+                {
+                    matchedTagIds.add(tag.getId());
+                }
+            }
+        }
+
+        // 保存匹配的标签关联
+        if (!matchedTagIds.isEmpty())
+        {
+            List<CoreMaterialTag2> tagList = new ArrayList<>();
+            for (Long tagId : matchedTagIds)
+            {
+                // 检查是否已存在关联，避免重复
+                if (!materialTag2Mapper.checkMaterialTag2Exists(material.getId(), tagId))
+                {
+                    CoreMaterialTag2 materialTag = new CoreMaterialTag2();
+                    materialTag.setMaterialId(material.getId());
+                    materialTag.setTagId(tagId);
+                    materialTag.setCreateBy(material.getCreateBy());
+                    tagList.add(materialTag);
+                }
+            }
+
+            if (!tagList.isEmpty())
+            {
+                materialTag2Mapper.batchInsertMaterialTag2(tagList);
+            }
+        }
     }
 }
