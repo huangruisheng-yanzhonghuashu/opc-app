@@ -7,11 +7,11 @@ import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.translate.TranslateUtils;
-import com.opc.core.domain.CoreCollectSource;
 import com.opc.core.domain.CoreMaterial;
-import com.opc.core.service.ICoreCollectSourceService;
-import com.opc.core.service.ICoreMaterialMediaService;
 import com.opc.core.service.ICoreMaterialService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +21,36 @@ import org.springframework.web.bind.annotation.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import static com.opc.web.controller.core.OpenCliConstants.*;
 
 /**
  * Twitter 数据导入控制器
- * 执行 opencli twitter search 命令获取数据并保存到素材表
+ * <p>
+ * 通过调用 opencli 命令行工具，实现 Twitter 数据的搜索和导入功能。
+ * 支持将 Twitter 推文数据解析并保存到 CoreMaterial 素材表中。
+ * </p>
+ *
+ * <h3>主要功能：</h3>
+ * <ul>
+ *   <li>Twitter 推文搜索与导入 - 执行 opencli twitter search 命令</li>
+ *   <li>自动翻译 - 使用 TranslateUtils 将推文内容翻译为中文</li>
+ *   <li>素材表管理 - 将数据保存到 CoreMaterial 表</li>
+ * </ul>
+ *
+ * <h3>API 端点：</h3>
+ * <ul>
+ *   <li>POST /core/twitter/search?keyword=xxx - 搜索并导入推文</li>
+ * </ul>
+ *
+ * @author opc
+ * @since 3.9.1
+ * @see com.opc.core.domain.CoreMaterial
+ * @see com.opc.core.service.ICoreMaterialService
  */
+@Tag(name = "Twitter数据导入", description = "Twitter推文搜索和导入")
 @RestController
 @RequestMapping("/core/twitter")
 public class TwitterImportController extends BaseController {
@@ -40,12 +61,6 @@ public class TwitterImportController extends BaseController {
     private ICoreMaterialService materialService;
 
     @Autowired
-    private ICoreCollectSourceService collectSourceService;
-
-    @Autowired
-    private ICoreMaterialMediaService materialMediaService;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     /**
@@ -54,6 +69,8 @@ public class TwitterImportController extends BaseController {
      * @param keyword 搜索关键词
      * @return 导入结果
      */
+    @Operation(summary = "搜索并导入推文", description = "根据关键词搜索Twitter推文并导入到素材表")
+    @Parameter(name = "keyword", description = "搜索关键词", required = true)
     @PreAuthorize("@ss.hasPermi('core:material:add')")
     @Log(title = "Twitter搜索导入", businessType = BusinessType.IMPORT)
     @PostMapping("/search")
@@ -61,7 +78,7 @@ public class TwitterImportController extends BaseController {
         try {
             // 查询采集配置获取 source_type
             //String sourceType = getSourceTypeByKeyword(keyword);
-            String sourceType = "twitter";
+            String sourceType = SOURCE_TWITTER;
 
             // 执行 opencli 命令获取 Twitter 数据
             String jsonResult = executeOpenCliCommand(keyword);
@@ -75,15 +92,13 @@ public class TwitterImportController extends BaseController {
             int failCount = 0;
 
             for (CoreMaterial material : materials) {
+                String originalId = material.getOriginalId();
                 try {
                     materialService.insertMaterial(material);
                     successCount++;
 
-                    // 异步下载媒体文件（图片/视频）
-                    //materialMediaService.downloadMediaAsync(material);
-
-                } catch (Exception e) {
-                    log.error("导入素材失败, originalId: {}", material.getOriginalId(), e);
+                            } catch (Exception e) {
+                    log.error("导入素材失败, originalId: {}", originalId, e);
                     failCount++;
                 }
             }
@@ -102,104 +117,23 @@ public class TwitterImportController extends BaseController {
     }
 
     /**
-     * 搜索 Twitter 并导入（返回详细信息）
-     *
-     * @param keyword 搜索关键词
-     * @return 导入详情
-     */
-    @PreAuthorize("@ss.hasPermi('core:material:add')")
-    @Log(title = "Twitter搜索导入详情", businessType = BusinessType.IMPORT)
-    @PostMapping("/search/detail")
-    public AjaxResult searchAndImportWithDetail(@RequestParam String keyword) {
-        try {
-            // 查询采集配置获取 source_type
-            String sourceType = getSourceTypeByKeyword(keyword);
-
-            // 执行 opencli 命令获取 Twitter 数据
-            String jsonResult = executeOpenCliCommand(keyword);
-            if (jsonResult == null || jsonResult.isEmpty()) {
-                return AjaxResult.error("未获取到 Twitter 数据");
-            }
-
-            // 解析并保存数据
-            List<CoreMaterial> materials = parseTwitterJson(jsonResult, sourceType);
-            List<String> successIds = new ArrayList<>();
-            List<String> failIds = new ArrayList<>();
-
-            for (CoreMaterial material : materials) {
-                try {
-
-                    materialService.insertMaterial(material);
-                    successIds.add(material.getOriginalId());
-
-                    // 异步下载媒体文件（图片/视频）
-                    //materialMediaService.downloadMediaAsync(material);
-
-                } catch (Exception e) {
-                    log.error("导入素材失败, originalId: {}", material.getOriginalId(), e);
-                    failIds.add(material.getOriginalId());
-                }
-            }
-
-            AjaxResult result = AjaxResult.success();
-            result.put("keyword", keyword);
-            result.put("sourceType", sourceType);
-            result.put("total", materials.size());
-            result.put("successCount", successIds.size());
-            result.put("failCount", failIds.size());
-            result.put("successIds", successIds);
-            result.put("failIds", failIds);
-            return result;
-        } catch (Exception e) {
-            log.error("Twitter 搜索导入失败", e);
-            return AjaxResult.error("导入失败: " + e.getMessage());
-        }
-    }
-
-    /**
      * 执行 opencli 命令获取 Twitter 数据
      *
      * @param keyword 搜索关键词
      * @return JSON 结果字符串
      */
     private String executeOpenCliCommand(String keyword) throws Exception {
-        // 检测操作系统类型
-        String osName = System.getProperty("os.name").toLowerCase();
-        boolean isWindows = osName.contains("win");
+        // 使用命令构建器构建命令
+        OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+                .withModule(MODULE_TWITTER)
+                .withSubCommand(SUBCOMMAND_SEARCH)
+                .withArg(keyword)
+                .withOption("--limit", "10")
+                .withOption(OPTION_FORMAT_JSON, VALUE_JSON);
 
-        // 构建命令
-        List<String> command = new ArrayList<>();
-        if (isWindows) {
-            // Windows 系统使用 cmd /c 执行
-            command.add("cmd");
-            command.add("/c");
-            command.add("opencli");
-        } else {
-            // Linux/Mac 系统
-            command.add("opencli");
-        }
-        command.add("twitter");
-        command.add("search");
-        command.add(keyword);
-        command.add("-f");
-        command.add("json");
+        ProcessBuilder processBuilder = builder.createProcessBuilder();
 
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.redirectErrorStream(true);
-
-        // 设置环境变量，确保能找到 opencli
-        Map<String, String> env = processBuilder.environment();
-        String path = env.get("PATH");
-        if (path != null) {
-            // 添加常见的 npm 全局安装路径
-            String additionalPaths = "C:\\Users\\admin-1\\AppData\\Roaming\\npm;" +
-                    System.getProperty("user.home") + "\\AppData\\Roaming\\npm;" +
-                    "C:\\Program Files\\nodejs;" +
-                    "C:\\Program Files (x86)\\nodejs";
-            env.put("PATH", additionalPaths + ";" + path);
-        }
-
-        log.info("执行命令: opencli twitter search \"{}\" -f json (OS: {})", keyword, osName);
+        log.info("执行命令: {} (OS: {})", builder.toCommandString(), builder.isWindows() ? "Windows" : "Unix");
         Process process = processBuilder.start();
 
         // 读取命令输出（保留换行符）
@@ -222,30 +156,6 @@ public class TwitterImportController extends BaseController {
         String result = output.toString().trim();
         log.info("获取到 {} 字节数据", result.length());
         return result;
-    }
-
-    /**
-     * 根据关键词查询采集配置的 source_type
-     *
-     * @param keyword 关键词
-     * @return source_type，如果没有找到则返回默认值 "twitter"
-     */
-    private String getSourceTypeByKeyword(String keyword) {
-        try {
-            CoreCollectSource query = new CoreCollectSource();
-            query.setKeyword(keyword);
-            query.setStatus("0"); // 只查询启用的配置
-            List<CoreCollectSource> sources = collectSourceService.selectCollectSourceList(query);
-            if (sources != null && !sources.isEmpty()) {
-                String sourceType = sources.get(0).getSourceType();
-                log.info("找到采集配置，关键词: {}, source_type: {}", keyword, sourceType);
-                return sourceType;
-            }
-        } catch (Exception e) {
-            log.warn("查询采集配置失败，使用默认 source_type, 关键词: {}", keyword, e);
-        }
-        // 默认返回 twitter
-        return "twitter";
     }
 
     /**
@@ -300,7 +210,8 @@ public class TwitterImportController extends BaseController {
         String originalText = getTextValue(node, "text");
         String text = convertNewLineToBr(originalText);
         // 自动检测语言并翻译为中文
-        String translatedText = TranslateUtils.toChinese(originalText);
+        //String translatedText = TranslateUtils.toChinese(originalText);
+        String translatedText = text;
         material.setContent(translatedText != null ? convertNewLineToBr(translatedText) : text);
 
         // 设置标题（取翻译后text前15字符，去掉HTML标签）
@@ -332,16 +243,16 @@ public class TwitterImportController extends BaseController {
         }
 
         // 设置套餐类型为普通会员 (1)
-        material.setPackageType(1);
+        material.setPackageType(PACKAGE_TYPE_NORMAL);
 
         // 设置状态为下线 (1)
-        material.setStatus("1");
+        material.setStatus(STATUS_OFFLINE);
 
         // 设置内容类型为文本
-        material.setContentType("text");
+        material.setContentType(CONTENT_TYPE_TEXT);
 
         // 设置来源（从采集配置中获取）
-        material.setSource(sourceType != null ? sourceType : "twitter");
+        material.setSource(sourceType != null ? sourceType : SOURCE_TWITTER);
 
         return material;
     }
@@ -366,4 +277,5 @@ public class TwitterImportController extends BaseController {
         // 将 \r\n 或 \n 替换为 <br>
         return text.replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>");
     }
+
 }
