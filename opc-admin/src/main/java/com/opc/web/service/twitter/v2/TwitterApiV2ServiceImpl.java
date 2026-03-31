@@ -744,15 +744,25 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                     StringBuilder mediaHtml = new StringBuilder();
                     for (Map.Entry<String, String> entry : info.getMediaUrlToLocalPath().entrySet()) {
                         String localPath = entry.getValue();
-                        // 获取媒体类型
-                        String mediaType = getMediaTypeByUrl(entry.getKey(), info.getMediaList());
+                        // 获取媒体信息
+                        TwitterSearchResponseDTO.Media media = getMediaByUrl(entry.getKey(), info.getMediaList());
+                        String mediaType = media != null ? media.getType() : "photo";
 
                         if ("video".equals(mediaType) || "animated_gif".equals(mediaType)) {
                             // 视频使用 video 标签
                             mediaHtml.append("<video src=\"").append(localPath).append("\" controls style=\"max-width:100%;\"></video><br>");
                         } else {
-                            // 图片使用 img 标签
-                            mediaHtml.append("<img src=\"").append(localPath).append("\" style=\"max-width:100%;\" /><br>");
+                            // 图片使用 img 标签，添加宽高属性
+                            Integer width = media != null ? media.getWidth() : null;
+                            Integer height = media != null ? media.getHeight() : null;
+                            mediaHtml.append("<img src=\"").append(localPath).append("\"");
+                            if (width != null) {
+                                mediaHtml.append(" width=\"").append(width).append("\"");
+                            }
+                            if (height != null) {
+                                mediaHtml.append(" height=\"").append(height).append("\"");
+                            }
+                            mediaHtml.append(" style=\"max-width:100%;\" /><br>");
                         }
                     }
                     content = content + "<br><br>" + mediaHtml.toString();
@@ -802,8 +812,6 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                 } else {
                     material.setContentType("image");
                 }
-                // 设置封面图为本地路径
-                material.setCoverImage(localPath != null ? localPath : firstMediaUrl);
             } else {
                 material.setContentType("text");
             }
@@ -824,16 +832,24 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
      * 根据原始URL获取媒体类型
      */
     private String getMediaTypeByUrl(String url, List<TwitterSearchResponseDTO.Media> mediaList) {
+        TwitterSearchResponseDTO.Media media = getMediaByUrl(url, mediaList);
+        return media != null ? media.getType() : "photo";
+    }
+
+    /**
+     * 根据原始URL获取媒体对象
+     */
+    private TwitterSearchResponseDTO.Media getMediaByUrl(String url, List<TwitterSearchResponseDTO.Media> mediaList) {
         if (mediaList == null) {
-            return "photo";
+            return null;
         }
         for (TwitterSearchResponseDTO.Media media : mediaList) {
             String mediaUrl = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
             if (url.equals(mediaUrl)) {
-                return media.getType();
+                return media;
             }
         }
-        return "photo";
+        return null;
     }
 
     /**
