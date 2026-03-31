@@ -93,9 +93,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     }
 
     @Override
-    public TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request) throws JsonProcessingException {
+    public TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request){
         //
-        String body = "{\n" +
+/*        String body = "{\n" +
                 "  \"data\" : [ {\n" +
                 "    \"edit_history_tweet_ids\" : [ \"2038546535810564481\" ],\n" +
                 "    \"id\" : \"2038546535810564481\",\n" +
@@ -431,74 +431,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                 "    \"result_count\" : 10,\n" +
                 "    \"next_token\" : \"b26v89c19zqg8o3juehk5kvivays4tefyvs04mdfi5k71\"\n" +
                 "  }\n" +
-                "}";
+                "}";*/
 
-        TwitterSearchResponseDTO result = objectMapper.readValue(
-                body,
-                TwitterSearchResponseDTO.class
-        );
-
-        // 提取推文信息并转换为素材
-        List<TweetInfo> tweetInfoList = extractTweetInfo(result);
-
-        // 打印每个推文的媒体类型和URL，并下载媒体文件
-        for (TweetInfo info : tweetInfoList) {
-            log.info("推文ID: {}", info.getId());
-            log.info("推文URL: {}", info.getUrl());
-
-            // 获取媒体列表
-            List<TwitterSearchResponseDTO.Media> mediaList = info.getMediaList();
-
-            // 初始化URL映射
-            Map<String, String> urlMapping = new HashMap<>();
-
-            // 遍历媒体并下载
-            for (TwitterSearchResponseDTO.Media media : mediaList) {
-                log.info("  媒体类型: {}", media.getType());        // photo / video / animated_gif
-                log.info("  媒体URL: {}", media.getUrl());           // 图片直接URL
-                log.info("  预览图: {}", media.getPreviewImageUrl()); // 视频封面
-                log.info("  宽度: {}", media.getWidth());
-                log.info("  高度: {}", media.getHeight());
-
-                // 下载媒体文件
-                String mediaUrl = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
-                if (mediaUrl != null) {
-                    String fileName = generateFileName(media);
-                    String localPath = downloadMedia(mediaUrl, fileName);
-                    if (localPath != null) {
-                        urlMapping.put(mediaUrl, localPath);
-                        log.info("  已保存到: {}", localPath);
-                    }
-                }
-            }
-
-            // 设置URL映射到TweetInfo
-            info.setMediaUrlToLocalPath(urlMapping);
-            log.info("---");
-        }
-
-        List<CoreMaterial> materials = convertToMaterials(tweetInfoList);
-
-        // 保存到数据库
-        int savedCount = 0;
-        for (CoreMaterial material : materials) {
-            try {
-                // 检查是否已存在（根据 originalId 去重）
-                CoreMaterial existMaterial = materialService.selectMaterialByOriginalId(material.getOriginalId());
-                if (existMaterial == null) {
-                    materialService.insertMaterial(material);
-                    savedCount++;
-                    log.info("素材已保存到数据库，originalId: {}", material.getOriginalId());
-                } else {
-                    log.info("素材已存在，跳过保存，originalId: {}", material.getOriginalId());
-                }
-            } catch (Exception e) {
-                log.error("保存素材到数据库失败，originalId: {}", material.getOriginalId(), e);
-            }
-        }
-        log.info("共保存 {} 条素材到数据库", savedCount);
-
-        /*try {
+        try {
             // 校验并修正 maxResults 参数（Twitter API 要求 10-100）
             if (request.getMaxResults() == null || request.getMaxResults() < 10) {
                 log.warn("maxResults 参数值 [{}] 小于 Twitter API 最小值 10，已修正为 10", request.getMaxResults());
@@ -516,6 +451,7 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             kong.unirest.GetRequest getRequest = Unirest.get(url)
                     .queryString("query", request.getQuery())
                     .queryString("max_results", request.getMaxResults())
+                    .queryString("sort_order", "relevancy")
                     .queryString("tweet.fields", "created_at,author_id,public_metrics,text,attachments,entities,lang")
                     .queryString("expansions", "attachments.media_keys,author_id")
                     .queryString("media.fields", "media_key,type,url,preview_image_url,alt_text,duration_ms,width,height")
@@ -541,6 +477,67 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                 );
                 log.info("Twitter API 搜索成功，获取 {} 条推文",
                         result.getMeta() != null ? result.getMeta().getResultCount() : 0);
+
+                // 提取推文信息并转换为素材
+                List<TweetInfo> tweetInfoList = extractTweetInfo(result);
+
+                // 打印每个推文的媒体类型和URL，并下载媒体文件
+                for (TweetInfo info : tweetInfoList) {
+                    log.info("推文ID: {}", info.getId());
+                    log.info("推文URL: {}", info.getUrl());
+
+                    // 获取媒体列表
+                    List<TwitterSearchResponseDTO.Media> mediaList = info.getMediaList();
+
+                    // 初始化URL映射
+                    Map<String, String> urlMapping = new HashMap<>();
+
+                    // 遍历媒体并下载
+                    for (TwitterSearchResponseDTO.Media media : mediaList) {
+                        log.info("  媒体类型: {}", media.getType());        // photo / video / animated_gif
+                        log.info("  媒体URL: {}", media.getUrl());           // 图片直接URL
+                        log.info("  预览图: {}", media.getPreviewImageUrl()); // 视频封面
+                        log.info("  宽度: {}", media.getWidth());
+                        log.info("  高度: {}", media.getHeight());
+
+                        // 下载媒体文件
+                        String mediaUrl = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
+                        if (mediaUrl != null) {
+                            String fileName = generateFileName(media);
+                            String localPath = downloadMedia(mediaUrl, fileName);
+                            if (localPath != null) {
+                                urlMapping.put(mediaUrl, localPath);
+                                log.info("  已保存到: {}", localPath);
+                            }
+                        }
+                    }
+
+                    // 设置URL映射到TweetInfo
+                    info.setMediaUrlToLocalPath(urlMapping);
+                    log.info("---");
+                }
+
+                List<CoreMaterial> materials = convertToMaterials(tweetInfoList);
+
+                // 保存到数据库
+                int savedCount = 0;
+                for (CoreMaterial material : materials) {
+                    try {
+                        // 检查是否已存在（根据 originalId 去重）
+                        CoreMaterial existMaterial = materialService.selectMaterialByOriginalId(material.getOriginalId());
+                        if (existMaterial == null) {
+                            materialService.insertMaterial(material);
+                            savedCount++;
+                            log.info("素材已保存到数据库，originalId: {}", material.getOriginalId());
+                        } else {
+                            log.info("素材已存在，跳过保存，originalId: {}", material.getOriginalId());
+                        }
+                    } catch (Exception e) {
+                        log.error("保存素材到数据库失败，originalId: {}", material.getOriginalId(), e);
+                    }
+                }
+                log.info("共保存 {} 条素材到数据库", savedCount);
+
                 return result;
             } else {
                 log.error("Twitter API 返回非成功状态码: {}，响应: {}", response.getStatus(), response.getBody());
@@ -553,9 +550,7 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
         } catch (Exception e) {
             log.error("调用 Twitter API v2 搜索接口失败", e);
             throw new RuntimeException("调用 Twitter API v2 搜索接口失败: " + e.getMessage(), e);
-        }*/
-
-        return null;
+        }
     }
 
     @Override
@@ -765,7 +760,7 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                             mediaHtml.append(" style=\"max-width:100%;\" /><br>");
                         }
                     }
-                    content = content + "<br><br>" + mediaHtml.toString();
+                    content = content + "<br>" + mediaHtml.toString();
                 }
             }
             material.setContent(content);
@@ -784,18 +779,6 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
 
             // 设置来源为 Twitter
             material.setSource("twitter");
-
-            // 设置发布时间
-            if (info.getCreatedAt() != null) {
-                try {
-                    Instant instant = Instant.parse(info.getCreatedAt());
-                    material.setPublishTime(instant);
-                } catch (Exception e) {
-                    material.setPublishTime(Instant.now());
-                }
-            } else {
-                material.setPublishTime(Instant.now());
-            }
 
             // 设置内容类型
             if (info.getMediaList() != null && !info.getMediaList().isEmpty()) {

@@ -173,10 +173,50 @@ public class TweetDTO {
         private String description;
 
         @Schema(description = "图片")
-        private List<String> images;
+        private List<Image> images;
 
         @Schema(description = "状态码")
         private Integer status;
+
+        /**
+         * URL 图片信息内部类
+         */
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class Image {
+
+            @Schema(description = "图片URL")
+            private String url;
+
+            @Schema(description = "宽度")
+            private Integer width;
+
+            @Schema(description = "高度")
+            private Integer height;
+
+            public String getUrl() {
+                return url;
+            }
+
+            public void setUrl(String url) {
+                this.url = url;
+            }
+
+            public Integer getWidth() {
+                return width;
+            }
+
+            public void setWidth(Integer width) {
+                this.width = width;
+            }
+
+            public Integer getHeight() {
+                return height;
+            }
+
+            public void setHeight(Integer height) {
+                this.height = height;
+            }
+        }
 
         @Schema(description = "是否展开")
         @JsonProperty("unwound_url")
@@ -238,11 +278,11 @@ public class TweetDTO {
             this.description = description;
         }
 
-        public List<String> getImages() {
+        public List<Image> getImages() {
             return images;
         }
 
-        public void setImages(List<String> images) {
+        public void setImages(List<Image> images) {
             this.images = images;
         }
 

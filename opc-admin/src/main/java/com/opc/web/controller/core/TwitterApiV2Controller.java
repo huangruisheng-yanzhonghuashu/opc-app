@@ -48,58 +48,6 @@ public class TwitterApiV2Controller extends BaseController {
 
     @Autowired
     private ICoreMaterialService materialService;
-
-    /**
-     * 搜索最近推文
-     *
-     * @param query        搜索关键词
-     * @param maxResults   返回结果数量（10-100，默认 10）
-     * @param nextToken    分页令牌
-     * @param tweetFields  返回的推文字段
-     * @param expansions   扩展数据
-     * @param startTime    开始时间（ISO 8601格式）
-     * @param endTime      结束时间（ISO 8601格式）
-     * @return 搜索结果
-     */
-    @Operation(summary = "搜索最近推文", description = "根据关键词搜索 Twitter 最近 7 天的推文")
-    @PreAuthorize("@ss.hasPermi('core:material:add')")
-    @Log(title = "Twitter API v2 搜索", businessType = BusinessType.OTHER)
-    @GetMapping("/search")
-    public AjaxResult search(
-            @Parameter(description = "搜索关键词", required = true) @RequestParam String query,
-            @Parameter(description = "返回结果数量（10-100，默认 10）") @RequestParam(required = false, defaultValue = "10") Integer maxResults,
-            @Parameter(description = "分页令牌") @RequestParam(required = false) String nextToken,
-            @Parameter(description = "返回的推文字段，逗号分隔") @RequestParam(required = false) String tweetFields,
-            @Parameter(description = "扩展数据") @RequestParam(required = false) String expansions,
-            @Parameter(description = "开始时间（ISO 8601格式）") @RequestParam(required = false) String startTime,
-            @Parameter(description = "结束时间（ISO 8601格式）") @RequestParam(required = false) String endTime) {
-
-        try {
-            // 构建请求参数
-            TwitterSearchRequestDTO request = new TwitterSearchRequestDTO();
-            request.setQuery(query);
-            request.setMaxResults(maxResults);
-            request.setNextToken(nextToken);
-            request.setStartTime(startTime);
-            request.setEndTime(endTime);
-
-            // 调用服务
-            TwitterSearchResponseDTO response = twitterApiV2Service.searchRecentTweets(request);
-
-            // 构建返回结果
-            Map<String, Object> result = new HashMap<>();
-            result.put("tweets", response.getData());
-            result.put("meta", response.getMeta());
-            result.put("includes", response.getIncludes());
-
-            return AjaxResult.success("搜索成功", result);
-
-        } catch (Exception e) {
-            log.error("Twitter API v2 搜索失败", e);
-            return AjaxResult.error("搜索失败: " + e.getMessage());
-        }
-    }
-
     /**
      * 搜索并导入推文到素材表
      *
@@ -126,41 +74,10 @@ public class TwitterApiV2Controller extends BaseController {
             request.setMaxResults(maxResults);
             request.setStartTime(startTime);
             request.setEndTime(endTime);
-
             // 调用服务搜索推文
             TwitterSearchResponseDTO response = twitterApiV2Service.searchRecentTweets(request);
 
-            if (response.getData() == null || response.getData().isEmpty()) {
-                return AjaxResult.success("未找到匹配的推文", new HashMap<String, Object>() {{
-                    put("total", 0);
-                    put("successCount", 0);
-                    put("failCount", 0);
-                }});
-            }
-
-            // 导入推文到素材表
-            List<CoreMaterial> materials = convertToMaterials(response.getData());
-            int successCount = 0;
-            int failCount = 0;
-
-            for (CoreMaterial material : materials) {
-                try {
-                    materialService.insertMaterial(material);
-                    successCount++;
-                } catch (Exception e) {
-                    log.error("导入素材失败, originalId: {}", material.getOriginalId(), e);
-                    failCount++;
-                }
-            }
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("keyword", query);
-            result.put("total", materials.size());
-            result.put("successCount", successCount);
-            result.put("failCount", failCount);
-            result.put("meta", response.getMeta());
-
-            return AjaxResult.success("导入完成", result);
+            return AjaxResult.success("导入完成");
 
         } catch (Exception e) {
             log.error("Twitter API v2 导入失败", e);
