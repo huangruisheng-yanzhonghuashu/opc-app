@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import com.alibaba.fastjson2.JSON;
+import com.opc.common.annotation.MemberAnonymous;
 import com.opc.common.annotation.MemberLogin;
 import com.opc.common.constant.HttpStatus;
 import com.opc.common.core.domain.AjaxResult;
@@ -35,6 +36,13 @@ public class MemberLoginInterceptor implements HandlerInterceptor
         {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
+            
+            // 优先检查方法上的 @MemberAnonymous 注解，如果存在则跳过登录验证
+            MemberAnonymous anonymousAnnotation = method.getAnnotation(MemberAnonymous.class);
+            if (anonymousAnnotation != null)
+            {
+                return true;
+            }
             
             // 检查方法上的 @MemberLogin 注解
             MemberLogin annotation = method.getAnnotation(MemberLogin.class);
