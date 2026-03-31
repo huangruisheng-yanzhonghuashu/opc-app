@@ -1,10 +1,15 @@
 package com.opc.web.service.twitter.v2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opc.core.domain.CoreMaterial;
 import com.opc.web.config.twitter.v2.TwitterApiV2Properties;
+import com.opc.web.dto.twitter.v2.TweetDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchResponseDTO;
+import kong.unirest.Config;
 import kong.unirest.HttpResponse;
+import kong.unirest.Proxy;
 import kong.unirest.Unirest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +19,13 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 /**
  * Twitter API v2 服务实现类
@@ -42,10 +51,20 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     @PostConstruct
     public void init() {
         // 配置 Unirest
-        Unirest.config()
+        Config config = Unirest.config()
                 .connectTimeout(twitterApiV2Properties.getTimeout())
                 .socketTimeout(twitterApiV2Properties.getTimeout())
                 .concurrency(100, 20);
+
+        // 设置代理
+        if (twitterApiV2Properties.isProxyEnabled()) {
+            Proxy proxy = new Proxy(twitterApiV2Properties.getProxyHost(), twitterApiV2Properties.getProxyPort());
+            config.proxy(proxy);
+            log.info("Unirest 代理已启用: {}:{}",
+                    twitterApiV2Properties.getProxyHost(),
+                    twitterApiV2Properties.getProxyPort());
+        }
+
         log.info("Unirest 初始化完成");
     }
 
@@ -56,16 +75,410 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     }
 
     @Override
-    public TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request) {
-        try {
-            // 构建请求 URL
-            String url = buildSearchUrl(request);
+    public TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request) throws JsonProcessingException {
+        //
+        String body = "{\n" +
+                "  \"data\" : [ {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038546535810564481\" ],\n" +
+                "    \"id\" : \"2038546535810564481\",\n" +
+                "    \"text\" : \"我集合了很多美国卡bin  冷门，干净 。事实上 只需要稳定给部分opc和个人开发者用  不污染卡池  大家就都好 https://t.co/ymdnhDQLaE\",\n" +
+                "    \"author_id\" : \"1910008069586862080\",\n" +
+                "    \"created_at\" : \"2026-03-30T09:19:03.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"urls\" : [ {\n" +
+                "        \"start\" : 58,\n" +
+                "        \"end\" : 81,\n" +
+                "        \"url\" : \"https://t.co/ymdnhDQLaE\",\n" +
+                "        \"expanded_url\" : \"https://x.com/Zechen_Ethan/status/2038546535810564481/photo/1\",\n" +
+                "        \"display_url\" : \"pic.x.com/ymdnhDQLaE\",\n" +
+                "        \"media_key\" : \"3_2038546196399378432\"\n" +
+                "      }, {\n" +
+                "        \"start\" : 58,\n" +
+                "        \"end\" : 81,\n" +
+                "        \"url\" : \"https://t.co/ymdnhDQLaE\",\n" +
+                "        \"expanded_url\" : \"https://x.com/Zechen_Ethan/status/2038546535810564481/photo/1\",\n" +
+                "        \"display_url\" : \"pic.x.com/ymdnhDQLaE\",\n" +
+                "        \"media_key\" : \"3_2038546196289953792\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"attachments\" : {\n" +
+                "      \"media_keys\" : [ \"3_2038546196399378432\", \"3_2038546196289953792\" ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"zh\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 0,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 2\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038541462405566539\" ],\n" +
+                "    \"id\" : \"2038541462405566539\",\n" +
+                "    \"text\" : \"@ParallelFacts What did you expect from a Pan Yoruba who sponsored OPC to massacre the Hausa/Fulani community during his time as Lagos Governor.\",\n" +
+                "    \"author_id\" : \"1569308384544833537\",\n" +
+                "    \"created_at\" : \"2026-03-30T08:58:53.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"mentions\" : [ {\n" +
+                "        \"start\" : 0,\n" +
+                "        \"end\" : 14,\n" +
+                "        \"username\" : \"ParallelFacts\",\n" +
+                "        \"id\" : \"1653894267159314433\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"en\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 0,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 6\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038540481265606776\" ],\n" +
+                "    \"id\" : \"2038540481265606776\",\n" +
+                "    \"text\" : \"The OPC era has arrived\\n let's take a look at how Fengwo has achieved it https://t.co/k6xa1LeFpL\",\n" +
+                "    \"author_id\" : \"2009519045910122498\",\n" +
+                "    \"created_at\" : \"2026-03-30T08:54:59.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"urls\" : [ {\n" +
+                "        \"start\" : 73,\n" +
+                "        \"end\" : 96,\n" +
+                "        \"url\" : \"https://t.co/k6xa1LeFpL\",\n" +
+                "        \"expanded_url\" : \"https://x.com/EiAmine71981/status/2038540481265606776/photo/1\",\n" +
+                "        \"display_url\" : \"pic.x.com/k6xa1LeFpL\",\n" +
+                "        \"media_key\" : \"3_2038540478363144192\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"attachments\" : {\n" +
+                "      \"media_keys\" : [ \"3_2038540478363144192\" ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"en\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 0,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 3\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038539757597172109\" ],\n" +
+                "    \"id\" : \"2038539757597172109\",\n" +
+                "    \"text\" : \"The fight sprawled to all locations the two groups are located. \\nEven they fought too in Cameroon before they were calmed. \\n\\nThey fought in Lagos too.... Even before OPC take charge for Ajegunle, we fought at JMJ, Itun àgàn, Igbo elejo (Snake Island)... The fight leads to erasure https://t.co/DHfP028YoY\",\n" +
+                "    \"author_id\" : \"1481694597126541312\",\n" +
+                "    \"created_at\" : \"2026-03-30T08:52:07.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"urls\" : [ {\n" +
+                "        \"start\" : 281,\n" +
+                "        \"end\" : 304,\n" +
+                "        \"url\" : \"https://t.co/DHfP028YoY\",\n" +
+                "        \"expanded_url\" : \"https://twitter.com/dvearse/status/2038538507082186864\",\n" +
+                "        \"display_url\" : \"x.com/dvearse/status…\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"en\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 0,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 20\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038539729420116177\" ],\n" +
+                "    \"id\" : \"2038539729420116177\",\n" +
+                "    \"text\" : \"opc最大的问题是需要社交。\\n所以，才会有opc社区这样的产物存在。\",\n" +
+                "    \"author_id\" : \"1969297652698529793\",\n" +
+                "    \"created_at\" : \"2026-03-30T08:52:00.000Z\",\n" +
+                "    \"lang\" : \"zh\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 0,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 2\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038538507082186864\" ],\n" +
+                "    \"id\" : \"2038538507082186864\",\n" +
+                "    \"text\" : \"@LOSEYIE @akintollgate Oooh. That was the period OPC was fighting them in Ajegunle, too. I guess. Do OPC help at all\",\n" +
+                "    \"author_id\" : \"755011214439251968\",\n" +
+                "    \"created_at\" : \"2026-03-30T08:47:08.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"mentions\" : [ {\n" +
+                "        \"start\" : 0,\n" +
+                "        \"end\" : 8,\n" +
+                "        \"username\" : \"LOSEYIE\",\n" +
+                "        \"id\" : \"1481694597126541312\"\n" +
+                "      }, {\n" +
+                "        \"start\" : 9,\n" +
+                "        \"end\" : 22,\n" +
+                "        \"username\" : \"akintollgate\",\n" +
+                "        \"id\" : \"1325419982004637698\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"en\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 1,\n" +
+                "      \"quote_count\" : 1,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 26\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038526894698860595\" ],\n" +
+                "    \"id\" : \"2038526894698860595\",\n" +
+                "    \"text\" : \"\uD83D\uDCF0 La presidenta de OPC España, Matilde Almandoz Ríos, protagoniza la Tribuna de la Revista Congresos de @puntomice.\\n\\nEn una edición dedicada a la etapa poscongreso, Matilde enumera las cualidades de las OPC y la urgencia de profesionalizar completamente el sector:\\n\uD83D\uDC49\uD83C\uDFFB Destaca en https://t.co/CFW5WY4ulP\",\n" +
+                "    \"author_id\" : \"864704310\",\n" +
+                "    \"created_at\" : \"2026-03-30T08:01:00.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"mentions\" : [ {\n" +
+                "        \"start\" : 104,\n" +
+                "        \"end\" : 114,\n" +
+                "        \"username\" : \"puntomice\",\n" +
+                "        \"id\" : \"2417264383\"\n" +
+                "      } ],\n" +
+                "      \"urls\" : [ {\n" +
+                "        \"start\" : 279,\n" +
+                "        \"end\" : 302,\n" +
+                "        \"url\" : \"https://t.co/CFW5WY4ulP\",\n" +
+                "        \"expanded_url\" : \"https://x.com/opcspain/status/2038526894698860595/photo/1\",\n" +
+                "        \"display_url\" : \"pic.x.com/CFW5WY4ulP\",\n" +
+                "        \"media_key\" : \"3_2037544840993632256\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"attachments\" : {\n" +
+                "      \"media_keys\" : [ \"3_2037544840993632256\" ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"es\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 1,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 7\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038525425022799936\" ],\n" +
+                "    \"id\" : \"2038525425022799936\",\n" +
+                "    \"text\" : \"@kayodebakre8 @Juwon_miles And you think the war will be fought like Opc and Nigeria police, keep dreaming when they tell you the USA Empire is falling you think is a joke. The Iran war has proved it\",\n" +
+                "    \"author_id\" : \"1627737072617328664\",\n" +
+                "    \"created_at\" : \"2026-03-30T07:55:09.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"mentions\" : [ {\n" +
+                "        \"start\" : 0,\n" +
+                "        \"end\" : 13,\n" +
+                "        \"username\" : \"kayodebakre8\",\n" +
+                "        \"id\" : \"972122845\"\n" +
+                "      }, {\n" +
+                "        \"start\" : 14,\n" +
+                "        \"end\" : 26,\n" +
+                "        \"username\" : \"Juwon_miles\",\n" +
+                "        \"id\" : \"1376511813056094212\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"en\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 0,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 61\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038515177306427484\" ],\n" +
+                "    \"id\" : \"2038515177306427484\",\n" +
+                "    \"text\" : \"@Bayo_Bilisi Our OPC ?  Haa egbon mi\",\n" +
+                "    \"author_id\" : \"1940853490177150977\",\n" +
+                "    \"created_at\" : \"2026-03-30T07:14:26.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"mentions\" : [ {\n" +
+                "        \"start\" : 0,\n" +
+                "        \"end\" : 12,\n" +
+                "        \"username\" : \"Bayo_Bilisi\",\n" +
+                "        \"id\" : \"1884638317787873281\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"ht\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 0,\n" +
+                "      \"reply_count\" : 0,\n" +
+                "      \"like_count\" : 0,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 20\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"edit_history_tweet_ids\" : [ \"2038508492865323024\" ],\n" +
+                "    \"id\" : \"2038508492865323024\",\n" +
+                "    \"text\" : \"#ありがとうTEPPEN\\n\\nTEPPENのコミュニティは優しくてプレイヤーとも呼べないただのおっちゃんユーザーでも様々な人が相手をしてくれた\\n誘ってもらったクランOPCは緩くて居心地がよかった\\n\\n何度も何度も言ったけどTEPPENプレイヤーの民度は高かった\\n居心地がよかった\\nありがとう\\n全てのTEPPENプレイヤー\",\n" +
+                "    \"author_id\" : \"2806769214\",\n" +
+                "    \"created_at\" : \"2026-03-30T06:47:53.000Z\",\n" +
+                "    \"entities\" : {\n" +
+                "      \"hashtags\" : [ {\n" +
+                "        \"start\" : 0,\n" +
+                "        \"end\" : 12,\n" +
+                "        \"tag\" : \"ありがとうTEPPEN\"\n" +
+                "      } ]\n" +
+                "    },\n" +
+                "    \"lang\" : \"ja\",\n" +
+                "    \"public_metrics\" : {\n" +
+                "      \"retweet_count\" : 2,\n" +
+                "      \"reply_count\" : 1,\n" +
+                "      \"like_count\" : 16,\n" +
+                "      \"quote_count\" : 0,\n" +
+                "      \"bookmark_count\" : 0,\n" +
+                "      \"impression_count\" : 182\n" +
+                "    }\n" +
+                "  } ],\n" +
+                "  \"includes\" : {\n" +
+                "    \"media\" : [ {\n" +
+                "      \"url\" : \"https://pbs.twimg.com/media/HEpe9wab0AABrit.jpg\",\n" +
+                "      \"height\" : 1280,\n" +
+                "      \"type\" : \"photo\",\n" +
+                "      \"media_key\" : \"3_2038546196399378432\",\n" +
+                "      \"width\" : 1280\n" +
+                "    }, {\n" +
+                "      \"url\" : \"https://pbs.twimg.com/media/HEpe9wAWIAAt72o.png\",\n" +
+                "      \"height\" : 702,\n" +
+                "      \"type\" : \"photo\",\n" +
+                "      \"media_key\" : \"3_2038546196289953792\",\n" +
+                "      \"width\" : 798\n" +
+                "    }, {\n" +
+                "      \"url\" : \"https://pbs.twimg.com/media/HEpZw7EXEAA_nPT.jpg\",\n" +
+                "      \"height\" : 2000,\n" +
+                "      \"type\" : \"photo\",\n" +
+                "      \"media_key\" : \"3_2038540478363144192\",\n" +
+                "      \"width\" : 800\n" +
+                "    }, {\n" +
+                "      \"url\" : \"https://pbs.twimg.com/media/HEbQPM1a8AA92YD.jpg\",\n" +
+                "      \"height\" : 2701,\n" +
+                "      \"type\" : \"photo\",\n" +
+                "      \"media_key\" : \"3_2037544840993632256\",\n" +
+                "      \"width\" : 2160\n" +
+                "    } ],\n" +
+                "    \"users\" : [ {\n" +
+                "      \"id\" : \"1910008069586862080\",\n" +
+                "      \"name\" : \"Ethan.大质\",\n" +
+                "      \"username\" : \"Zechen_Ethan\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"1569308384544833537\",\n" +
+                "      \"name\" : \"Big BALLS\",\n" +
+                "      \"username\" : \"Amaogudu\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"2009519045910122498\",\n" +
+                "      \"name\" : \"FENGWO\",\n" +
+                "      \"username\" : \"EiAmine71981\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"1481694597126541312\",\n" +
+                "      \"name\" : \"EMPEROR LỌ́GỌ̀\",\n" +
+                "      \"username\" : \"LOSEYIE\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"1969297652698529793\",\n" +
+                "      \"name\" : \"k lin\",\n" +
+                "      \"username\" : \"klin279832\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"755011214439251968\",\n" +
+                "      \"name\" : \"D Vearse\",\n" +
+                "      \"username\" : \"dvearse\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"864704310\",\n" +
+                "      \"name\" : \"OPC España\",\n" +
+                "      \"username\" : \"opcspain\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"1627737072617328664\",\n" +
+                "      \"name\" : \"Icenberg \uD83E\uDDCA\",\n" +
+                "      \"username\" : \"simplykaycee411\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"1940853490177150977\",\n" +
+                "      \"name\" : \"MFAFO\",\n" +
+                "      \"username\" : \"nelhoug\"\n" +
+                "    }, {\n" +
+                "      \"id\" : \"2806769214\",\n" +
+                "      \"name\" : \"ぼぶ(E)@OPCω\",\n" +
+                "      \"username\" : \"ponkotsuban\"\n" +
+                "    } ]\n" +
+                "  },\n" +
+                "  \"meta\" : {\n" +
+                "    \"newest_id\" : \"2038546535810564481\",\n" +
+                "    \"oldest_id\" : \"2038508492865323024\",\n" +
+                "    \"result_count\" : 10,\n" +
+                "    \"next_token\" : \"b26v89c19zqg8o3juehk5kvivays4tefyvs04mdfi5k71\"\n" +
+                "  }\n" +
+                "}";
+
+        TwitterSearchResponseDTO result = objectMapper.readValue(
+                body,
+                TwitterSearchResponseDTO.class
+        );
+
+        // 提取推文信息并转换为素材
+        List<TweetInfo> tweetInfoList = extractTweetInfo(result);
+
+        // 打印每个推文的媒体类型和URL
+        for (TweetInfo info : tweetInfoList) {
+            log.info("推文ID: {}", info.getId());
+            log.info("推文URL: {}", info.getUrl());
+
+            // 获取媒体列表
+            List<TwitterSearchResponseDTO.Media> mediaList = info.getMediaList();
+
+            // 遍历媒体
+            for (TwitterSearchResponseDTO.Media media : mediaList) {
+                log.info("  媒体类型: {}", media.getType());        // photo / video / animated_gif
+                log.info("  媒体URL: {}", media.getUrl());           // 图片直接URL
+                log.info("  预览图: {}", media.getPreviewImageUrl()); // 视频封面
+                log.info("  宽度: {}", media.getWidth());
+                log.info("  高度: {}", media.getHeight());
+            }
+            log.info("---");
+        }
+
+        List<CoreMaterial> materials = convertToMaterials(tweetInfoList);
+
+        /*try {
+            // 校验并修正 maxResults 参数（Twitter API 要求 10-100）
+            if (request.getMaxResults() == null || request.getMaxResults() < 10) {
+                log.warn("maxResults 参数值 [{}] 小于 Twitter API 最小值 10，已修正为 10", request.getMaxResults());
+                request.setMaxResults(10);
+            } else if (request.getMaxResults() > 100) {
+                log.warn("maxResults 参数值 [{}] 大于 Twitter API 最大值 100，已修正为 100", request.getMaxResults());
+                request.setMaxResults(100);
+            }
+
+            // 构建基础 URL
+            String url = twitterApiV2Properties.getBaseUrl() + SEARCH_RECENT_ENDPOINT;
             log.info("调用 Twitter API v2 搜索接口: {}", url);
 
-            // 发送请求
-            HttpResponse<String> response = Unirest.get(url)
-                    .header("Authorization", "Bearer " + twitterApiV2Properties.getBearerToken())
-                    .asString();
+            // 构建请求 - 使用 queryString 方式构建参数
+            kong.unirest.GetRequest getRequest = Unirest.get(url)
+                    .queryString("query", request.getQuery())
+                    .queryString("max_results", request.getMaxResults())
+                    .queryString("tweet.fields", "created_at,author_id,public_metrics,text,attachments,entities,lang")
+                    .queryString("expansions", "attachments.media_keys,author_id")
+                    .queryString("media.fields", "media_key,type,url,preview_image_url,alt_text,duration_ms,width,height")
+                    .header("Authorization", "Bearer " + twitterApiV2Properties.getBearerToken());
+
+            // 添加可选参数
+            if (request.getNextToken() != null && !request.getNextToken().isEmpty()) {
+                getRequest.queryString("next_token", request.getNextToken());
+            }
+            if (request.getStartTime() != null && !request.getStartTime().isEmpty()) {
+                getRequest.queryString("start_time", request.getStartTime());
+            }
+            if (request.getEndTime() != null && !request.getEndTime().isEmpty()) {
+                getRequest.queryString("end_time", request.getEndTime());
+            }
+
+            HttpResponse<String> response = getRequest.asString();
 
             if (response.getStatus() == 200) {
                 TwitterSearchResponseDTO result = objectMapper.readValue(
@@ -86,7 +499,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
         } catch (Exception e) {
             log.error("调用 Twitter API v2 搜索接口失败", e);
             throw new RuntimeException("调用 Twitter API v2 搜索接口失败: " + e.getMessage(), e);
-        }
+        }*/
+
+        return null;
     }
 
     @Override
@@ -98,58 +513,216 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     }
 
     /**
-     * 构建搜索请求 URL
+     * 从响应中获取推文 URL 和对应的媒体信息
      *
-     * @param request 搜索请求参数
-     * @return 构建好的 URL
+     * @param response Twitter API 响应
+     * @return 推文信息列表，包含 URL 和媒体
      */
-    private String buildSearchUrl(TwitterSearchRequestDTO request) {
-        StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(twitterApiV2Properties.getBaseUrl())
-                .append(SEARCH_RECENT_ENDPOINT);
+    public List<TweetInfo> extractTweetInfo(TwitterSearchResponseDTO response) {
+        List<TweetInfo> result = new ArrayList<>();
 
-        // 添加查询参数
-        urlBuilder.append("?query=").append(encodeValue(request.getQuery()));
-
-        // 添加可选参数
-        if (request.getMaxResults() != null) {
-            urlBuilder.append("&max_results=").append(request.getMaxResults());
+        if (response == null || response.getData() == null || response.getData().isEmpty()) {
+            return result;
         }
 
-        if (request.getNextToken() != null && !request.getNextToken().isEmpty()) {
-            urlBuilder.append("&next_token=").append(encodeValue(request.getNextToken()));
+        // 构建用户ID到用户名的映射
+        Map<String, String> userIdToUsername = new HashMap<>();
+        if (response.getIncludes() != null && response.getIncludes().getUsers() != null) {
+            for (TwitterSearchResponseDTO.User user : response.getIncludes().getUsers()) {
+                userIdToUsername.put(user.getId(), user.getUsername());
+            }
         }
 
-        if (request.getTweetFields() != null && !request.getTweetFields().isEmpty()) {
-            urlBuilder.append("&tweet.fields=").append(encodeValue(request.getTweetFields()));
-        } else {
-            // 默认字段
-            urlBuilder.append("&tweet.fields=").append(encodeValue("created_at,author_id,public_metrics,source,lang"));
+        // 构建媒体密钥到媒体信息的映射
+        Map<String, TwitterSearchResponseDTO.Media> mediaKeyToMedia = new HashMap<>();
+        if (response.getIncludes() != null && response.getIncludes().getMedia() != null) {
+            for (TwitterSearchResponseDTO.Media media : response.getIncludes().getMedia()) {
+                mediaKeyToMedia.put(media.getMediaKey(), media);
+            }
         }
 
-        if (request.getExpansions() != null && !request.getExpansions().isEmpty()) {
-            urlBuilder.append("&expansions=").append(encodeValue(request.getExpansions()));
+        // 遍历推文数据
+        for (TweetDTO tweet : response.getData()) {
+            TweetInfo info = new TweetInfo();
+            info.setId(tweet.getId());
+            info.setText(tweet.getText());
+            info.setCreatedAt(tweet.getCreatedAt());
+
+            // 构建推文 URL
+            String authorUsername = userIdToUsername.get(tweet.getAuthorId());
+            info.setUrl(buildTweetUrl(tweet.getId(), authorUsername));
+            info.setAuthorUsername(authorUsername);
+
+            // 获取媒体列表
+            List<TwitterSearchResponseDTO.Media> mediaList = new ArrayList<>();
+            if (tweet.getAttachments() != null && tweet.getAttachments().getMediaKeys() != null) {
+                for (String mediaKey : tweet.getAttachments().getMediaKeys()) {
+                    TwitterSearchResponseDTO.Media media = mediaKeyToMedia.get(mediaKey);
+                    if (media != null) {
+                        mediaList.add(media);
+                    }
+                }
+            }
+            info.setMediaList(mediaList);
+
+            result.add(info);
         }
 
-        if (request.getStartTime() != null && !request.getStartTime().isEmpty()) {
-            urlBuilder.append("&start_time=").append(encodeValue(request.getStartTime()));
-        }
-
-        if (request.getEndTime() != null && !request.getEndTime().isEmpty()) {
-            urlBuilder.append("&end_time=").append(encodeValue(request.getEndTime()));
-        }
-
-        return urlBuilder.toString();
+        return result;
     }
 
     /**
-     * URL 编码
+     * 推文信息封装类
      */
-    private String encodeValue(String value) {
-        try {
-            return URLEncoder.encode(value, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("URL 编码失败", e);
+    public static class TweetInfo {
+        private String id;
+        private String text;
+        private String url;
+        private String createdAt;
+        private String authorUsername;
+        private List<TwitterSearchResponseDTO.Media> mediaList;
+
+        public String getId() {
+            return id;
         }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(String createdAt) {
+            this.createdAt = createdAt;
+        }
+
+        public String getAuthorUsername() {
+            return authorUsername;
+        }
+
+        public void setAuthorUsername(String authorUsername) {
+            this.authorUsername = authorUsername;
+        }
+
+        public List<TwitterSearchResponseDTO.Media> getMediaList() {
+            return mediaList;
+        }
+
+        public void setMediaList(List<TwitterSearchResponseDTO.Media> mediaList) {
+            this.mediaList = mediaList;
+        }
+
+        /**
+         * 获取媒体 URL 列表（只包含图片/视频的直接 URL）
+         */
+        public List<String> getMediaUrls() {
+            if (mediaList == null) {
+                return new ArrayList<>();
+            }
+            return mediaList.stream()
+                    .map(media -> media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl())
+                    .filter(url -> url != null)
+                    .collect(Collectors.toList());
+        }
+
+        @Override
+        public String toString() {
+            return "TweetInfo{" +
+                    "id='" + id + '\'' +
+                    ", url='" + url + '\'' +
+                    ", authorUsername='" + authorUsername + '\'' +
+                    ", mediaCount=" + (mediaList != null ? mediaList.size() : 0) +
+                    '}';
+        }
+    }
+
+    /**
+     * 将推文信息列表转换为素材列表
+     *
+     * @param tweetInfoList 推文信息列表
+     * @return 素材列表
+     */
+    public List<CoreMaterial> convertToMaterials(List<TweetInfo> tweetInfoList) {
+        List<CoreMaterial> materials = new ArrayList<>();
+
+        for (TweetInfo info : tweetInfoList) {
+            CoreMaterial material = new CoreMaterial();
+
+            // 设置原ID
+            material.setOriginalId(info.getId());
+
+            // 设置内容
+            material.setContent(info.getText());
+
+            // 设置标题（取前50字符）
+            String title = info.getText() != null && !info.getText().isEmpty()
+                    ? (info.getText().length() > 50 ? info.getText().substring(0, 50) + "..." : info.getText())
+                    : "Twitter 内容";
+            material.setTitle(title);
+
+            // 设置作者
+            material.setAuthor(info.getAuthorUsername());
+
+            // 设置原链接
+            material.setOriginalUrl(info.getUrl());
+
+            // 设置来源为 Twitter
+            material.setSource("twitter");
+
+            // 设置发布时间
+            if (info.getCreatedAt() != null) {
+                try {
+                    Instant instant = Instant.parse(info.getCreatedAt());
+                    material.setPublishTime(instant);
+                } catch (Exception e) {
+                    material.setPublishTime(Instant.now());
+                }
+            } else {
+                material.setPublishTime(Instant.now());
+            }
+
+            // 设置内容类型
+            if (info.getMediaList() != null && !info.getMediaList().isEmpty()) {
+                String mediaType = info.getMediaList().get(0).getType();
+                if ("video".equals(mediaType) || "animated_gif".equals(mediaType)) {
+                    material.setContentType("video");
+                    material.setVideoUrl(info.getMediaUrls().get(0));
+                } else {
+                    material.setContentType("image");
+                }
+                // 设置封面图为第一张媒体
+                material.setCoverImage(info.getMediaUrls().get(0));
+            } else {
+                material.setContentType("text");
+            }
+
+            // 设置默认状态为下线
+            material.setStatus("1");
+
+            // 设置默认套餐类型为普通会员
+            material.setPackageType(1);
+
+            materials.add(material);
+        }
+
+        return materials;
     }
 }

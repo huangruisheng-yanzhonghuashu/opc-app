@@ -29,6 +29,21 @@ public class TwitterApiV2Properties {
      */
     private int timeout = 30000;
 
+    /**
+     * 是否启用代理
+     */
+    private boolean proxyEnabled = false;
+
+    /**
+     * 代理主机
+     */
+    private String proxyHost = "localhost";
+
+    /**
+     * 代理端口
+     */
+    private int proxyPort = 11301;
+
     public String getBearerToken() {
         return bearerToken;
     }
@@ -51,5 +66,29 @@ public class TwitterApiV2Properties {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    public boolean isProxyEnabled() {
+        return proxyEnabled;
+    }
+
+    public void setProxyEnabled(boolean proxyEnabled) {
+        this.proxyEnabled = proxyEnabled;
+    }
+
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public int getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        this.proxyPort = proxyPort;
     }
 }

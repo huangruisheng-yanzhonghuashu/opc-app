@@ -23,12 +23,6 @@ public class TwitterSearchRequestDTO {
     @Schema(description = "分页令牌", example = "b26v89c19zqg8o3fosbs7l4ecm0k8v0mxv7nucx1d0e9p")
     private String nextToken;
 
-    @Schema(description = "返回的推文字段，逗号分隔", example = "created_at,author_id,public_metrics")
-    private String tweetFields;
-
-    @Schema(description = "扩展数据，如 author_id", example = "author_id")
-    private String expansions;
-
     @Schema(description = "开始时间（ISO 8601格式）", example = "2024-01-01T00:00:00Z")
     private String startTime;
 
@@ -57,22 +51,6 @@ public class TwitterSearchRequestDTO {
 
     public void setNextToken(String nextToken) {
         this.nextToken = nextToken;
-    }
-
-    public String getTweetFields() {
-        return tweetFields;
-    }
-
-    public void setTweetFields(String tweetFields) {
-        this.tweetFields = tweetFields;
-    }
-
-    public String getExpansions() {
-        return expansions;
-    }
-
-    public void setExpansions(String expansions) {
-        this.expansions = expansions;
     }
 
     public String getStartTime() {

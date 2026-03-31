@@ -1,5 +1,6 @@
 package com.opc.web.service.twitter.v2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchResponseDTO;
 
@@ -23,7 +24,7 @@ public interface TwitterApiV2Service {
      * @param request 搜索请求参数
      * @return 搜索响应结果
      */
-    TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request);
+    TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request) throws JsonProcessingException;
 
     /**
      * 构建 Twitter 推文 URL

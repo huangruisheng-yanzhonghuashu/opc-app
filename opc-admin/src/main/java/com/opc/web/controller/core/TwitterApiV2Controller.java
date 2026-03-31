@@ -80,8 +80,6 @@ public class TwitterApiV2Controller extends BaseController {
             request.setQuery(query);
             request.setMaxResults(maxResults);
             request.setNextToken(nextToken);
-            request.setTweetFields(tweetFields);
-            request.setExpansions(expansions);
             request.setStartTime(startTime);
             request.setEndTime(endTime);
 
@@ -128,8 +126,6 @@ public class TwitterApiV2Controller extends BaseController {
             request.setMaxResults(maxResults);
             request.setStartTime(startTime);
             request.setEndTime(endTime);
-            // 确保获取必要的字段
-            request.setTweetFields("created_at,author_id,public_metrics,source,lang");
 
             // 调用服务搜索推文
             TwitterSearchResponseDTO response = twitterApiV2Service.searchRecentTweets(request);

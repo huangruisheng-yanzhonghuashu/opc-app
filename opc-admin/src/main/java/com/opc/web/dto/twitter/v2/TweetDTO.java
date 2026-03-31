@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.List;
+
 /**
  * Twitter 推文数据 DTO
  * <p>
@@ -52,6 +54,402 @@ public class TweetDTO {
     @Schema(description = "对话ID", example = "1234567890123456789")
     @JsonProperty("conversation_id")
     private String conversationId;
+
+    @Schema(description = "附件（媒体引用）")
+    private Attachments attachments;
+
+    @Schema(description = "实体信息（URL、话题标签等）")
+    private Entities entities;
+
+    /**
+     * 附件内部类
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Attachments {
+
+        @Schema(description = "媒体密钥列表")
+        @JsonProperty("media_keys")
+        private List<String> mediaKeys;
+
+        @Schema(description = "投票ID列表")
+        @JsonProperty("poll_ids")
+        private List<String> pollIds;
+
+        public List<String> getMediaKeys() {
+            return mediaKeys;
+        }
+
+        public void setMediaKeys(List<String> mediaKeys) {
+            this.mediaKeys = mediaKeys;
+        }
+
+        public List<String> getPollIds() {
+            return pollIds;
+        }
+
+        public void setPollIds(List<String> pollIds) {
+            this.pollIds = pollIds;
+        }
+    }
+
+    /**
+     * 实体信息内部类
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Entities {
+
+        @Schema(description = "URL列表")
+        private List<UrlEntity> urls;
+
+        @Schema(description = "话题标签列表")
+        private List<HashtagEntity> hashtags;
+
+        @Schema(description = "提及用户列表")
+        private List<MentionEntity> mentions;
+
+        @Schema(description = "媒体列表")
+        private List<MediaEntity> media;
+
+        public List<UrlEntity> getUrls() {
+            return urls;
+        }
+
+        public void setUrls(List<UrlEntity> urls) {
+            this.urls = urls;
+        }
+
+        public List<HashtagEntity> getHashtags() {
+            return hashtags;
+        }
+
+        public void setHashtags(List<HashtagEntity> hashtags) {
+            this.hashtags = hashtags;
+        }
+
+        public List<MentionEntity> getMentions() {
+            return mentions;
+        }
+
+        public void setMentions(List<MentionEntity> mentions) {
+            this.mentions = mentions;
+        }
+
+        public List<MediaEntity> getMedia() {
+            return media;
+        }
+
+        public void setMedia(List<MediaEntity> media) {
+            this.media = media;
+        }
+    }
+
+    /**
+     * URL实体内部类
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class UrlEntity {
+
+        @Schema(description = "起始位置")
+        private Integer start;
+
+        @Schema(description = "结束位置")
+        private Integer end;
+
+        @Schema(description = "URL")
+        private String url;
+
+        @Schema(description = "扩展URL")
+        @JsonProperty("expanded_url")
+        private String expandedUrl;
+
+        @Schema(description = "显示URL")
+        @JsonProperty("display_url")
+        private String displayUrl;
+
+        @Schema(description = "标题")
+        private String title;
+
+        @Schema(description = "描述")
+        private String description;
+
+        @Schema(description = "图片")
+        private List<String> images;
+
+        @Schema(description = "状态码")
+        private Integer status;
+
+        @Schema(description = "是否展开")
+        @JsonProperty("unwound_url")
+        private String unwoundUrl;
+
+        public Integer getStart() {
+            return start;
+        }
+
+        public void setStart(Integer start) {
+            this.start = start;
+        }
+
+        public Integer getEnd() {
+            return end;
+        }
+
+        public void setEnd(Integer end) {
+            this.end = end;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getExpandedUrl() {
+            return expandedUrl;
+        }
+
+        public void setExpandedUrl(String expandedUrl) {
+            this.expandedUrl = expandedUrl;
+        }
+
+        public String getDisplayUrl() {
+            return displayUrl;
+        }
+
+        public void setDisplayUrl(String displayUrl) {
+            this.displayUrl = displayUrl;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public List<String> getImages() {
+            return images;
+        }
+
+        public void setImages(List<String> images) {
+            this.images = images;
+        }
+
+        public Integer getStatus() {
+            return status;
+        }
+
+        public void setStatus(Integer status) {
+            this.status = status;
+        }
+
+        public String getUnwoundUrl() {
+            return unwoundUrl;
+        }
+
+        public void setUnwoundUrl(String unwoundUrl) {
+            this.unwoundUrl = unwoundUrl;
+        }
+    }
+
+    /**
+     * 话题标签实体内部类
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class HashtagEntity {
+
+        @Schema(description = "起始位置")
+        private Integer start;
+
+        @Schema(description = "结束位置")
+        private Integer end;
+
+        @Schema(description = "标签文本")
+        private String tag;
+
+        public Integer getStart() {
+            return start;
+        }
+
+        public void setStart(Integer start) {
+            this.start = start;
+        }
+
+        public Integer getEnd() {
+            return end;
+        }
+
+        public void setEnd(Integer end) {
+            this.end = end;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(String tag) {
+            this.tag = tag;
+        }
+    }
+
+    /**
+     * 提及用户实体内部类
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class MentionEntity {
+
+        @Schema(description = "起始位置")
+        private Integer start;
+
+        @Schema(description = "结束位置")
+        private Integer end;
+
+        @Schema(description = "用户名")
+        private String username;
+
+        @Schema(description = "用户ID")
+        private String id;
+
+        public Integer getStart() {
+            return start;
+        }
+
+        public void setStart(Integer start) {
+            this.start = start;
+        }
+
+        public Integer getEnd() {
+            return end;
+        }
+
+        public void setEnd(Integer end) {
+            this.end = end;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+    }
+
+    /**
+     * 媒体实体内部类
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class MediaEntity {
+
+        @Schema(description = "媒体密钥")
+        @JsonProperty("media_key")
+        private String mediaKey;
+
+        @Schema(description = "类型")
+        private String type;
+
+        @Schema(description = "起始位置")
+        private Integer start;
+
+        @Schema(description = "结束位置")
+        private Integer end;
+
+        @Schema(description = "URL")
+        private String url;
+
+        @Schema(description = "预览图片URL")
+        @JsonProperty("preview_image_url")
+        private String previewImageUrl;
+
+        @Schema(description = "宽度")
+        private Integer width;
+
+        @Schema(description = "高度")
+        private Integer height;
+
+        public String getMediaKey() {
+            return mediaKey;
+        }
+
+        public void setMediaKey(String mediaKey) {
+            this.mediaKey = mediaKey;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public Integer getStart() {
+            return start;
+        }
+
+        public void setStart(Integer start) {
+            this.start = start;
+        }
+
+        public Integer getEnd() {
+            return end;
+        }
+
+        public void setEnd(Integer end) {
+            this.end = end;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getPreviewImageUrl() {
+            return previewImageUrl;
+        }
+
+        public void setPreviewImageUrl(String previewImageUrl) {
+            this.previewImageUrl = previewImageUrl;
+        }
+
+        public Integer getWidth() {
+            return width;
+        }
+
+        public void setWidth(Integer width) {
+            this.width = width;
+        }
+
+        public Integer getHeight() {
+            return height;
+        }
+
+        public void setHeight(Integer height) {
+            this.height = height;
+        }
+    }
 
     /**
      * 公开指标内部类
@@ -210,5 +608,21 @@ public class TweetDTO {
 
     public void setConversationId(String conversationId) {
         this.conversationId = conversationId;
+    }
+
+    public Attachments getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(Attachments attachments) {
+        this.attachments = attachments;
+    }
+
+    public Entities getEntities() {
+        return entities;
+    }
+
+    public void setEntities(Entities entities) {
+        this.entities = entities;
     }
 }
