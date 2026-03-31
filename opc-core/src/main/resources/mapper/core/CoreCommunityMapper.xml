@@ -9,6 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="name"                column="name"                 />
 		<result property="image"               column="image"                />
 		<result property="address"             column="address"              />
+		<result property="province"            column="province"             />
 		<result property="longitude"           column="longitude"            />
 		<result property="latitude"            column="latitude"             />
 		<result property="details"             column="details"              />
@@ -26,7 +27,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="selectCommunityVo">
-        select id, name, image, address, longitude, latitude, details,
+        select id, name, image, address, province, longitude, latitude, details,
                want_to_go_count, visited_count, review_count, rating,
                status, sort_order, create_by, create_time, update_by, update_time, remark
 		from core_community
@@ -40,6 +41,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			</if>
 			<if test="address != null and address != ''">
 				AND address like concat('%', #{address}, '%')
+			</if>
+			<if test="province != null and province != ''">
+				AND province = #{province}
 			</if>
 			<if test="status != null and status != ''">
 				AND status = #{status}
@@ -64,6 +68,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="name != null and name != ''">name,</if>
 			<if test="image != null">image,</if>
 			<if test="address != null">address,</if>
+			<if test="province != null">province,</if>
 			<if test="longitude != null">longitude,</if>
 			<if test="latitude != null">latitude,</if>
 			<if test="details != null">details,</if>
@@ -81,6 +86,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="name != null and name != ''">#{name},</if>
 			<if test="image != null">#{image},</if>
 			<if test="address != null">#{address},</if>
+			<if test="province != null">#{province},</if>
 			<if test="longitude != null">#{longitude},</if>
 			<if test="latitude != null">#{latitude},</if>
 			<if test="details != null">#{details},</if>
@@ -102,6 +108,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="name != null and name != ''">name = #{name},</if>
  			<if test="image != null">image = #{image},</if>
  			<if test="address != null">address = #{address},</if>
+ 			<if test="province != null">province = #{province},</if>
  			<if test="longitude != null">longitude = #{longitude},</if>
  			<if test="latitude != null">latitude = #{latitude},</if>
  			<if test="details != null">details = #{details},</if>

@@ -28,6 +28,10 @@ public class CoreCommunity extends BaseEntity
     @Size(min = 0, max = 255, message = "社区地址长度不能超过255个字符")
     private String address;
 
+    @Excel(name = "省份")
+    @Size(min = 0, max = 50, message = "省份长度不能超过50个字符")
+    private String province;
+
     @Excel(name = "经度")
     private BigDecimal longitude;
 
@@ -93,6 +97,16 @@ public class CoreCommunity extends BaseEntity
     public void setAddress(String address)
     {
         this.address = address;
+    }
+
+    public String getProvince()
+    {
+        return province;
+    }
+
+    public void setProvince(String province)
+    {
+        this.province = province;
     }
 
     public BigDecimal getLongitude()
@@ -192,6 +206,7 @@ public class CoreCommunity extends BaseEntity
             .append("name", getName())
             .append("image", getImage())
             .append("address", getAddress())
+            .append("province", getProvince())
             .append("longitude", getLongitude())
             .append("latitude", getLatitude())
             .append("details", getDetails())

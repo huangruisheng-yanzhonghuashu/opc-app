@@ -19,6 +19,21 @@
                @keyup.enter="handleQuery"
             />
          </el-form-item>
+         <el-form-item label="省份" prop="province">
+            <el-select
+               v-model="queryParams.province"
+               placeholder="请选择省份"
+               clearable
+               style="width: 200px"
+            >
+               <el-option
+                  v-for="item in provinceOptions"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+               />
+            </el-select>
+         </el-form-item>
          <el-form-item label="状态" prop="status">
             <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 200px">
                <el-option
@@ -95,6 +110,7 @@
             </template>
          </el-table-column>
          <el-table-column label="社区名" align="center" prop="name" :show-overflow-tooltip="true" />
+         <el-table-column label="省份" align="center" prop="province" width="100" />
          <el-table-column label="社区地址" align="center" prop="address" :show-overflow-tooltip="true" />
          <el-table-column label="经纬度" align="center" width="180">
             <template #default="scope">
@@ -164,7 +180,19 @@
                </el-col>
             </el-row>
             <el-row>
-               <el-col :span="24">
+               <el-col :span="12">
+                  <el-form-item label="省份" prop="province">
+                     <el-select v-model="form.province" placeholder="请选择省份" style="width: 100%">
+                        <el-option
+                           v-for="item in provinceOptions"
+                           :key="item"
+                           :label="item"
+                           :value="item"
+                        />
+                     </el-select>
+                  </el-form-item>
+               </el-col>
+               <el-col :span="12">
                   <el-form-item label="社区地址" prop="address">
                      <el-input v-model="form.address" placeholder="请输入社区地址" />
                   </el-form-item>
@@ -251,7 +279,8 @@
                   <el-icon size="32"><Picture /></el-icon>
                </div>
             </el-descriptions-item>
-            <el-descriptions-item label="社区地址" :span="2">{{ detailData.address || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="省份" :span="1">{{ detailData.province || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="社区地址" :span="1">{{ detailData.address || '-' }}</el-descriptions-item>
             <el-descriptions-item label="经度" :span="1">{{ detailData.longitude || '-' }}</el-descriptions-item>
             <el-descriptions-item label="纬度" :span="1">{{ detailData.latitude || '-' }}</el-descriptions-item>
             <el-descriptions-item label="想去数" :span="1">{{ detailData.wantToGoCount || 0 }}</el-descriptions-item>
@@ -287,6 +316,44 @@ const { sys_normal_disable } = proxy.useDict("sys_normal_disable")
 
 const baseUrl = import.meta.env.VITE_APP_BASE_API
 
+// 省份选项
+const provinceOptions = [
+  '北京市',
+  '天津市',
+  '河北省',
+  '山西省',
+  '内蒙古自治区',
+  '辽宁省',
+  '吉林省',
+  '黑龙江省',
+  '上海市',
+  '江苏省',
+  '浙江省',
+  '安徽省',
+  '福建省',
+  '江西省',
+  '山东省',
+  '河南省',
+  '湖北省',
+  '湖南省',
+  '广东省',
+  '广西壮族自治区',
+  '海南省',
+  '重庆市',
+  '四川省',
+  '贵州省',
+  '云南省',
+  '西藏自治区',
+  '陕西省',
+  '甘肃省',
+  '青海省',
+  '宁夏回族自治区',
+  '新疆维吾尔自治区',
+  '台湾省',
+  '香港特别行政区',
+  '澳门特别行政区'
+]
+
 const communityList = ref([])
 const open = ref(false)
 const detailOpen = ref(false)
@@ -306,6 +373,7 @@ const data = reactive({
     pageSize: 10,
     name: undefined,
     address: undefined,
+    province: undefined,
     status: undefined
   },
   rules: {
@@ -345,6 +413,7 @@ function reset() {
     name: undefined,
     image: undefined,
     address: undefined,
+    province: undefined,
     longitude: undefined,
     latitude: undefined,
     details: undefined,

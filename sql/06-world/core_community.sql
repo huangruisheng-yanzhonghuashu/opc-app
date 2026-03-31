@@ -8,6 +8,7 @@ create table core_community
     name                  varchar(100) not null comment '社区名',
     image                 varchar(500) default null comment '社区图片',
     address               varchar(255) default null comment '社区地址',
+    province              varchar(50)  default null comment '省份',
     longitude             decimal(10, 7) default null comment '经度',
     latitude              decimal(10, 7) default null comment '纬度',
     details               text         default null comment '相关详情',

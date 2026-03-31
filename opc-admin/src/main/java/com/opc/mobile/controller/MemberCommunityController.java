@@ -2,8 +2,9 @@ package com.opc.mobile.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import com.github.pagehelper.PageHelper;
 import com.opc.mobile.vo.CoreCommunityVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.opc.common.annotation.MemberLogin;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
-import com.opc.common.core.page.TableDataInfo;
 import com.opc.core.domain.CoreCommunity;
 import com.opc.core.domain.CoreCommunityReview;
 import com.opc.core.domain.CoreCommunityVisited;
@@ -54,18 +54,25 @@ public class MemberCommunityController extends BaseController
     @Autowired
     private MemberTokenService memberTokenService;
 
-    @Operation(summary = "社区列表", description = "分页查询社区列表")
+    @Operation(summary = "社区列表", description = "查询全部社区列表，按省份分组")
     @PostMapping("/list")
-    public TableDataInfo list(@RequestBody CommunityQueryDTO dto)
+    public AjaxResult list(@RequestBody CommunityQueryDTO dto)
     {
-        PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
         CoreCommunity community = new CoreCommunity();
         if (dto != null) {
             BeanUtils.copyProperties(dto, community);
         }
         community.setStatus("0");
         List<CoreCommunity> list = communityService.selectCommunityList(community);
-        return getDataTable(list);
+
+        // 按省份分组
+        Map<String, List<CoreCommunity>> groupedByProvince = list.stream()
+                .collect(Collectors.groupingBy(
+                        c -> c.getProvince() != null ? c.getProvince() : "其他",
+                        Collectors.toList()
+                ));
+
+        return AjaxResult.success(groupedByProvince);
     }
 
     @Operation(summary = "社区详情", description = "根据社区ID获取详细信息，需要会员登录")
