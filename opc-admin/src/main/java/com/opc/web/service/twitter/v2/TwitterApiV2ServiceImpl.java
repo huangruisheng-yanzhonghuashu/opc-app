@@ -2,7 +2,9 @@ package com.opc.web.service.twitter.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opc.common.config.SopConfig;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.service.ICoreMaterialService;
 import com.opc.web.config.twitter.v2.TwitterApiV2Properties;
 import com.opc.web.dto.twitter.v2.TweetDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
@@ -18,12 +20,25 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -45,6 +60,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
 
     @Autowired
     private TwitterApiV2Properties twitterApiV2Properties;
+
+    @Autowired
+    private ICoreMaterialService materialService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -423,7 +441,7 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
         // 提取推文信息并转换为素材
         List<TweetInfo> tweetInfoList = extractTweetInfo(result);
 
-        // 打印每个推文的媒体类型和URL
+        // 打印每个推文的媒体类型和URL，并下载媒体文件
         for (TweetInfo info : tweetInfoList) {
             log.info("推文ID: {}", info.getId());
             log.info("推文URL: {}", info.getUrl());
@@ -431,18 +449,54 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             // 获取媒体列表
             List<TwitterSearchResponseDTO.Media> mediaList = info.getMediaList();
 
-            // 遍历媒体
+            // 初始化URL映射
+            Map<String, String> urlMapping = new HashMap<>();
+
+            // 遍历媒体并下载
             for (TwitterSearchResponseDTO.Media media : mediaList) {
                 log.info("  媒体类型: {}", media.getType());        // photo / video / animated_gif
                 log.info("  媒体URL: {}", media.getUrl());           // 图片直接URL
                 log.info("  预览图: {}", media.getPreviewImageUrl()); // 视频封面
                 log.info("  宽度: {}", media.getWidth());
                 log.info("  高度: {}", media.getHeight());
+
+                // 下载媒体文件
+                String mediaUrl = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
+                if (mediaUrl != null) {
+                    String fileName = generateFileName(media);
+                    String localPath = downloadMedia(mediaUrl, fileName);
+                    if (localPath != null) {
+                        urlMapping.put(mediaUrl, localPath);
+                        log.info("  已保存到: {}", localPath);
+                    }
+                }
             }
+
+            // 设置URL映射到TweetInfo
+            info.setMediaUrlToLocalPath(urlMapping);
             log.info("---");
         }
 
         List<CoreMaterial> materials = convertToMaterials(tweetInfoList);
+
+        // 保存到数据库
+        int savedCount = 0;
+        for (CoreMaterial material : materials) {
+            try {
+                // 检查是否已存在（根据 originalId 去重）
+                CoreMaterial existMaterial = materialService.selectMaterialByOriginalId(material.getOriginalId());
+                if (existMaterial == null) {
+                    materialService.insertMaterial(material);
+                    savedCount++;
+                    log.info("素材已保存到数据库，originalId: {}", material.getOriginalId());
+                } else {
+                    log.info("素材已存在，跳过保存，originalId: {}", material.getOriginalId());
+                }
+            } catch (Exception e) {
+                log.error("保存素材到数据库失败，originalId: {}", material.getOriginalId(), e);
+            }
+        }
+        log.info("共保存 {} 条素材到数据库", savedCount);
 
         /*try {
             // 校验并修正 maxResults 参数（Twitter API 要求 10-100）
@@ -581,6 +635,8 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
         private String createdAt;
         private String authorUsername;
         private List<TwitterSearchResponseDTO.Media> mediaList;
+        /** 媒体URL到本地路径的映射 */
+        private Map<String, String> mediaUrlToLocalPath;
 
         public String getId() {
             return id;
@@ -630,6 +686,14 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             this.mediaList = mediaList;
         }
 
+        public Map<String, String> getMediaUrlToLocalPath() {
+            return mediaUrlToLocalPath;
+        }
+
+        public void setMediaUrlToLocalPath(Map<String, String> mediaUrlToLocalPath) {
+            this.mediaUrlToLocalPath = mediaUrlToLocalPath;
+        }
+
         /**
          * 获取媒体 URL 列表（只包含图片/视频的直接 URL）
          */
@@ -669,8 +733,32 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             // 设置原ID
             material.setOriginalId(info.getId());
 
-            // 设置内容
-            material.setContent(info.getText());
+            // 设置内容 - 移除推文中的 t.co URL，在末尾添加图片/视频HTML
+            String content = info.getText();
+            if (content != null) {
+                // 移除 t.co 短链接（通常是推文末尾的媒体链接）
+                content = content.replaceAll("\\s*https?://t\\.co/\\w+\\s*$", "");
+
+                // 如果有媒体文件，在末尾添加 HTML 标签
+                if (info.getMediaUrlToLocalPath() != null && !info.getMediaUrlToLocalPath().isEmpty()) {
+                    StringBuilder mediaHtml = new StringBuilder();
+                    for (Map.Entry<String, String> entry : info.getMediaUrlToLocalPath().entrySet()) {
+                        String localPath = entry.getValue();
+                        // 获取媒体类型
+                        String mediaType = getMediaTypeByUrl(entry.getKey(), info.getMediaList());
+
+                        if ("video".equals(mediaType) || "animated_gif".equals(mediaType)) {
+                            // 视频使用 video 标签
+                            mediaHtml.append("<video src=\"").append(localPath).append("\" controls style=\"max-width:100%;\"></video><br>");
+                        } else {
+                            // 图片使用 img 标签
+                            mediaHtml.append("<img src=\"").append(localPath).append("\" style=\"max-width:100%;\" /><br>");
+                        }
+                    }
+                    content = content + "<br><br>" + mediaHtml.toString();
+                }
+            }
+            material.setContent(content);
 
             // 设置标题（取前50字符）
             String title = info.getText() != null && !info.getText().isEmpty()
@@ -702,14 +790,20 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             // 设置内容类型
             if (info.getMediaList() != null && !info.getMediaList().isEmpty()) {
                 String mediaType = info.getMediaList().get(0).getType();
+                // 获取第一张媒体的本地路径
+                String firstMediaUrl = info.getMediaUrls().get(0);
+                String localPath = info.getMediaUrlToLocalPath() != null
+                        ? info.getMediaUrlToLocalPath().get(firstMediaUrl)
+                        : null;
+
                 if ("video".equals(mediaType) || "animated_gif".equals(mediaType)) {
                     material.setContentType("video");
-                    material.setVideoUrl(info.getMediaUrls().get(0));
+                    material.setVideoUrl(localPath != null ? localPath : firstMediaUrl);
                 } else {
                     material.setContentType("image");
                 }
-                // 设置封面图为第一张媒体
-                material.setCoverImage(info.getMediaUrls().get(0));
+                // 设置封面图为本地路径
+                material.setCoverImage(localPath != null ? localPath : firstMediaUrl);
             } else {
                 material.setContentType("text");
             }
@@ -724,5 +818,145 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
         }
 
         return materials;
+    }
+
+    /**
+     * 根据原始URL获取媒体类型
+     */
+    private String getMediaTypeByUrl(String url, List<TwitterSearchResponseDTO.Media> mediaList) {
+        if (mediaList == null) {
+            return "photo";
+        }
+        for (TwitterSearchResponseDTO.Media media : mediaList) {
+            String mediaUrl = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
+            if (url.equals(mediaUrl)) {
+                return media.getType();
+            }
+        }
+        return "photo";
+    }
+
+    /**
+     * 生成文件名
+     */
+    private String generateFileName(TwitterSearchResponseDTO.Media media) {
+        String extension = getExtension(media);
+        return UUID.randomUUID().toString() + "." + extension;
+    }
+
+    /**
+     * 根据媒体类型获取扩展名
+     */
+    private String getExtension(TwitterSearchResponseDTO.Media media) {
+        String url = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
+        if (url == null) {
+            return "jpg";
+        }
+
+        // 从URL中提取扩展名
+        if (url.contains(".jpg") || url.contains(".jpeg")) {
+            return "jpg";
+        } else if (url.contains(".png")) {
+            return "png";
+        } else if (url.contains(".gif")) {
+            return "gif";
+        } else if (url.contains(".mp4")) {
+            return "mp4";
+        }
+
+        // 根据类型默认
+        if ("video".equals(media.getType())) {
+            return "mp4";
+        } else if ("animated_gif".equals(media.getType())) {
+            return "gif";
+        }
+        return "jpg";
+    }
+
+    /**
+     * 下载媒体文件到上传路径
+     * @return 可访问的URL路径（通过serverUrl组装）
+     */
+    private String downloadMedia(String mediaUrl, String fileName) {
+        try {
+            // 使用系统上传路径 + twitter/日期 作为保存目录
+            String basePath = SopConfig.getUploadPath();
+            String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+            String saveDir = basePath + "/twitter/" + dateDir;
+
+            Path dirPath = Paths.get(saveDir);
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath);
+            }
+
+            // 本地文件路径 - 使用 Paths.get 自动处理分隔符
+            String localPath = Paths.get(saveDir, fileName).toString();
+
+            // 下载文件（使用代理）
+            URL url = new URL(mediaUrl);
+            InputStream in;
+            if (twitterApiV2Properties.isProxyEnabled()) {
+                // 使用代理
+                java.net.Proxy proxy = new java.net.Proxy(
+                        java.net.Proxy.Type.HTTP,
+                        new InetSocketAddress(twitterApiV2Properties.getProxyHost(),
+                                twitterApiV2Properties.getProxyPort()));
+                in = url.openConnection(proxy).getInputStream();
+            } else {
+                // 直接连接
+                in = url.openStream();
+            }
+
+            try (ReadableByteChannel rbc = Channels.newChannel(in);
+                 FileOutputStream fos = new FileOutputStream(localPath)) {
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            }
+
+            // 转换为可访问的URL
+            String accessUrl = convertToAccessUrl(localPath);
+            log.info("媒体文件下载成功: {}, 访问URL: {}", localPath, accessUrl);
+            return accessUrl;
+        } catch (Exception e) {
+            log.error("下载媒体文件失败: {}", mediaUrl, e);
+            return null;
+        }
+    }
+
+    /**
+     * 将本地路径转换为可访问的URL
+     * 例如: /home/ubuntu/uploadPath/upload/twitter/2026/03/31/xxx.jpg
+     * 转为: http://192.168.1.7:8080/profile/upload/twitter/2026/03/31/xxx.jpg
+     */
+    private String convertToAccessUrl(String localPath) {
+        String serverUrl = SopConfig.getServerUrl();
+
+        // 处理路径分隔符，统一使用 /
+        String normalizedPath = localPath.replace("\\", "/");
+
+        // 提取 upload 之后的相对路径
+        // /home/ubuntu/uploadPath/upload/twitter/2026/03/31/xxx.jpg
+        // -> /upload/twitter/2026/03/31/xxx.jpg
+        String relativePath = normalizedPath;
+        int uploadIndex = normalizedPath.indexOf("/upload/");
+        if (uploadIndex != -1) {
+            relativePath = normalizedPath.substring(uploadIndex);
+        }
+
+        // 确保 relativePath 以 / 开头
+        if (!relativePath.startsWith("/")) {
+            relativePath = "/" + relativePath;
+        }
+
+        // 拼接 serverUrl 和 /profile + 相对路径
+        if (serverUrl != null && !serverUrl.isEmpty()) {
+            // 去掉 serverUrl 末尾的 /
+            if (serverUrl.endsWith("/")) {
+                serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
+            }
+            return serverUrl + "/profile" + relativePath;
+        }
+
+        // 如果没有配置 serverUrl，返回带 /profile 前缀的路径
+        return "/profile" + relativePath;
     }
 }
