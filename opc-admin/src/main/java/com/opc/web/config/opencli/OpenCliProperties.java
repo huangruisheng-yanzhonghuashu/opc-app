@@ -1,0 +1,124 @@
+package com.opc.web.config.opencli;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+/**
+ * OpenCLI 配置属性
+ * <p>
+ * 从 application-opencli.yml 读取 OpenCLI 相关配置，
+ * 包括代理设置等。
+ * </p>
+ *
+ * @author opc
+ * @since 3.9.1
+ */
+@Component
+@ConfigurationProperties(prefix = "opencli")
+public class OpenCliProperties {
+
+    /**
+     * 代理配置
+     */
+    private ProxyConfig proxy = new ProxyConfig();
+
+    public ProxyConfig getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(ProxyConfig proxy) {
+        this.proxy = proxy;
+    }
+
+    /**
+     * 获取完整的代理 URL
+     *
+     * @return 代理地址，如 http://127.0.0.1:7890，如果未启用则返回 null
+     */
+    public String getProxyUrl() {
+        if (proxy == null || !proxy.isEnabled()) {
+            return null;
+        }
+        // 如果配置了完整的 url，优先使用
+        if (proxy.getUrl() != null && !proxy.getUrl().isEmpty()) {
+            return proxy.getUrl();
+        }
+        // 否则根据 host/port/protocol 构建
+        if (proxy.getHost() == null || proxy.getHost().isEmpty()) {
+            return null;
+        }
+        String protocol = proxy.getProtocol() != null ? proxy.getProtocol() : "http";
+        int port = proxy.getPort() > 0 ? proxy.getPort() : 7890;
+        return String.format("%s://%s:%d", protocol, proxy.getHost(), port);
+    }
+
+    /**
+     * 代理配置内部类
+     */
+    public static class ProxyConfig {
+        /**
+         * 是否启用代理
+         */
+        private boolean enabled = false;
+
+        /**
+         * 代理主机地址
+         */
+        private String host = "127.0.0.1";
+
+        /**
+         * 代理端口
+         */
+        private int port = 7890;
+
+        /**
+         * 代理协议 (http, https, socks5)
+         */
+        private String protocol = "http";
+
+        /**
+         * 代理完整地址（优先使用）
+         */
+        private String url;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getProtocol() {
+            return protocol;
+        }
+
+        public void setProtocol(String protocol) {
+            this.protocol = protocol;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+    }
+}

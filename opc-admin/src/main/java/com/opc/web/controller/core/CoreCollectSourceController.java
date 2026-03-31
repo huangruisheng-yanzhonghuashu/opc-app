@@ -1,6 +1,7 @@
 package com.opc.web.controller.core;
 
 import java.util.List;
+
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import com.opc.common.utils.poi.ExcelUtil;
 import com.opc.core.domain.CoreCollectSource;
 import com.opc.core.service.ICoreCollectSourceService;
 import com.opc.web.service.core.CollectSourceFetchService;
+import com.opc.web.service.twitter.v2.TwitterApiV2Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,22 +31,33 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "采集信息源", description = "采集信息源相关操作")
 @RestController
 @RequestMapping("/core/collect")
-public class CoreCollectSourceController extends BaseController
-{
+public class CoreCollectSourceController extends BaseController {
     @Autowired
     private ICoreCollectSourceService collectSourceService;
 
     @Autowired
     private CollectSourceFetchService collectSourceFetchService;
 
+    @Autowired
+    private TwitterApiV2Service twitterApiV2Service;
+
     private static final String SOURCE_TWITTER = "twitter";
     private static final String SOURCE_REDDIT = "reddit";
+
+    /**
+     * Twitter API v2 搜索最近推文端点
+     */
+    private static final String TWITTER_API_V2_SEARCH_RECENT = "https://api.x.com/2/tweets/search/recent";
+
+    /**
+     * Twitter 用户主页 URL 前缀
+     */
+    private static final String TWITTER_X_COM_PREFIX = "https://x.com/";
 
     @Operation(summary = "获取采集信息源列表", description = "分页查询采集信息源列表")
     @PreAuthorize("@ss.hasPermi('core:collect:list')")
     @GetMapping("/list")
-    public TableDataInfo list(CoreCollectSource collectSource)
-    {
+    public TableDataInfo list(CoreCollectSource collectSource) {
         startPage();
         List<CoreCollectSource> list = collectSourceService.selectCollectSourceList(collectSource);
         return getDataTable(list);
@@ -53,8 +66,7 @@ public class CoreCollectSourceController extends BaseController
     @Log(title = "采集信息源配置", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('core:collect:export')")
     @PostMapping("/export")
-    public void export(HttpServletResponse response, CoreCollectSource collectSource)
-    {
+    public void export(HttpServletResponse response, CoreCollectSource collectSource) {
         List<CoreCollectSource> list = collectSourceService.selectCollectSourceList(collectSource);
         ExcelUtil<CoreCollectSource> util = new ExcelUtil<CoreCollectSource>(CoreCollectSource.class);
         util.exportExcel(response, list, "采集信息源数据");
@@ -64,8 +76,7 @@ public class CoreCollectSourceController extends BaseController
     @Parameter(name = "id", description = "配置ID", required = true)
     @PreAuthorize("@ss.hasPermi('core:collect:query')")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable Long id)
-    {
+    public AjaxResult getInfo(@PathVariable Long id) {
         return success(collectSourceService.selectCollectSourceById(id));
     }
 
@@ -73,8 +84,7 @@ public class CoreCollectSourceController extends BaseController
     @PreAuthorize("@ss.hasPermi('core:collect:add')")
     @Log(title = "采集信息源配置", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@Validated @RequestBody CoreCollectSource collectSource)
-    {
+    public AjaxResult add(@Validated @RequestBody CoreCollectSource collectSource) {
         collectSource.setCreateBy(getUsername());
         return toAjax(collectSourceService.insertCollectSource(collectSource));
     }
@@ -83,8 +93,7 @@ public class CoreCollectSourceController extends BaseController
     @PreAuthorize("@ss.hasPermi('core:collect:edit')")
     @Log(title = "采集信息源配置", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@Validated @RequestBody CoreCollectSource collectSource)
-    {
+    public AjaxResult edit(@Validated @RequestBody CoreCollectSource collectSource) {
         collectSource.setUpdateBy(getUsername());
         return toAjax(collectSourceService.updateCollectSource(collectSource));
     }
@@ -94,8 +103,7 @@ public class CoreCollectSourceController extends BaseController
     @PreAuthorize("@ss.hasPermi('core:collect:remove')")
     @Log(title = "采集信息源配置", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
+    public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(collectSourceService.deleteCollectSourceByIds(ids));
     }
 
@@ -103,8 +111,7 @@ public class CoreCollectSourceController extends BaseController
     @PreAuthorize("@ss.hasPermi('core:collect:changeStatus')")
     @Log(title = "采集信息源配置", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
-    public AjaxResult changeStatus(@RequestBody CoreCollectSource collectSource)
-    {
+    public AjaxResult changeStatus(@RequestBody CoreCollectSource collectSource) {
         return toAjax(collectSourceService.changeStatus(collectSource.getId(), collectSource.getStatus()));
     }
 
@@ -113,34 +120,83 @@ public class CoreCollectSourceController extends BaseController
     @PreAuthorize("@ss.hasPermi('core:collect:query')")
     @Log(title = "采集信息源获取数据", businessType = BusinessType.OTHER)
     @PostMapping("/fetch/{id}")
-    public AjaxResult fetchData(@PathVariable Long id)
-    {
+    public AjaxResult fetchData(@PathVariable Long id) {
         CoreCollectSource collectSource = collectSourceService.selectCollectSourceById(id);
-        if (collectSource == null)
-        {
+        if (collectSource == null) {
             return AjaxResult.error("采集信息源不存在");
         }
 
         String sourceType = collectSource.getSourceType();
+        String sourceUrl = collectSource.getSourceUrl();
         String keyword = collectSource.getKeyword();
 
-        if (sourceType == null || sourceType.isEmpty())
-        {
+        if (sourceType == null || sourceType.isEmpty()) {
             return AjaxResult.error("来源类型不能为空");
         }
 
         // 根据来源类型调用不同服务方法
-        if (SOURCE_TWITTER.equalsIgnoreCase(sourceType))
-        {
-            return collectSourceFetchService.fetchTwitterData(keyword);
-        }
-        else if (SOURCE_REDDIT.equalsIgnoreCase(sourceType))
-        {
+        if (SOURCE_TWITTER.equalsIgnoreCase(sourceType)) {
+            // 根据信息源链接判断使用哪种方式获取数据
+            if (TWITTER_API_V2_SEARCH_RECENT.equals(sourceUrl)) {
+                // API v2 搜索端点
+                return collectSourceFetchService.fetchTwitterDataByApiV2(keyword);
+            } else if (isTwitterUserUrl(sourceUrl)) {
+                // Twitter 用户主页，提取用户名调用 fetchTwitterDataByUserName
+                String userName = extractUserNameFromUrl(sourceUrl);
+                if (userName != null && !userName.isEmpty()) {
+                    return collectSourceFetchService.fetchTwitterDataByUserName(userName);
+                } else {
+                    return AjaxResult.error("无法从 URL 提取用户名: " + sourceUrl);
+                }
+            } else {
+                // 其他情况使用 opencli
+                return collectSourceFetchService.fetchTwitterData(keyword);
+            }
+        } else if (SOURCE_REDDIT.equalsIgnoreCase(sourceType)) {
             return collectSourceFetchService.fetchRedditData(keyword);
-        }
-        else
-        {
+        } else {
             return AjaxResult.error("该来源类型暂且不支持：" + sourceType);
         }
     }
+
+    /**
+     * 判断是否是 Twitter 用户主页 URL (https://x.com/用户名)
+     *
+     * @param sourceUrl 信息源链接
+     * @return true=是用户主页URL
+     */
+    private boolean isTwitterUserUrl(String sourceUrl) {
+        if (sourceUrl == null || sourceUrl.isEmpty()) {
+            return false;
+        }
+
+        // 使用正则匹配 https://x.com/用户名
+        // 用户名规则：1-15位，只能包含字母、数字、下划线
+        String twitterUserPattern = "^https://x\\.com/[a-zA-Z0-9_]{1,15}$";
+        return sourceUrl.matches(twitterUserPattern);
+    }
+
+    /**
+     * 从 Twitter 用户主页 URL 中提取用户名
+     *
+     * @param sourceUrl Twitter 用户主页 URL，如 https://x.com/elonmusk
+     * @return 用户名，如 elonmusk；提取失败返回 null
+     */
+    private String extractUserNameFromUrl(String sourceUrl) {
+        if (sourceUrl == null || sourceUrl.isEmpty()) {
+            return null;
+        }
+
+        // 使用正则匹配并捕获用户名
+        String twitterUserPattern = "^https://x\\.com/([a-zA-Z0-9_]{1,15})$";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(twitterUserPattern);
+        java.util.regex.Matcher matcher = pattern.matcher(sourceUrl);
+
+        if (matcher.matches()) {
+            return matcher.group(1); // 返回捕获的用户名
+        }
+
+        return null;
+    }
+
 }

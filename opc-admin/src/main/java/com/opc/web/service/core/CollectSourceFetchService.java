@@ -5,7 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.core.domain.CoreMaterial;
 import com.opc.core.service.ICoreMaterialService;
-import com.opc.web.controller.core.OpenCliCommandBuilder;
+import com.opc.web.config.opencli.OpenCliProperties;
+import com.opc.web.controller.common.OpenCliCommandBuilder;
+import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
+import com.opc.web.dto.twitter.v2.TwitterSearchResponseDTO;
+import com.opc.web.service.twitter.v2.TwitterApiV2Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +20,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import static com.opc.web.controller.core.OpenCliConstants.*;
+import static com.opc.web.controller.common.OpenCliConstants.*;
 
 /**
  * 采集信息源数据获取服务
@@ -39,8 +44,46 @@ public class CollectSourceFetchService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private OpenCliProperties openCliProperties;
+
+    @Autowired
+    private TwitterApiV2Service twitterApiV2Service;
+
+
     /**
-     * 获取 Twitter 数据并导入
+     * 使用 Twitter API v2 获取数据
+     *
+     * @param keyword 搜索关键词
+     * @return 导入结果
+     */
+    public AjaxResult fetchTwitterDataByApiV2(String keyword)
+    {
+        try
+        {
+            com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO request = new com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO();
+            request.setQuery(keyword);
+            request.setMaxResults(10);
+
+            TwitterSearchResponseDTO response = twitterApiV2Service.searchRecentTweets(request);
+
+            int resultCount = (response.getMeta() != null) ? response.getMeta().getResultCount() : 0;
+
+            AjaxResult ajaxResult = AjaxResult.success("导入完成");
+            ajaxResult.put("keyword", keyword);
+            ajaxResult.put("sourceType", SOURCE_TWITTER);
+            ajaxResult.put("apiVersion", "v2");
+            ajaxResult.put("resultCount", resultCount);
+            return ajaxResult;
+        }
+        catch (Exception e)
+        {
+            return AjaxResult.error("导入失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取 Twitter 数据并导入（使用 opencli）
      *
      * @param keyword 搜索关键词
      * @return 导入结果
@@ -62,6 +105,7 @@ public class CollectSourceFetchService {
             AjaxResult ajaxResult = AjaxResult.success("导入完成");
             ajaxResult.put("keyword", keyword);
             ajaxResult.put("sourceType", sourceType);
+            ajaxResult.put("apiVersion", "opencli");
             ajaxResult.put("total", result.total);
             ajaxResult.put("successCount", result.successCount);
             ajaxResult.put("failCount", result.failCount);
@@ -69,6 +113,48 @@ public class CollectSourceFetchService {
 
         } catch (Exception e) {
             log.error("Twitter 搜索导入失败", e);
+            return AjaxResult.error("导入失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 根据用户名获取 Twitter 数据并导入（使用 opencli）
+     * <p>
+     * 执行命令: opencli twitter search "from:userName" --limit 10 -f json
+     * </p>
+     *
+     * @param userName Twitter 用户名
+     * @return 导入结果
+     */
+    public AjaxResult fetchTwitterDataByUserName(String userName) {
+        try {
+            String sourceType = SOURCE_TWITTER;
+
+            // 构建 from:username 查询格式
+            String query = "from:" + userName;
+
+            // 执行 opencli 命令获取 Twitter 数据
+            String jsonResult = executeOpenCliCommand(MODULE_TWITTER, SUBCOMMAND_SEARCH, query);
+            if (jsonResult == null || jsonResult.isEmpty()) {
+                return AjaxResult.error("未获取到 Twitter 数据");
+            }
+
+            // 解析并保存数据
+            List<CoreMaterial> materials = parseTwitterJson(jsonResult, sourceType);
+            ImportResult result = importMaterials(materials);
+
+            AjaxResult ajaxResult = AjaxResult.success("导入完成");
+            ajaxResult.put("userName", userName);
+            ajaxResult.put("sourceType", sourceType);
+            ajaxResult.put("apiVersion", "opencli");
+            ajaxResult.put("query", query);
+            ajaxResult.put("total", result.total);
+            ajaxResult.put("successCount", result.successCount);
+            ajaxResult.put("failCount", result.failCount);
+            return ajaxResult;
+
+        } catch (Exception e) {
+            log.error("Twitter 根据用户名搜索导入失败，用户名: {}", userName, e);
             return AjaxResult.error("导入失败: " + e.getMessage());
         }
     }
@@ -127,6 +213,13 @@ public class CollectSourceFetchService {
                         continue;
                     }
                 }
+
+                // 执行带代理的下载命令
+                String originalUrl = material.getOriginalUrl();
+                if (originalUrl != null && !originalUrl.isEmpty()) {
+                    //downloadWithProxy(originalUrl);
+                }
+
                 materialService.insertMaterial(material);
                 successCount++;
             } catch (Exception e) {
@@ -140,6 +233,79 @@ public class CollectSourceFetchService {
     }
 
     /**
+     * 执行带代理的下载命令（使用 opencli twitter download）
+     *
+     * @param originalUrl 原始URL（Twitter推文链接）
+     */
+    private void downloadWithProxy(String originalUrl) {
+        try {
+            // 构建下载目录路径
+            String downloadPath = buildDownloadPath();
+            log.info("执行带代理的下载命令, URL: {}, 下载路径: {}", originalUrl, downloadPath);
+
+            // 使用配置中的代理执行下载命令
+            OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+                    .withModule(MODULE_TWITTER)
+                    .withSubCommand(SUBCOMMAND_DOWNLOAD)
+                    .withOption(PARAM_TWEET_URL, originalUrl)
+                    .withOption(PARAM_OUTPUT, downloadPath);
+
+            // 应用配置中的代理设置
+            builder.applyProxyFromConfig(openCliProperties);
+
+            String result = executeCommand(builder);
+            log.info("下载命令执行成功, URL: {}, 下载路径: {}, 结果: {}", originalUrl, downloadPath, result);
+
+        } catch (Exception e) {
+            log.error("下载命令执行失败, URL: {}", originalUrl, e);
+            // 下载失败不影响素材导入，只记录日志
+        }
+    }
+
+    /**
+     * 使用 yt-dlp 执行带代理的下载命令
+     *
+     * @param originalUrl 原始URL（视频链接，支持 Twitter/X、YouTube 等）
+     */
+    private void downloadWithYtDlp(String originalUrl) {
+        try {
+            // 构建下载目录路径
+            String downloadPath = buildDownloadPath();
+            log.info("使用 yt-dlp 执行下载命令, URL: {}, 下载路径: {}", originalUrl, downloadPath);
+
+            // 使用 yt-dlp 下载命令（自动应用配置代理）
+            OpenCliCommandBuilder builder = OpenCliCommandBuilder
+                    .buildYtDlpDownloadWithConfigProxy(originalUrl, downloadPath, openCliProperties);
+
+            String result = executeCommand(builder);
+            log.info("yt-dlp 下载命令执行成功, URL: {}, 下载路径: {}, 结果: {}", originalUrl, downloadPath, result);
+
+        } catch (Exception e) {
+            log.error("yt-dlp 下载命令执行失败, URL: {}", originalUrl, e);
+            // 下载失败不影响素材导入，只记录日志
+        }
+    }
+
+    /**
+     * 构建下载目录路径
+     *
+     * @return 下载目录完整路径
+     */
+    private String buildDownloadPath() {
+        // 使用系统临时目录 + twitter 子目录
+        String tempDir = System.getProperty("java.io.tmpdir");
+        String downloadDir = tempDir + DIR_TWITTER + "/";
+        
+        // 确保目录存在
+        java.io.File dir = new java.io.File(downloadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        
+        return downloadDir;
+    }
+
+    /**
      * 执行 opencli 命令获取数据
      */
     private String executeOpenCliCommand(String module, String subCommand, String keyword) throws Exception {
@@ -150,6 +316,22 @@ public class CollectSourceFetchService {
                 .withArg(keyword)
                 .withOption("--limit", "10")
                 .withOption(OPTION_FORMAT_JSON, VALUE_JSON);
+
+        return executeCommand(builder);
+    }
+
+    /**
+     * 执行 opencli 命令获取数据（带代理）
+     */
+    private String executeOpenCliCommandWithProxy(String module, String subCommand, String keyword, String proxyUrl) throws Exception {
+        // 使用命令构建器构建命令，添加代理支持
+        OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+                .withModule(module)
+                .withSubCommand(subCommand)
+                .withArg(keyword)
+                .withOption("--limit", "10")
+                .withOption(OPTION_FORMAT_JSON, VALUE_JSON)
+                .withProxy(proxyUrl);
 
         return executeCommand(builder);
     }
@@ -170,11 +352,37 @@ public class CollectSourceFetchService {
     }
 
     /**
-     * 执行命令并返回输出
+     * 执行命令并返回输出（自动应用配置中的代理设置）
      */
     private String executeCommand(OpenCliCommandBuilder builder) throws Exception {
-        ProcessBuilder processBuilder = builder.createProcessBuilder();
-        log.info("执行命令: {} (OS: {})", builder.toCommandString(), builder.isWindows() ? "Windows" : "Unix");
+        ProcessBuilder processBuilder = builder.createProcessBuilder(openCliProperties);
+        
+        // 获取实际应用的代理设置（builder 中的优先级高于配置）
+        String effectiveProxy = builder.getProxyUrl();
+        if (effectiveProxy == null || effectiveProxy.isEmpty()) {
+            if (openCliProperties != null && openCliProperties.getProxy() != null && openCliProperties.getProxy().isEnabled()) {
+                effectiveProxy = openCliProperties.getProxyUrl();
+            }
+        }
+        
+        // 打印实际设置的环境变量（用于调试）
+        String proxyDebug = (effectiveProxy != null && !effectiveProxy.isEmpty()) ? effectiveProxy : "未启用";
+        if (effectiveProxy != null && !effectiveProxy.isEmpty()) {
+            Map<String, String> env = processBuilder.environment();
+            String httpProxy = env.get("HTTP_PROXY");
+            String httpsProxy = env.get("HTTPS_PROXY");
+            log.debug("环境变量 HTTP_PROXY={}, HTTPS_PROXY={}", httpProxy, httpsProxy);
+        }
+        
+        log.info("执行命令: {} (OS: {}, 代理: {})", 
+                builder.toFullCommandString(), 
+                builder.isWindows() ? "Windows" : "Unix",
+                proxyDebug);
+        
+        // 调试：打印完整的命令列表
+        if (log.isDebugEnabled()) {
+            log.debug("ProcessBuilder 命令: {}", processBuilder.command());
+        }
 
         Process process = processBuilder.start();
 

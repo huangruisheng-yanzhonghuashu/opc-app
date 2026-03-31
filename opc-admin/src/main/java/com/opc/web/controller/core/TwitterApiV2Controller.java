@@ -20,12 +20,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static com.opc.web.controller.core.OpenCliConstants.*;
+import static com.opc.web.controller.common.OpenCliConstants.*;
 
 /**
  * Twitter API v2 控制器
@@ -46,8 +47,6 @@ public class TwitterApiV2Controller extends BaseController {
     @Autowired
     private TwitterApiV2Service twitterApiV2Service;
 
-    @Autowired
-    private ICoreMaterialService materialService;
     /**
      * 搜索并导入推文到素材表
      *
@@ -64,18 +63,19 @@ public class TwitterApiV2Controller extends BaseController {
     public AjaxResult searchAndImport(
             @Parameter(description = "搜索关键词", required = true) @RequestParam String query,
             @Parameter(description = "返回结果数量（10-100，默认 10）") @RequestParam(required = false, defaultValue = "10") Integer maxResults,
-            @Parameter(description = "开始时间（ISO 8601格式）") @RequestParam(required = false) String startTime,
-            @Parameter(description = "结束时间（ISO 8601格式）") @RequestParam(required = false) String endTime) {
+            @Parameter(description = "开始时间（yyyy-MM-dd格式）") @RequestParam(required = false) String startTime,
+            @Parameter(description = "结束时间（yyyy-MM-dd格式）") @RequestParam(required = false) String endTime) {
 
         try {
             // 构建请求参数
             TwitterSearchRequestDTO request = new TwitterSearchRequestDTO();
             request.setQuery(query);
             request.setMaxResults(maxResults);
-            request.setStartTime(startTime);
-            request.setEndTime(endTime);
+            // 将 yyyy-MM-dd 格式转换为 ISO 8601 格式
+            request.setStartTime(convertToIso8601(startTime, true));
+            request.setEndTime(convertToIso8601(endTime, false));
             // 调用服务搜索推文
-            TwitterSearchResponseDTO response = twitterApiV2Service.searchRecentTweets(request);
+            twitterApiV2Service.searchRecentTweets(request);
 
             return AjaxResult.success("导入完成");
 
@@ -85,82 +85,28 @@ public class TwitterApiV2Controller extends BaseController {
         }
     }
 
+
     /**
-     * 将推文数据转换为素材对象
+     * 将 yyyy-MM-dd 格式转换为 ISO 8601 格式
      *
-     * @param tweets 推文列表
-     * @return 素材列表
+     * @param dateStr 日期字符串（yyyy-MM-dd格式）
+     * @param isStart true=开始时间(00:00:00)，false=结束时间(23:59:59)
+     * @return ISO 8601 格式字符串
      */
-    private List<CoreMaterial> convertToMaterials(List<TweetDTO> tweets) {
-        List<CoreMaterial> materials = new ArrayList<>();
-
-        for (TweetDTO tweet : tweets) {
-            CoreMaterial material = new CoreMaterial();
-
-            // 设置原ID
-            material.setOriginalId(tweet.getId());
-
-            // 设置内容
-            String text = tweet.getText();
-            material.setContent(convertNewLineToBr(text));
-
-            // 设置标题（取前50字符）
-            String title = text != null && !text.isEmpty()
-                    ? (text.length() > 50 ? text.substring(0, 50) + "..." : text)
-                    : "Twitter 内容";
-            material.setTitle(title);
-
-            // 设置作者
-            material.setAuthor(tweet.getAuthorId());
-
-            // 设置原链接
-            material.setOriginalUrl(twitterApiV2Service.buildTweetUrl(tweet.getId(), null));
-
-            // 设置点赞数
-            if (tweet.getPublicMetrics() != null) {
-                material.setLikeCount(tweet.getPublicMetrics().getLikeCount() != null
-                        ? tweet.getPublicMetrics().getLikeCount().longValue() : 0L);
-                material.setViewCount(tweet.getPublicMetrics().getImpressionCount() != null
-                        ? tweet.getPublicMetrics().getImpressionCount().longValue() : 0L);
-            }
-
-            // 设置套餐类型为普通会员 (1)
-            material.setPackageType(PACKAGE_TYPE_NORMAL);
-
-            // 设置状态为下线 (1)
-            material.setStatus(STATUS_OFFLINE);
-
-            // 设置内容类型为文本
-            material.setContentType(CONTENT_TYPE_TEXT);
-
-            // 设置来源
-            material.setSource(SOURCE_TWITTER);
-
-            // 设置发布时间
-            if (tweet.getCreatedAt() != null) {
-                try {
-                    Instant instant = Instant.parse(tweet.getCreatedAt());
-                    material.setPublishTime(instant);
-                } catch (Exception e) {
-                    material.setPublishTime(Instant.now());
-                }
+    private String convertToIso8601(String dateStr, boolean isStart) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return null;
+        }
+        try {
+            LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+            if (isStart) {
+                return date.atStartOfDay(ZoneOffset.UTC).toInstant().toString();
             } else {
-                material.setPublishTime(Instant.now());
+                return date.atTime(23, 59, 59).atOffset(ZoneOffset.UTC).toInstant().toString();
             }
-
-            materials.add(material);
+        } catch (Exception e) {
+            log.warn("日期格式转换失败: {}", dateStr);
+            return null;
         }
-
-        return materials;
-    }
-
-    /**
-     * 将换行符转换为 HTML <br> 标签
-     */
-    private String convertNewLineToBr(String text) {
-        if (text == null || text.isEmpty()) {
-            return text;
-        }
-        return text.replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>");
     }
 }

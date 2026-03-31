@@ -1,4 +1,7 @@
-package com.opc.web.controller.core;
+package com.opc.web.controller.common;
+
+import com.opc.web.controller.core.RedditImportController;
+import com.opc.web.controller.core.TwitterImportController;
 
 /**
  * OpenCLI 命令行常量定义
@@ -39,6 +42,9 @@ public final class OpenCliConstants {
 
     /** Reddit 模块 */
     public static final String MODULE_REDDIT = "reddit";
+
+    /** yt-dlp 命令 */
+    public static final String CMD_YT_DLP = "yt-dlp";
 
     // ==================== 子命令 ====================
 
@@ -151,5 +157,16 @@ public final class OpenCliConstants {
 
     /** 日志前缀 - 获取数据 */
     public static final String LOG_DATA_RECEIVED = "获取到 {} 字节数据";
+
+    // ==================== 代理设置 ====================
+
+    /** HTTP 代理环境变量名 */
+    public static final String ENV_HTTP_PROXY = "HTTP_PROXY";
+
+    /** HTTPS 代理环境变量名 */
+    public static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
+
+    /** 默认代理地址 */
+    public static final String DEFAULT_PROXY = "http://127.0.0.1:7890";
 
 }
