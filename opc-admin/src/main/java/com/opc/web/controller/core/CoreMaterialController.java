@@ -20,6 +20,8 @@ import com.opc.common.core.page.TableDataInfo;
 import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.poi.ExcelUtil;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreMaterialMedia;
+import com.opc.core.service.ICoreMaterialMediaService;
 import com.opc.core.service.ICoreMaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,6 +34,9 @@ public class CoreMaterialController extends BaseController
 {
     @Autowired
     private ICoreMaterialService materialService;
+
+    @Autowired
+    private ICoreMaterialMediaService materialMediaService;
 
     @Operation(summary = "获取素材列表", description = "分页查询素材列表")
     @PreAuthorize("@ss.hasPermi('core:material:list')")
@@ -108,5 +113,15 @@ public class CoreMaterialController extends BaseController
     public AjaxResult changeTop(@RequestBody CoreMaterial material)
     {
         return toAjax(materialService.changeTop(material.getId(), material.getIsTop()));
+    }
+
+    @Operation(summary = "获取素材媒体列表", description = "根据素材ID获取关联的媒体文件列表")
+    @Parameter(name = "materialId", description = "素材ID", required = true)
+    @PreAuthorize("@ss.hasPermi('core:material:query')")
+    @GetMapping("/media/{materialId}")
+    public AjaxResult getMaterialMedia(@PathVariable Long materialId)
+    {
+        List<CoreMaterialMedia> mediaList = materialMediaService.selectMaterialMediaByMaterialId(materialId);
+        return success(mediaList);
     }
 }

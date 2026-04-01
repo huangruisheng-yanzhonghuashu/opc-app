@@ -401,6 +401,37 @@
                <el-image v-if="detailData.coverImage" :src="detailData.coverImage" style="max-width: 200px; max-height: 200px;" fit="cover" />
                <span v-else>-</span>
             </el-descriptions-item>
+            <el-descriptions-item label="媒体文件" :span="2" v-if="detailMediaList && detailMediaList.length > 0">
+               <div class="media-list">
+                  <div v-for="(media, index) in detailMediaList" :key="media.id" class="media-item">
+                     <div class="media-index">{{ index + 1 }}</div>
+                     <div class="media-content">
+                        <el-image 
+                           v-if="media.mediaType === 'image'" 
+                           :src="media.fileUrl" 
+                           style="max-width: 150px; max-height: 150px;" 
+                           fit="cover"
+                           :preview-src-list="detailMediaList.filter(m => m.mediaType === 'image').map(m => m.fileUrl)"
+                           :initial-index="detailMediaList.filter(m => m.mediaType === 'image').indexOf(media)"
+                        />
+                        <video 
+                           v-else-if="media.mediaType === 'video'" 
+                           controls 
+                           style="max-width: 300px; max-height: 200px;"
+                        >
+                           <source :src="media.fileUrl" type="video/mp4">
+                           您的浏览器不支持视频播放
+                        </video>
+                     </div>
+                     <div class="media-info">
+                        <el-tag size="small" :type="media.mediaType === 'image' ? 'success' : 'warning'">
+                           {{ media.mediaType === 'image' ? '图片' : '视频' }}
+                        </el-tag>
+                        <span class="media-sort">排序: {{ media.sortOrder }}</span>
+                     </div>
+                  </div>
+               </div>
+            </el-descriptions-item>
             <el-descriptions-item label="总结" :span="2">{{ detailData.summary || '-' }}</el-descriptions-item>
             <el-descriptions-item label="正文" :span="2">
                <div v-if="detailData.content" style="max-height: 400px; overflow-y: auto; border: 1px solid #e4e7ed; padding: 10px; border-radius: 4px;" v-html="detailData.content"></div>
@@ -426,7 +457,7 @@
 </template>
 
 <script setup name="Material">
-import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop } from "@/api/core/material"
+import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia } from "@/api/core/material"
 import { getAllActiveTags } from "@/api/core/tag"
 import { User, Star, Medal, Sunrise } from '@element-plus/icons-vue'
 import Editor from "@/components/Editor/index.vue"
@@ -446,6 +477,7 @@ const total = ref(0)
 const title = ref("")
 const activeTab = ref("0")
 const detailData = ref({})
+const detailMediaList = ref([])
 const tagOptions = ref([])
 
 const data = reactive({
@@ -582,6 +614,10 @@ function handleAdd() {
 function handleView(row) {
   getMaterial(row.id).then(response => {
     detailData.value = response.data
+    // 加载素材媒体列表
+    getMaterialMedia(row.id).then(mediaResponse => {
+      detailMediaList.value = mediaResponse.data || []
+    })
     detailOpen.value = true
   })
 }
@@ -701,5 +737,46 @@ getList()
   width: 12px;
   height: 12px;
   border-radius: 50%;
+}
+.media-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.media-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  background-color: #f5f7fa;
+}
+.media-index {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+}
+.media-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.media-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.media-sort {
+  font-size: 12px;
+  color: #909399;
 }
 </style>

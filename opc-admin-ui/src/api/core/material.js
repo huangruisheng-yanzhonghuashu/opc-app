@@ -53,3 +53,10 @@ export function changeMaterialTop(id, isTop) {
     data: { id: id, isTop: isTop }
   })
 }
+
+export function getMaterialMedia(materialId) {
+  return request({
+    url: '/core/material/media/' + materialId,
+    method: 'get'
+  })
+}
