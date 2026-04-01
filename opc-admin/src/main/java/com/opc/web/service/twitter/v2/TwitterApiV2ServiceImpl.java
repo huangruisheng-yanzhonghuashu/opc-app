@@ -534,23 +534,15 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     }
 
     /**
-     * 下载媒体文件到上传路径
-     * @return 可访问的URL路径（通过serverUrl组装）
+     * 下载媒体文件并上传到文件服务器
+     * @return 文件服务器返回的URL
      */
     private String downloadMedia(String mediaUrl, String fileName) {
+        File tempFile = null;
         try {
-            // 使用系统上传路径 + twitter/日期 作为保存目录
-            String basePath = SopConfig.getUploadPath();
-            String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-            String saveDir = basePath + "/twitter/" + dateDir;
-
-            Path dirPath = Paths.get(saveDir);
-            if (!Files.exists(dirPath)) {
-                Files.createDirectories(dirPath);
-            }
-
-            // 本地文件路径 - 使用 Paths.get 自动处理分隔符
-            String localPath = Paths.get(saveDir, fileName).toString();
+            // 下载文件到临时目录
+            String tempDir = System.getProperty("java.io.tmpdir");
+            tempFile = new File(tempDir, fileName);
 
             // 下载文件（使用代理）
             URL url = new URL(mediaUrl);
@@ -568,17 +560,50 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             }
 
             try (ReadableByteChannel rbc = Channels.newChannel(in);
-                 FileOutputStream fos = new FileOutputStream(localPath)) {
+                 FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
 
-            // 转换为可访问的URL
-            String accessUrl = convertToAccessUrl(localPath);
-            log.info("媒体文件下载成功: {}, 访问URL: {}", localPath, accessUrl);
-            return accessUrl;
+            // 上传到文件服务器
+            String serverUrl = SopConfig.getServerUrl();
+            if (serverUrl == null || serverUrl.isEmpty()) {
+                serverUrl = "http://localhost:8080";
+            }
+            // 去掉末尾的斜杠
+            if (serverUrl.endsWith("/")) {
+                serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
+            }
+
+            String uploadUrl = serverUrl + "/open-api/mobile/member/upload";
+            log.info("上传文件到: {}", uploadUrl);
+
+            HttpResponse<String> response = Unirest.post(uploadUrl)
+                    .field("file", tempFile)
+                    .asString();
+
+            if (response.getStatus() == 200) {
+                Map<String, Object> result = objectMapper.readValue(response.getBody(), Map.class);
+                if (result != null && "200".equals(String.valueOf(result.get("code")))) {
+                    String fileUrl = (String) result.get("url");
+                    log.info("文件上传成功: {}", fileUrl);
+                    return fileUrl;
+                } else {
+                    log.error("文件上传失败: {}", response.getBody());
+                    return null;
+                }
+            } else {
+                log.error("文件上传失败，状态码: {}, 响应: {}", response.getStatus(), response.getBody());
+                return null;
+            }
+
         } catch (Exception e) {
-            log.error("下载媒体文件失败: {}", mediaUrl, e);
+            log.error("下载或上传媒体文件失败: {}", mediaUrl, e);
             return null;
+        } finally {
+            // 清理临时文件
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
         }
     }
 
