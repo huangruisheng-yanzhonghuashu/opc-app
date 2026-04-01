@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CoreMaterialMediaMapper">
+
+    <resultMap type="CoreMaterialMedia" id="CoreMaterialMediaResult">
+        <id     property="id"                column="id"                  />
+        <result property="materialId"        column="material_id"         />
+        <result property="mediaType"         column="media_type"          />
+        <result property="fileUrl"           column="file_url"            />
+        <result property="sortOrder"         column="sort_order"          />
+        <result property="status"            column="status"              />
+        <result property="createBy"          column="create_by"           />
+        <result property="createTime"        column="create_time"         />
+        <result property="updateBy"          column="update_by"           />
+        <result property="updateTime"        column="update_time"         />
+        <result property="remark"            column="remark"              />
+    </resultMap>
+
+    <sql id="selectMaterialMediaVo">
+        select id, material_id, media_type, file_url, sort_order, status,
+               create_by, create_time, update_by, update_time, remark
+        from core_material_media
+    </sql>
+
+    <select id="selectMaterialMediaById" parameterType="Long" resultMap="CoreMaterialMediaResult">
+        <include refid="selectMaterialMediaVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectMaterialMediaList" parameterType="CoreMaterialMedia" resultMap="CoreMaterialMediaResult">
+        <include refid="selectMaterialMediaVo"/>
+        <where>
+            <if test="materialId != null">
+                AND material_id = #{materialId}
+            </if>
+            <if test="mediaType != null and mediaType != ''">
+                AND media_type = #{mediaType}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        order by sort_order asc, create_time desc
+    </select>
+
+    <select id="selectMaterialMediaByMaterialId" parameterType="Long" resultMap="CoreMaterialMediaResult">
+        <include refid="selectMaterialMediaVo"/>
+        where material_id = #{materialId} and status = '0'
+        order by sort_order asc, create_time asc
+    </select>
+
+    <insert id="insertMaterialMedia" parameterType="CoreMaterialMedia" useGeneratedKeys="true" keyProperty="id">
+        insert into core_material_media
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="materialId != null">material_id,</if>
+            <if test="mediaType != null">media_type,</if>
+            <if test="fileUrl != null">file_url,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="status != null">status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="materialId != null">#{materialId},</if>
+            <if test="mediaType != null">#{mediaType},</if>
+            <if test="fileUrl != null">#{fileUrl},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="status != null">#{status},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateMaterialMedia" parameterType="CoreMaterialMedia">
+        update core_material_media
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="materialId != null">material_id = #{materialId},</if>
+            <if test="mediaType != null">media_type = #{mediaType},</if>
+            <if test="fileUrl != null">file_url = #{fileUrl},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMaterialMediaById" parameterType="Long">
+        update core_material_media set status = '1' where id = #{id}
+    </delete>
+
+    <delete id="deleteMaterialMediaByIds">
+        update core_material_media set status = '1' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteMaterialMediaByMaterialId" parameterType="Long">
+        update core_material_media set status = '1' where material_id = #{materialId}
+    </delete>
+
+</mapper>

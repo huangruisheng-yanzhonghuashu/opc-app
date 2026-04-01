@@ -33,6 +33,9 @@ public class SopConfig
     /** 服务器域名 */
     private static String serverUrl;
 
+    /** 文件服务器上传地址 */
+    private static String fileServer;
+
     public String getName()
     {
         return name;
@@ -97,6 +100,14 @@ public class SopConfig
 
     public void setServerUrl(String serverUrl) {
         SopConfig.serverUrl = serverUrl;
+    }
+
+    public static String getFileServer() {
+        return fileServer;
+    }
+
+    public void setFileServer(String fileServer) {
+        SopConfig.fileServer = fileServer;
     }
 
     /**

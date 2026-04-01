@@ -4,7 +4,7 @@
 DROP TABLE IF EXISTS core_material;
 CREATE TABLE core_material (
     id                  BIGINT(20)      NOT NULL AUTO_INCREMENT    COMMENT '素材ID',
-    title               VARCHAR(255)    NOT NULL                   COMMENT '标题',
+    title               VARCHAR(255)    DEFAULT NULL                   COMMENT '标题',
     author              VARCHAR(100)    DEFAULT NULL               COMMENT '作者（注明出处）',
     summary             TEXT            DEFAULT NULL               COMMENT '总结',
     content             LONGTEXT        DEFAULT NULL               COMMENT '正文',

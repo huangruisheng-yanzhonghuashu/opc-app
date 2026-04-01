@@ -2,8 +2,10 @@ package com.opc.web.controller.common;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.utils.StringUtils;
 import com.opc.common.utils.file.FileUploadUtils;
 import com.opc.common.utils.file.FileUtils;
+import com.opc.common.utils.http.HttpUtils;
 import com.opc.framework.config.ServerConfig;
 
 /**
@@ -69,7 +72,7 @@ public class CommonController
     }
 
     /**
-     * 通用上传请求（单个）
+     * 通用上传请求（单个）- 本地上传
      */
     @PostMapping("/upload")
     public AjaxResult uploadFile(MultipartFile file) throws Exception
@@ -95,7 +98,7 @@ public class CommonController
     }
 
     /**
-     * 通用上传请求（多个）
+     * 通用上传请求（多个）- 本地上传
      */
     @PostMapping("/uploads")
     public AjaxResult uploadFiles(List<MultipartFile> files) throws Exception
@@ -127,6 +130,81 @@ public class CommonController
         }
         catch (Exception e)
         {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 文件服务器上传请求（单个）
+     */
+    @PostMapping("/uploadToServer")
+    public AjaxResult uploadFileToServer(MultipartFile file) throws Exception
+    {
+        String fileServerUrl = SopConfig.getFileServer();
+        if (StringUtils.isEmpty(fileServerUrl)) {
+            return AjaxResult.error("未配置文件服务器地址(sop.fileServer)");
+        }
+
+        try
+        {
+            String url = HttpUtils.uploadToFileServer(file);
+            if (url == null) {
+                return AjaxResult.error("文件上传失败");
+            }
+
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("url", url);
+            ajax.put("fileName", file.getOriginalFilename());
+            ajax.put("newFileName", file.getOriginalFilename());
+            ajax.put("originalFilename", file.getOriginalFilename());
+            return ajax;
+        }
+        catch (Exception e)
+        {
+            log.error("上传文件到文件服务器失败", e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 文件服务器上传请求（多个）
+     */
+    @PostMapping("/uploadsToServer")
+    public AjaxResult uploadFilesToServer(List<MultipartFile> files) throws Exception
+    {
+        String fileServerUrl = SopConfig.getFileServer();
+        if (StringUtils.isEmpty(fileServerUrl)) {
+            return AjaxResult.error("未配置文件服务器地址(sop.fileServer)");
+        }
+
+        try
+        {
+            List<String> urls = new ArrayList<String>();
+            List<String> fileNames = new ArrayList<String>();
+            List<String> newFileNames = new ArrayList<String>();
+            List<String> originalFilenames = new ArrayList<String>();
+
+            for (MultipartFile file : files)
+            {
+                String url = HttpUtils.uploadToFileServer(file);
+                if (url != null) {
+                    urls.add(url);
+                    fileNames.add(file.getOriginalFilename());
+                    newFileNames.add(file.getOriginalFilename());
+                    originalFilenames.add(file.getOriginalFilename());
+                }
+            }
+
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("urls", StringUtils.join(urls, FILE_DELIMITER));
+            ajax.put("fileNames", StringUtils.join(fileNames, FILE_DELIMITER));
+            ajax.put("newFileNames", StringUtils.join(newFileNames, FILE_DELIMITER));
+            ajax.put("originalFilenames", StringUtils.join(originalFilenames, FILE_DELIMITER));
+            return ajax;
+        }
+        catch (Exception e)
+        {
+            log.error("上传文件到文件服务器失败", e);
             return AjaxResult.error(e.getMessage());
         }
     }

@@ -219,7 +219,7 @@ import { getToken } from "@/utils/auth"
 const { proxy } = getCurrentInstance()
 
 // 上传相关配置
-const uploadAction = ref(import.meta.env.VITE_APP_BASE_API + "/common/upload")
+const uploadAction = ref(import.meta.env.VITE_APP_BASE_API + "/common/uploadToServer")
 const uploadHeaders = ref({ Authorization: "Bearer " + getToken() })
 
 const bannerList = ref([])

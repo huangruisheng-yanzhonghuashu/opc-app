@@ -61,7 +61,7 @@ public class CollectSourceFetchService {
     {
         try
         {
-            com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO request = new com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO();
+            TwitterSearchRequestDTO request = new TwitterSearchRequestDTO();
             request.setQuery(keyword);
             request.setMaxResults(10);
 

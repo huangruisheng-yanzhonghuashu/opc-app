@@ -1,9 +1,10 @@
 package com.opc.web.service.twitter.v2;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opc.common.config.SopConfig;
+import com.opc.common.utils.http.HttpUtils;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreMaterialMedia;
+import com.opc.core.service.ICoreMaterialMediaService;
 import com.opc.core.service.ICoreMaterialService;
 import com.opc.web.config.twitter.v2.TwitterApiV2Properties;
 import com.opc.web.dto.twitter.v2.TweetDTO;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,12 +30,6 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +60,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     @Autowired
     private ICoreMaterialService materialService;
 
+    @Autowired
+    private ICoreMaterialMediaService materialMediaService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
@@ -93,7 +92,7 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     }
 
     @Override
-    public TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request){
+    public TwitterSearchResponseDTO searchRecentTweets(TwitterSearchRequestDTO request) {
         try {
             // 校验并修正 maxResults 参数（Twitter API 要求 10-100）
             if (request.getMaxResults() == null || request.getMaxResults() < 10) {
@@ -127,6 +126,12 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             }
             if (request.getEndTime() != null && !request.getEndTime().isEmpty()) {
                 getRequest.queryString("end_time", request.getEndTime());
+            }
+
+            // 如果配置了代理，在请求级别也设置代理（确保使用代理）
+            if (twitterApiV2Properties.isProxyEnabled()) {
+                getRequest.proxy(twitterApiV2Properties.getProxyHost(), twitterApiV2Properties.getProxyPort());
+                log.debug("请求已设置代理: {}:{}", twitterApiV2Properties.getProxyHost(), twitterApiV2Properties.getProxyPort());
             }
 
             HttpResponse<String> response = getRequest.asString();
@@ -165,16 +170,16 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                         String mediaUrl = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
                         if (mediaUrl != null) {
                             String fileName = generateFileName(media);
-                            String localPath = downloadMedia(mediaUrl, fileName);
-                            if (localPath != null) {
-                                urlMapping.put(mediaUrl, localPath);
-                                log.info("  已保存到: {}", localPath);
+                            String fileUrl = downloadMediaAndUpload(mediaUrl, fileName);
+                            if (fileUrl != null) {
+                                urlMapping.put(mediaUrl, fileUrl);
+                                log.info("  已保存到: {}", fileUrl);
                             }
                         }
                     }
 
                     // 设置URL映射到TweetInfo
-                    info.setMediaUrlToLocalPath(urlMapping);
+                    info.setMediaUrlToFileServicePath(urlMapping);
                     log.info("---");
                 }
 
@@ -182,7 +187,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
 
                 // 保存到数据库
                 int savedCount = 0;
-                for (CoreMaterial material : materials) {
+                for (int i = 0; i < materials.size(); i++) {
+                    CoreMaterial material = materials.get(i);
+                    TweetInfo tweetInfo = tweetInfoList.get(i);
                     try {
                         // 检查是否已存在（根据 originalId 去重）
                         CoreMaterial existMaterial = materialService.selectMaterialByOriginalId(material.getOriginalId());
@@ -190,6 +197,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                             materialService.insertMaterial(material);
                             savedCount++;
                             log.info("素材已保存到数据库，originalId: {}", material.getOriginalId());
+
+                            // 保存媒体文件信息到 core_material_media
+                            saveMaterialMedias(material.getId(), tweetInfo);
                         } else {
                             log.info("素材已存在，跳过保存，originalId: {}", material.getOriginalId());
                         }
@@ -291,8 +301,10 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
         private String createdAt;
         private String authorUsername;
         private List<TwitterSearchResponseDTO.Media> mediaList;
-        /** 媒体URL到本地路径的映射 */
-        private Map<String, String> mediaUrlToLocalPath;
+        /**
+         * 媒体URL到文件服务器路径的映射
+         */
+        private Map<String, String> mediaUrlToFileServicePath;
 
         public String getId() {
             return id;
@@ -342,12 +354,12 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             this.mediaList = mediaList;
         }
 
-        public Map<String, String> getMediaUrlToLocalPath() {
-            return mediaUrlToLocalPath;
+        public Map<String, String> getMediaUrlToFileServicePath() {
+            return mediaUrlToFileServicePath;
         }
 
-        public void setMediaUrlToLocalPath(Map<String, String> mediaUrlToLocalPath) {
-            this.mediaUrlToLocalPath = mediaUrlToLocalPath;
+        public void setMediaUrlToFileServicePath(Map<String, String> mediaUrlToFileServicePath) {
+            this.mediaUrlToFileServicePath = mediaUrlToFileServicePath;
         }
 
         /**
@@ -392,17 +404,18 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             // 设置内容 - 移除推文中的 t.co URL，在末尾添加图片/视频HTML
             String content = info.getText();
             if (content != null) {
-                // 移除 t.co 短链接（通常是推文末尾的媒体链接）
+          /*      // 移除 t.co 短链接（通常是推文末尾的媒体链接）
                 content = content.replaceAll("\\s*https?://t\\.co/\\w+\\s*$", "");
 
                 // 如果有媒体文件，在末尾添加 HTML 标签
-                if (info.getMediaUrlToLocalPath() != null && !info.getMediaUrlToLocalPath().isEmpty()) {
+                if (info.getMediaUrlToFileServicePath() != null && !info.getMediaUrlToFileServicePath().isEmpty()) {
                     StringBuilder mediaHtml = new StringBuilder();
-                    for (Map.Entry<String, String> entry : info.getMediaUrlToLocalPath().entrySet()) {
+                    for (Map.Entry<String, String> entry : info.getMediaUrlToFileServicePath().entrySet()) {
                         String localPath = entry.getValue();
                         // 获取媒体信息
                         TwitterSearchResponseDTO.Media media = getMediaByUrl(entry.getKey(), info.getMediaList());
                         String mediaType = media != null ? media.getType() : "photo";
+
 
                         if ("video".equals(mediaType) || "animated_gif".equals(mediaType)) {
                             // 视频使用 video 标签
@@ -422,15 +435,15 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                         }
                     }
                     content = content + "<br>" + mediaHtml.toString();
-                }
+                }*/
             }
             material.setContent(content);
 
             // 设置标题（取前50字符）
-            String title = info.getText() != null && !info.getText().isEmpty()
+            /*String title = info.getText() != null && !info.getText().isEmpty()
                     ? (info.getText().length() > 50 ? info.getText().substring(0, 50) + "..." : info.getText())
                     : "Twitter 内容";
-            material.setTitle(title);
+            material.setTitle(title);*/
 
             // 设置作者
             material.setAuthor(info.getAuthorUsername());
@@ -444,20 +457,20 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             // 设置内容类型
             if (info.getMediaList() != null && !info.getMediaList().isEmpty()) {
                 String mediaType = info.getMediaList().get(0).getType();
-                // 获取第一张媒体的本地路径
+                // 获取第一张媒体的文件服务器路径
                 String firstMediaUrl = info.getMediaUrls().get(0);
-                String localPath = info.getMediaUrlToLocalPath() != null
-                        ? info.getMediaUrlToLocalPath().get(firstMediaUrl)
+                String fileServicePath = info.getMediaUrlToFileServicePath() != null
+                        ? info.getMediaUrlToFileServicePath().get(firstMediaUrl)
                         : null;
 
                 if ("video".equals(mediaType) || "animated_gif".equals(mediaType)) {
                     material.setContentType("video");
-                    material.setVideoUrl(localPath != null ? localPath : firstMediaUrl);
+                    material.setVideoUrl(fileServicePath != null ? fileServicePath : firstMediaUrl);
                 } else {
                     material.setContentType("image");
                 }
             } else {
-                material.setContentType("text");
+                material.setContentType("image");
             }
 
             // 设置默认状态为下线
@@ -535,9 +548,10 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
 
     /**
      * 下载媒体文件并上传到文件服务器
+     *
      * @return 文件服务器返回的URL
      */
-    private String downloadMedia(String mediaUrl, String fileName) {
+    private String downloadMediaAndUpload(String mediaUrl, String fileName) {
         File tempFile = null;
         try {
             // 下载文件到临时目录
@@ -564,37 +578,14 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
 
-            // 上传到文件服务器
-            String serverUrl = SopConfig.getServerUrl();
-            if (serverUrl == null || serverUrl.isEmpty()) {
-                serverUrl = "http://localhost:8080";
-            }
-            // 去掉末尾的斜杠
-            if (serverUrl.endsWith("/")) {
-                serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
-            }
-
-            String uploadUrl = serverUrl + "/open-api/mobile/member/upload";
-            log.info("上传文件到: {}", uploadUrl);
-
-            HttpResponse<String> response = Unirest.post(uploadUrl)
-                    .field("file", tempFile)
-                    .asString();
-
-            if (response.getStatus() == 200) {
-                Map<String, Object> result = objectMapper.readValue(response.getBody(), Map.class);
-                if (result != null && "200".equals(String.valueOf(result.get("code")))) {
-                    String fileUrl = (String) result.get("url");
-                    log.info("文件上传成功: {}", fileUrl);
-                    return fileUrl;
-                } else {
-                    log.error("文件上传失败: {}", response.getBody());
-                    return null;
-                }
+            // 使用通用方法上传到文件服务器
+            String fileUrl = HttpUtils.uploadToFileServer(tempFile, fileName);
+            if (fileUrl != null) {
+                log.info("文件上传成功: {}", fileUrl);
             } else {
-                log.error("文件上传失败，状态码: {}, 响应: {}", response.getStatus(), response.getBody());
-                return null;
+                log.error("文件上传到文件服务器失败");
             }
+            return fileUrl;
 
         } catch (Exception e) {
             log.error("下载或上传媒体文件失败: {}", mediaUrl, e);
@@ -608,40 +599,47 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     }
 
     /**
-     * 将本地路径转换为可访问的URL
-     * 例如: /home/ubuntu/uploadPath/upload/twitter/2026/03/31/xxx.jpg
-     * 转为: http://192.168.1.7:8080/profile/upload/twitter/2026/03/31/xxx.jpg
+     * 保存素材媒体文件信息到 core_material_media
+     *
+     * @param materialId 素材ID
+     * @param tweetInfo  推文信息
      */
-    private String convertToAccessUrl(String localPath) {
-        String serverUrl = SopConfig.getServerUrl();
-
-        // 处理路径分隔符，统一使用 /
-        String normalizedPath = localPath.replace("\\", "/");
-
-        // 提取 upload 之后的相对路径
-        // /home/ubuntu/uploadPath/upload/twitter/2026/03/31/xxx.jpg
-        // -> /upload/twitter/2026/03/31/xxx.jpg
-        String relativePath = normalizedPath;
-        int uploadIndex = normalizedPath.indexOf("/upload/");
-        if (uploadIndex != -1) {
-            relativePath = normalizedPath.substring(uploadIndex);
+    private void saveMaterialMedias(Long materialId, TweetInfo tweetInfo) {
+        if (tweetInfo.getMediaList() == null || tweetInfo.getMediaList().isEmpty()) {
+            return;
         }
 
-        // 确保 relativePath 以 / 开头
-        if (!relativePath.startsWith("/")) {
-            relativePath = "/" + relativePath;
+        Map<String, String> urlMapping = tweetInfo.getMediaUrlToFileServicePath();
+        if (urlMapping == null || urlMapping.isEmpty()) {
+            return;
         }
 
-        // 拼接 serverUrl 和 /profile + 相对路径
-        if (serverUrl != null && !serverUrl.isEmpty()) {
-            // 去掉 serverUrl 末尾的 /
-            if (serverUrl.endsWith("/")) {
-                serverUrl = serverUrl.substring(0, serverUrl.length() - 1);
+        int sortOrder = 0;
+        for (TwitterSearchResponseDTO.Media media : tweetInfo.getMediaList()) {
+            String originalUrl = media.getUrl() != null ? media.getUrl() : media.getPreviewImageUrl();
+            if (originalUrl == null) {
+                continue;
             }
-            return serverUrl + "/profile" + relativePath;
-        }
 
-        // 如果没有配置 serverUrl，返回带 /profile 前缀的路径
-        return "/profile" + relativePath;
+            String fileUrl = urlMapping.get(originalUrl);
+            if (fileUrl == null) {
+                continue;
+            }
+
+            String mediaType = "photo".equals(media.getType()) ? "image" :
+                    ("video".equals(media.getType()) || "animated_gif".equals(media.getType())) ? "video" : "image";
+
+            try {
+                materialMediaService.saveMaterialMedia(
+                        materialId,
+                        mediaType,
+                        fileUrl,
+                        sortOrder++
+                );
+                log.info("媒体文件已保存到 core_material_media, materialId: {}, type: {}", materialId, mediaType);
+            } catch (Exception e) {
+                log.error("保存媒体文件信息失败, materialId: {}, url: {}", materialId, originalUrl, e);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.opc.common.utils.http;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,17 +12,31 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opc.common.config.SopConfig;
 import com.opc.common.constant.Constants;
 import com.opc.common.utils.StringUtils;
-import org.springframework.http.MediaType;
 
 /**
  * 通用http发送方法
@@ -288,6 +303,122 @@ public class HttpUtils
         public boolean verify(String hostname, SSLSession session)
         {
             return true;
+        }
+    }
+
+    /**
+     * 上传文件到文件服务器
+     * 
+     * @param file 文件
+     * @param fileName 文件名
+     * @return 文件服务器返回的URL
+     */
+    public static String uploadToFileServer(File file, String fileName)
+    {
+        try
+        {
+            byte[] fileBytes = java.nio.file.Files.readAllBytes(file.toPath());
+            return uploadToFileServer(fileBytes, fileName);
+        }
+        catch (IOException e)
+        {
+            log.error("读取文件失败: {}", file.getAbsolutePath(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 上传文件到文件服务器
+     * 
+     * @param file MultipartFile文件
+     * @return 文件服务器返回的URL
+     */
+    public static String uploadToFileServer(MultipartFile file)
+    {
+        try
+        {
+            return uploadToFileServer(file.getBytes(), file.getOriginalFilename());
+        }
+        catch (IOException e)
+        {
+            log.error("读取文件失败: {}", file.getOriginalFilename(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 上传文件到文件服务器
+     * 
+     * @param fileBytes 文件字节数组
+     * @param fileName 文件名
+     * @return 文件服务器返回的URL
+     */
+    public static String uploadToFileServer(byte[] fileBytes, String fileName)
+    {
+        String fileServerUrl = SopConfig.getFileServer();
+        if (StringUtils.isEmpty(fileServerUrl))
+        {
+            log.error("未配置文件服务器地址(sop.fileServer)");
+            return null;
+        }
+
+        if (fileBytes == null || fileBytes.length == 0)
+        {
+            log.error("文件内容为空");
+            return null;
+        }
+
+        try
+        {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // 构建 multipart 请求
+            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+            builder.part("file", new ByteArrayResource(fileBytes)
+            {
+                @Override
+                public String getFilename()
+                {
+                    return fileName;
+                }
+            });
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            HttpEntity<MultiValueMap<String, HttpEntity<?>>> requestEntity =
+                    new HttpEntity<>(builder.build(), headers);
+
+            // 调用文件服务器上传接口
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    fileServerUrl, requestEntity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null)
+            {
+                Map<String, Object> result = response.getBody();
+                // 文件服务器返回格式: { code: 200, msg: "上传成功", url: "xxx", fileName: "xxx" }
+                if (result.get("code") != null && "200".equals(String.valueOf(result.get("code"))))
+                {
+                    String url = String.valueOf(result.get("url"));
+                    log.info("文件上传成功: {}", url);
+                    return url;
+                }
+                else
+                {
+                    log.error("文件上传失败: {}", result.get("msg"));
+                    return null;
+                }
+            }
+            else
+            {
+                log.error("文件上传失败，状态码: {}", response.getStatusCode());
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("上传文件到文件服务器失败", e);
+            return null;
         }
     }
 }

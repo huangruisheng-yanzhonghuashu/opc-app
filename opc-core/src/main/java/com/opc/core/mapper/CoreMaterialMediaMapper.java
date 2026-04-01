@@ -1,16 +1,15 @@
-package com.opc.core.service;
+package com.opc.core.mapper;
 
 import java.util.List;
-import com.opc.core.domain.CoreMaterial;
 import com.opc.core.domain.CoreMaterialMedia;
 
 /**
- * 素材媒体文件Service接口
+ * 素材媒体文件Mapper接口
  * 
  * @author opc
  */
-public interface ICoreMaterialMediaService {
-
+public interface CoreMaterialMediaMapper 
+{
     /**
      * 查询素材媒体文件
      * 
@@ -52,15 +51,7 @@ public interface ICoreMaterialMediaService {
     public int updateMaterialMedia(CoreMaterialMedia materialMedia);
 
     /**
-     * 批量删除素材媒体文件
-     * 
-     * @param ids 需要删除的素材媒体文件主键集合
-     * @return 结果
-     */
-    public int deleteMaterialMediaByIds(Long[] ids);
-
-    /**
-     * 删除素材媒体文件信息
+     * 删除素材媒体文件
      * 
      * @param id 素材媒体文件主键
      * @return 结果
@@ -68,20 +59,18 @@ public interface ICoreMaterialMediaService {
     public int deleteMaterialMediaById(Long id);
 
     /**
-     * 异步下载素材中的媒体文件（图片/视频）
-     *
-     * @param material 素材对象
-     */
-    void downloadMediaAsync(CoreMaterial material);
-
-    /**
-     * 保存素材媒体文件
+     * 批量删除素材媒体文件
      * 
-     * @param materialId 素材ID
-     * @param mediaType 媒体类型（image/video）
-     * @param fileUrl 文件服务器URL
-     * @param sortOrder 排序号
+     * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    public int saveMaterialMedia(Long materialId, String mediaType, String fileUrl, Integer sortOrder);
+    public int deleteMaterialMediaByIds(Long[] ids);
+
+    /**
+     * 根据素材ID删除媒体文件
+     * 
+     * @param materialId 素材ID
+     * @return 结果
+     */
+    public int deleteMaterialMediaByMaterialId(Long materialId);
 }
