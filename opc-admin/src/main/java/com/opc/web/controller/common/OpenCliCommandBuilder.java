@@ -41,7 +41,16 @@ public class OpenCliCommandBuilder {
      * 创建命令构建器
      */
     public OpenCliCommandBuilder() {
-        this(true);
+        this(true, null);
+    }
+
+    /**
+     * 创建命令构建器（使用配置）
+     *
+     * @param properties OpenCLI 配置属性
+     */
+    public OpenCliCommandBuilder(OpenCliProperties properties) {
+        this(true, properties != null ? properties.getExecutablePath() : null);
     }
 
     /**
@@ -50,6 +59,16 @@ public class OpenCliCommandBuilder {
      * @param isOpenCliCommand 是否是 opencli 命令，false 表示直接执行其他命令（如 yt-dlp）
      */
     public OpenCliCommandBuilder(boolean isOpenCliCommand) {
+        this(isOpenCliCommand, null);
+    }
+
+    /**
+     * 创建命令构建器（支持配置可执行路径）
+     *
+     * @param isOpenCliCommand 是否是 opencli 命令，false 表示直接执行其他命令（如 yt-dlp）
+     * @param executablePath   opencli 的绝对路径，如果为 null 则使用默认名称
+     */
+    public OpenCliCommandBuilder(boolean isOpenCliCommand, String executablePath) {
         this.command = new ArrayList<>();
         this.isOpenCliCommand = isOpenCliCommand;
         String osName = System.getProperty("os.name").toLowerCase();
@@ -60,9 +79,10 @@ public class OpenCliCommandBuilder {
             if (isWindows) {
                 command.add(CMD_WINDOWS);
                 command.add(CMD_WINDOWS_ARG);
-                command.add(OPENCLI);
+                command.add(executablePath != null ? executablePath : OPENCLI);
             } else {
-                command.add(CMD_UNIX);
+                // Mac/Linux: 使用配置的绝对路径或默认名称
+                command.add(executablePath != null ? executablePath : CMD_UNIX);
             }
         }
     }
@@ -248,11 +268,23 @@ public class OpenCliCommandBuilder {
         Map<String, String> env = processBuilder.environment();
         String path = env.get("PATH");
         if (path != null) {
-            String additionalPaths = "C:\\Users\\admin-1\\AppData\\Roaming\\npm;" +
-                    System.getProperty("user.home") + "\\AppData\\Roaming\\npm;" +
-                    "C:\\Program Files\\nodejs;" +
-                    "C:\\Program Files (x86)\\nodejs";
-            env.put("PATH", additionalPaths + ";" + path);
+            if (isWindows) {
+                String additionalPaths = "C:\\Users\\admin-1\\AppData\\Roaming\\npm;" +
+                        System.getProperty("user.home") + "\\AppData\\Roaming\\npm;" +
+                        "C:\\Program Files\\nodejs;" +
+                        "C:\\Program Files (x86)\\nodejs";
+                env.put("PATH", additionalPaths + ";" + path);
+            } else {
+                // Mac/Linux: 添加常见的 npm 全局安装路径
+                String home = System.getProperty("user.home");
+                String additionalPaths = "/usr/local/bin:" +
+                        "/opt/homebrew/bin:" +
+                        home + "/.npm-global/bin:" +
+                        home + "/.nvm/versions/node/current/bin:" +
+                        // 添加可能的 nvm 版本路径（如 v22.22.0）
+                        getNvmVersionPaths(home);
+                env.put("PATH", additionalPaths + ":" + path);
+            }
         }
 
         // 设置代理环境变量（非 Windows 系统）
@@ -342,6 +374,29 @@ public class OpenCliCommandBuilder {
         } else {
             cmdBuilder.append(" ").append(arg);
         }
+    }
+
+    /**
+     * 获取 nvm 版本目录路径
+     * 扫描 ~/.nvm/versions/node/ 下的所有版本目录
+     */
+    private static String getNvmVersionPaths(String homeDir) {
+        StringBuilder paths = new StringBuilder();
+        java.io.File nvmDir = new java.io.File(homeDir + "/.nvm/versions/node");
+        if (nvmDir.exists() && nvmDir.isDirectory()) {
+            java.io.File[] versionDirs = nvmDir.listFiles();
+            if (versionDirs != null) {
+                for (java.io.File dir : versionDirs) {
+                    if (dir.isDirectory()) {
+                        if (paths.length() > 0) {
+                            paths.append(":");
+                        }
+                        paths.append(dir.getAbsolutePath()).append("/bin");
+                    }
+                }
+            }
+        }
+        return paths.toString();
     }
 
     // ==================== 便捷静态方法 ====================

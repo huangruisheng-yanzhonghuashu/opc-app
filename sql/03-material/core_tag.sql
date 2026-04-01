@@ -1,5 +1,5 @@
 -- ----------------------------
--- 标签库表 core_tag
+-- 首页Tab表 core_tag
 -- ----------------------------
 DROP TABLE IF EXISTS core_tag;
 CREATE TABLE core_tag (
@@ -17,5 +17,5 @@ CREATE TABLE core_tag (
     UNIQUE KEY uk_tag_name (tag_name),
     KEY idx_status (status),
     KEY idx_sort_order (sort_order)
-) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='标签库表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='首页Tab表';
 

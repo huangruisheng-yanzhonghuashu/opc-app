@@ -46,13 +46,13 @@
                <el-option label="下线" value="1" />
             </el-select>
          </el-form-item>
-         <el-form-item label="标签" prop="tagIds">
+         <el-form-item label="首页Tab" prop="tagIds">
             <el-select
                v-model="queryParams.tagIds"
                multiple
                collapse-tags
                collapse-tags-tooltip
-               placeholder="请选择标签"
+               placeholder="请选择Tab"
                clearable
                style="width: 200px"
             >
@@ -107,37 +107,32 @@
             </template>
          </el-table-column>
          <el-table-column label="作者" align="center" prop="author" width="120" />
-         <el-table-column label="标签" align="center" width="150">
+         <el-table-column label="首页Tab" align="center" width="150">
             <template #default="scope">
                <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tag-list">
-                  <el-tag 
-                     v-for="tag in scope.row.tags.slice(0, 3)" 
+                  <span
+                     v-for="tag in scope.row.tags.slice(0, 3)"
                      :key="tag.id"
-                     :style="{ backgroundColor: tag.tagColor, color: '#fff', borderColor: tag.tagColor }"
-                     size="small"
-                     class="material-tag"
+                     :style="{ backgroundColor: tag.tagColor || '#909399', color: getContrastTextColor(tag.tagColor), padding: '2px 8px', borderRadius: '4px', fontSize: '12px', marginRight: '4px', display: 'inline-block', lineHeight: '1.5' }"
                   >
                      {{ tag.tagName }}
-                  </el-tag>
-                  <el-tag v-if="scope.row.tags.length > 3" size="small" type="info">+{{ scope.row.tags.length - 3 }}</el-tag>
+                  </span>
+                  <span v-if="scope.row.tags.length > 3" style="font-size: 12px; color: #666;">+{{ scope.row.tags.length - 3 }}</span>
                </div>
                <span v-else>-</span>
             </template>
          </el-table-column>
-         <el-table-column label="自动标签" align="center" width="150">
+         <el-table-column label="内容标签" align="center" width="150">
             <template #default="scope">
                <div v-if="scope.row.tags2 && scope.row.tags2.length > 0" class="tag-list">
-                  <el-tag 
-                     v-for="tag in scope.row.tags2.slice(0, 3)" 
+                  <span
+                     v-for="tag in scope.row.tags2.slice(0, 3)"
                      :key="tag.id"
-                     :style="{ backgroundColor: tag.tagColor || '#409EFF', color: '#fff', borderColor: tag.tagColor || '#409EFF' }"
-                     size="small"
-                     class="material-tag"
-                     type="success"
+                     :style="{ backgroundColor: tag.tagColor || '#409EFF', color: getContrastTextColor(tag.tagColor || '#409EFF'), padding: '2px 8px', borderRadius: '4px', fontSize: '12px', marginRight: '4px', display: 'inline-block', lineHeight: '1.5' }"
                   >
                      {{ tag.tagName }}
-                  </el-tag>
-                  <el-tag v-if="scope.row.tags2.length > 3" size="small" type="info">+{{ scope.row.tags2.length - 3 }}</el-tag>
+                  </span>
+                  <span v-if="scope.row.tags2.length > 3" style="font-size: 12px; color: #666;">+{{ scope.row.tags2.length - 3 }}</span>
                </div>
                <span v-else>-</span>
             </template>
@@ -284,7 +279,7 @@
                   </el-form-item>
                </el-col>
             </el-row>
-            <el-form-item label="标签" prop="tagIds">
+            <el-form-item label="首页Tab" prop="tagIds">
                <el-select
                   v-model="form.tagIds"
                   multiple
@@ -359,7 +354,7 @@
                   {{ detailData.isTop === '1' ? '是' : '否' }}
                </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="标签" :span="2">
+            <el-descriptions-item label="首页Tab" :span="2">
                <div v-if="detailData.tags && detailData.tags.length > 0" class="detail-tag-list">
                   <el-tag 
                      v-for="tag in detailData.tags" 
@@ -372,7 +367,7 @@
                </div>
                <span v-else>-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="自动标签" :span="2">
+            <el-descriptions-item label="内容标签" :span="2">
                <div v-if="detailData.tags2 && detailData.tags2.length > 0" class="detail-tag-list">
                   <el-tag 
                      v-for="tag in detailData.tags2" 
@@ -521,6 +516,30 @@ function getSourceLabel(source) {
     'twitter': '推特'
   }
   return map[source] || source || '-'
+}
+
+// 根据背景色计算文字颜色（深色背景用白字，浅色背景用黑字）
+function getContrastTextColor(bgColor) {
+  if (!bgColor) return '#fff'
+  // 将颜色转换为 RGB
+  let r, g, b
+  if (bgColor.startsWith('#')) {
+    const hex = bgColor.replace('#', '')
+    r = parseInt(hex.substr(0, 2), 16)
+    g = parseInt(hex.substr(2, 2), 16)
+    b = parseInt(hex.substr(4, 2), 16)
+  } else if (bgColor.startsWith('rgb')) {
+    const matches = bgColor.match(/\d+/g)
+    if (matches) {
+      r = parseInt(matches[0])
+      g = parseInt(matches[1])
+      b = parseInt(matches[2])
+    }
+  }
+  if (r === undefined) return '#fff'
+  // 计算亮度 (YIQ公式)
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000
+  return brightness > 128 ? '#333' : '#fff'
 }
 
 function getList() {

@@ -217,7 +217,7 @@ public class CollectSourceFetchService {
                 // 执行带代理的下载命令
                 String originalUrl = material.getOriginalUrl();
                 if (originalUrl != null && !originalUrl.isEmpty()) {
-                    //downloadWithProxy(originalUrl);
+                    downloadWithProxy(originalUrl,material.getOriginalId());
                 }
 
                 materialService.insertMaterial(material);
@@ -236,15 +236,16 @@ public class CollectSourceFetchService {
      * 执行带代理的下载命令（使用 opencli twitter download）
      *
      * @param originalUrl 原始URL（Twitter推文链接）
+     * @param originalId  素材原始ID
      */
-    private void downloadWithProxy(String originalUrl) {
+    private void downloadWithProxy(String originalUrl, String originalId) {
         try {
             // 构建下载目录路径
-            String downloadPath = buildDownloadPath();
+            String downloadPath = buildDownloadPath(originalId);
             log.info("执行带代理的下载命令, URL: {}, 下载路径: {}", originalUrl, downloadPath);
 
             // 使用配置中的代理执行下载命令
-            OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+            OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
                     .withModule(MODULE_TWITTER)
                     .withSubCommand(SUBCOMMAND_DOWNLOAD)
                     .withOption(PARAM_TWEET_URL, originalUrl)
@@ -266,11 +267,12 @@ public class CollectSourceFetchService {
      * 使用 yt-dlp 执行带代理的下载命令
      *
      * @param originalUrl 原始URL（视频链接，支持 Twitter/X、YouTube 等）
+     * @param originalId  素材原始ID
      */
-    private void downloadWithYtDlp(String originalUrl) {
+    private void downloadWithYtDlp(String originalUrl, String originalId) {
         try {
             // 构建下载目录路径
-            String downloadPath = buildDownloadPath();
+            String downloadPath = buildDownloadPath(originalId);
             log.info("使用 yt-dlp 执行下载命令, URL: {}, 下载路径: {}", originalUrl, downloadPath);
 
             // 使用 yt-dlp 下载命令（自动应用配置代理）
@@ -289,12 +291,13 @@ public class CollectSourceFetchService {
     /**
      * 构建下载目录路径
      *
+     * @param originalId 素材原始ID
      * @return 下载目录完整路径
      */
-    private String buildDownloadPath() {
-        // 使用系统临时目录 + twitter 子目录
-        String tempDir = System.getProperty("java.io.tmpdir");
-        String downloadDir = tempDir + DIR_TWITTER + "/";
+    private String buildDownloadPath(String originalId) {
+        // 使用应用当前目录 + twitter_downloads/originalId 子目录
+        String currentDir = System.getProperty("user.dir");
+        String downloadDir = currentDir + "/twitter_downloads/" + originalId + "/";
         
         // 确保目录存在
         java.io.File dir = new java.io.File(downloadDir);
@@ -309,8 +312,8 @@ public class CollectSourceFetchService {
      * 执行 opencli 命令获取数据
      */
     private String executeOpenCliCommand(String module, String subCommand, String keyword) throws Exception {
-        // 使用命令构建器构建命令
-        OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+        // 使用命令构建器构建命令（传入配置以获取可执行路径）
+        OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
                 .withModule(module)
                 .withSubCommand(subCommand)
                 .withArg(keyword)
@@ -325,7 +328,7 @@ public class CollectSourceFetchService {
      */
     private String executeOpenCliCommandWithProxy(String module, String subCommand, String keyword, String proxyUrl) throws Exception {
         // 使用命令构建器构建命令，添加代理支持
-        OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+        OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
                 .withModule(module)
                 .withSubCommand(subCommand)
                 .withArg(keyword)
@@ -340,7 +343,7 @@ public class CollectSourceFetchService {
      * 执行 opencli reddit search 命令
      */
     private String executeOpenCliRedditCommand(String keyword) throws Exception {
-        OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+        OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
                 .withModule(MODULE_REDDIT)
                 .withSubCommand(SUBCOMMAND_SEARCH)
                 .withArg(keyword)
@@ -472,34 +475,27 @@ public class CollectSourceFetchService {
         String text = convertNewLineToBr(originalText);
         material.setContent(text);
 
-        // 设置标题（取内容前15字符）
-        String plainText = text != null ? text.replaceAll("<[^>]+>", "") : "";
-        String title = !plainText.isEmpty()
-                ? (plainText.length() > 15 ? plainText.substring(0, 15) + "..." : plainText)
-                : "Twitter 内容";
-        material.setTitle(title);
-
         material.setAuthor(getTextValue(node, "author"));
         material.setOriginalUrl(getTextValue(node, "url"));
 
         // 设置点赞数
         if (node.has("likes") && !node.get("likes").isNull()) {
-            material.setLikeCount(node.get("likes").asLong());
+            //material.setLikeCount(node.get("likes").asLong());
         }
 
         // 设置查看数
         if (node.has("views") && !node.get("views").isNull()) {
-            String viewsStr = node.get("views").asText().replaceAll(",", "");
+           /* String viewsStr = node.get("views").asText().replaceAll(",", "");
             try {
                 material.setViewCount(Long.parseLong(viewsStr));
             } catch (NumberFormatException e) {
                 material.setViewCount(0L);
-            }
+            }*/
         }
 
         material.setPackageType(PACKAGE_TYPE_NORMAL);
         material.setStatus(STATUS_OFFLINE);
-        material.setContentType(CONTENT_TYPE_TEXT);
+        //material.setContentType(CONTENT_TYPE_TEXT);
         material.setSource(sourceType != null ? sourceType : SOURCE_TWITTER);
 
         return material;
@@ -561,7 +557,7 @@ public class CollectSourceFetchService {
      */
     private String fetchRedditDetailContent(String postUrl) {
         try {
-            OpenCliCommandBuilder builder = new OpenCliCommandBuilder()
+            OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
                     .withModule(MODULE_REDDIT)
                     .withSubCommand(SUBCOMMAND_READ)
                     .withArg(postUrl)

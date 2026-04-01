@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "标签库管理", description = "素材标签相关操作")
+@Tag(name = "首页Tab管理", description = "素材标签相关操作")
 @RestController
 @RequestMapping("/core/tag")
 public class CoreTagController extends BaseController
@@ -56,7 +56,7 @@ public class CoreTagController extends BaseController
         return success(list);
     }
 
-    @Log(title = "标签库管理", businessType = BusinessType.EXPORT)
+    @Log(title = "首页Tab管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('core:tag:export')")
     @PostMapping("/export")
     public void export(HttpServletResponse response, CoreTag tag)
@@ -77,7 +77,7 @@ public class CoreTagController extends BaseController
 
     @Operation(summary = "新增标签", description = "新增标签信息")
     @PreAuthorize("@ss.hasPermi('core:tag:add')")
-    @Log(title = "标签库管理", businessType = BusinessType.INSERT)
+    @Log(title = "首页Tab管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@Validated @RequestBody CoreTag tag)
     {
@@ -93,7 +93,7 @@ public class CoreTagController extends BaseController
 
     @Operation(summary = "修改标签", description = "修改标签信息")
     @PreAuthorize("@ss.hasPermi('core:tag:edit')")
-    @Log(title = "标签库管理", businessType = BusinessType.UPDATE)
+    @Log(title = "首页Tab管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@Validated @RequestBody CoreTag tag)
     {
@@ -110,7 +110,7 @@ public class CoreTagController extends BaseController
     @Operation(summary = "删除标签", description = "删除标签信息")
     @Parameter(name = "id", description = "标签ID", required = true)
     @PreAuthorize("@ss.hasPermi('core:tag:remove')")
-    @Log(title = "标签库管理", businessType = BusinessType.DELETE)
+    @Log(title = "首页Tab管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {

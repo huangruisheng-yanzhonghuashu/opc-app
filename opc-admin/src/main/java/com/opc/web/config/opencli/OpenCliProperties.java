@@ -18,9 +18,24 @@ import org.springframework.stereotype.Component;
 public class OpenCliProperties {
 
     /**
+     * opencli 可执行文件的绝对路径
+     * 例如: /Users/sevilinma/.nvm/versions/node/v22.22.0/bin/opencli
+     * 如果未设置，则使用 PATH 环境变量查找
+     */
+    private String executablePath;
+
+    /**
      * 代理配置
      */
     private ProxyConfig proxy = new ProxyConfig();
+
+    public String getExecutablePath() {
+        return executablePath;
+    }
+
+    public void setExecutablePath(String executablePath) {
+        this.executablePath = executablePath;
+    }
 
     public ProxyConfig getProxy() {
         return proxy;

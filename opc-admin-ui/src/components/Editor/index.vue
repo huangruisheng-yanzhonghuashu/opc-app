@@ -17,9 +17,9 @@
   <div class="editor">
     <quill-editor
       ref="quillEditorRef"
-      v-model:content="content"
+      :content="content"
       contentType="html"
-      @textChange="(e) => $emit('update:modelValue', content)"
+      @textChange="handleTextChange"
       :options="options"
       :style="styles"
     />
@@ -28,11 +28,31 @@
 
 <script setup>
 import axios from 'axios'
-import { QuillEditor } from "@vueup/vue-quill"
+import { QuillEditor, Quill } from "@vueup/vue-quill"
 import "@vueup/vue-quill/dist/vue-quill.snow.css"
 import { getToken } from "@/utils/auth"
 
+// 配置所有样式使用内联样式而不是 class
+const AlignStyle = Quill.import("attributors/style/align")
+const BackgroundStyle = Quill.import("attributors/style/background")
+const ColorStyle = Quill.import("attributors/style/color")
+const DirectionStyle = Quill.import("attributors/style/direction")
+const FontStyle = Quill.import("attributors/style/font")
+const SizeStyle = Quill.import("attributors/style/size")
+
+// 字体大小白名单 - 使用 rem 单位适配移动端
+SizeStyle.whitelist = ["0.625rem", "0.875rem", "1.125rem", "2rem"]
+
+// 注册为内联样式（true 表示覆盖已有定义）
+Quill.register(SizeStyle, true)
+Quill.register(AlignStyle, true)
+Quill.register(BackgroundStyle, true)
+Quill.register(ColorStyle, true)
+Quill.register(DirectionStyle, true)
+Quill.register(FontStyle, true)
+
 const { proxy } = getCurrentInstance()
+const emit = defineEmits(['update:modelValue'])
 
 const quillEditorRef = ref()
 const uploadUrl = ref(import.meta.env.VITE_APP_BASE_API + "/common/uploadToServer") // 上传的图片服务器地址
@@ -83,7 +103,7 @@ const options = ref({
       ["blockquote", "code-block"],                   // 引用  代码块
       [{ list: "ordered" }, { list: "bullet" }],      // 有序、无序列表
       [{ indent: "-1" }, { indent: "+1" }],           // 缩进
-      [{ size: ["small", false, "large", "huge"] }],  // 字体大小
+      [{ size: ["0.625rem", "0.875rem", "1.125rem", "2rem"] }],  // 字体大小（10px, 14px, 18px, 32px）
       [{ header: [1, 2, 3, 4, 5, 6, false] }],        // 标题
       [{ color: [] }, { background: [] }],            // 字体颜色、字体背景颜色
       [{ align: [] }],                                // 对齐方式
@@ -106,12 +126,72 @@ const styles = computed(() => {
   return style
 })
 
+// 将旧的 class 格式转换为内联样式（加载时转换）
+function convertClassToInlineStyle(html) {
+  if (!html) return "<p></p>"
+
+  // 处理字体大小 class（旧格式）
+  const sizeMap = {
+    'ql-size-small': '0.625rem',
+    'ql-size-large': '1.125rem',
+    'ql-size-huge': '2rem'
+  }
+  let result = html
+  Object.keys(sizeMap).forEach(className => {
+    const size = sizeMap[className]
+    const regex = new RegExp(`class="([^"]*${className}[^"]*)"`, 'g')
+    result = result.replace(regex, (match, classValue) => {
+      const newClass = classValue.replace(className, '').trim().replace(/\s+/g, ' ')
+      if (newClass) {
+        return `class="${newClass}" style="font-size: ${size};"`
+      }
+      return `style="font-size: ${size};"`
+    })
+  })
+
+  // 处理旧的 px 格式字体大小，转换为 rem
+  result = result.replace(/style="font-size:\s*10px;?"/g, 'style="font-size: 0.625rem;"')
+  result = result.replace(/style="font-size:\s*14px;?"/g, 'style="font-size: 0.875rem;"')
+  result = result.replace(/style="font-size:\s*18px;?"/g, 'style="font-size: 1.125rem;"')
+  result = result.replace(/style="font-size:\s*32px;?"/g, 'style="font-size: 2rem;"')
+
+  // 处理缩进 class
+  result = result.replace(/class="ql-indent-(\d+)"/g, (match, level) => {
+    return `style="padding-left: ${level}em;"`
+  })
+
+  // 处理 code-block：移除 class，添加内联样式
+  result = result.replace(/<pre[^>]*class="ql-syntax"[^>]*>/g, '<pre style="background-color: #f3f3f3; padding: 10px; border-radius: 4px; overflow-x: auto;">')
+
+  return result
+}
+
+// 保存时确保所有样式都是内联的
+function ensureInlineStyles(html) {
+  if (!html) return html
+  // 再次确保没有 ql-size-* class 残留
+  return convertClassToInlineStyle(html)
+}
+
 const content = ref("")
 watch(() => props.modelValue, (v) => {
-  if (v !== content.value) {
-    content.value = v == undefined ? "<p></p>" : v
+  const converted = convertClassToInlineStyle(v)
+  // 只在值确实不同时更新，避免循环
+  if (converted !== content.value) {
+    content.value = converted
   }
-}, { immediate: true })
+})
+
+// 处理文本变化，清理 class 样式
+function handleTextChange() {
+  // 从编辑器获取HTML内容
+  const quill = quillEditorRef.value?.getQuill()
+  if (quill) {
+    const html = quill.root.innerHTML
+    const cleaned = ensureInlineStyles(html)
+    emit('update:modelValue', cleaned)
+  }
+}
 
 // 如果设置了上传地址则自定义图片上传事件
 onMounted(() => {
@@ -221,16 +301,20 @@ function insertImage(file) {
 .ql-snow .ql-picker.ql-size .ql-picker-item::before {
   content: "14px";
 }
-.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="small"]::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="small"]::before {
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="0.875rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="0.875rem"]::before {
+  content: "14px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="0.625rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="0.625rem"]::before {
   content: "10px";
 }
-.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="large"]::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="large"]::before {
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.125rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.125rem"]::before {
   content: "18px";
 }
-.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="huge"]::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]::before {
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="2rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="2rem"]::before {
   content: "32px";
 }
 .ql-snow .ql-picker.ql-header .ql-picker-label::before,

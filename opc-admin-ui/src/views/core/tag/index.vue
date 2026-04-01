@@ -1,10 +1,10 @@
 <template>
    <div class="app-container">
       <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
-         <el-form-item label="标签名称" prop="tagName">
+         <el-form-item label="Tab名称" prop="tagName">
             <el-input
                v-model="queryParams.tagName"
-               placeholder="请输入标签名称"
+               placeholder="请输入Tab名称"
                clearable
                style="width: 200px"
                @keyup.enter="handleQuery"
@@ -47,9 +47,9 @@
 
       <el-table v-loading="loading" :data="tagList" @selection-change="handleSelectionChange">
          <el-table-column type="selection" width="55" align="center" />
-         <el-table-column label="标签ID" align="center" prop="id" width="80" />
-         <el-table-column label="标签名称" align="center" prop="tagName" />
-         <el-table-column label="标签颜色" align="center" prop="tagColor" width="150">
+         <el-table-column label="TabID" align="center" prop="id" width="80" />
+         <el-table-column label="Tab名称" align="center" prop="tagName" />
+         <el-table-column label="Tab颜色" align="center" prop="tagColor" width="150">
             <template #default="scope">
                <div v-if="scope.row.tagColor" class="color-preview">
                   <span class="color-block" :style="{ backgroundColor: scope.row.tagColor }"></span>
@@ -90,10 +90,10 @@
 
       <el-dialog :title="title" v-model="open" width="600px" append-to-body>
          <el-form ref="tagRef" :model="form" :rules="rules" label-width="100px">
-            <el-form-item label="标签名称" prop="tagName">
-               <el-input v-model="form.tagName" placeholder="请输入标签名称" />
+            <el-form-item label="Tab名称" prop="tagName">
+               <el-input v-model="form.tagName" placeholder="请输入Tab名称" />
             </el-form-item>
-            <el-form-item label="标签颜色" prop="tagColor">
+            <el-form-item label="Tab颜色" prop="tagColor">
                <el-color-picker v-model="form.tagColor" show-alpha :predefine="predefineColors" />
                <span class="color-value" v-if="form.tagColor">{{ form.tagColor }}</span>
             </el-form-item>
@@ -163,7 +163,7 @@ const data = reactive({
     status: undefined
   },
   rules: {
-    tagName: [{ required: true, message: "标签名称不能为空", trigger: "blur" }],
+    tagName: [{ required: true, message: "Tab名称不能为空", trigger: "blur" }],
     sortOrder: [{ required: true, message: "排序不能为空", trigger: "blur" }]
   }
 })
@@ -216,7 +216,7 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset()
   open.value = true
-  title.value = "添加标签"
+  title.value = "添加Tab"
 }
 
 function handleUpdate(row) {
@@ -225,13 +225,13 @@ function handleUpdate(row) {
   getTag(id).then(response => {
     form.value = response.data
     open.value = true
-    title.value = "修改标签"
+    title.value = "修改Tab"
   })
 }
 
 function handleDelete(row) {
   const tagIds = row.id ? [row.id] : ids.value
-  proxy.$modal.confirm('是否确认删除标签编号为"' + tagIds + '"的数据项？').then(function() {
+  proxy.$modal.confirm('是否确认删除Tab编号为"' + tagIds + '"的数据项？').then(function() {
     return delTag(tagIds)
   }).then(() => {
     getList()

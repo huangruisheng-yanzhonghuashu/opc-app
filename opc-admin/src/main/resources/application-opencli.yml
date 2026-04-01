@@ -1,5 +1,10 @@
 # OpenCLI 命令行工具配置
 opencli:
+  # opencli 可执行文件的绝对路径（Mac/Linux 必需）
+  # 通过 `which opencli` 命令获取实际路径
+  # 例如: /Users/sevilinma/.nvm/versions/node/v22.22.0/bin/opencli
+  executablePath: /Users/sevilinma/.nvm/versions/node/v22.22.0/bin/opencli
+  
   # 代理配置
   proxy:
     # 是否启用代理
@@ -7,7 +12,7 @@ opencli:
     # 代理主机地址
     host: 127.0.0.1
     # 代理端口
-    port: 7899
+    port: 1082
     # 代理协议 (http, https, socks5)
     protocol: http
     # 代理完整地址（如果配置此项，则优先使用，忽略 host/port/protocol）
