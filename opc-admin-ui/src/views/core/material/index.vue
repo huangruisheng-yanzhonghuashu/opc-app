@@ -101,12 +101,24 @@
       <el-table v-loading="loading" :data="materialList" @selection-change="handleSelectionChange">
          <el-table-column type="selection" width="55" align="center" />
          <el-table-column label="素材ID" align="center" prop="id" width="80" />
+         <el-table-column label="创建时间" align="center" prop="createTime" width="160">
+            <template #default="scope">
+               <span>{{ parseTime(scope.row.createTime) || '-' }}</span>
+            </template>
+         </el-table-column>
          <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true">
             <template #default="scope">
                <el-button link type="primary" @click="handleView(scope.row)">{{ scope.row.title }}</el-button>
             </template>
          </el-table-column>
          <el-table-column label="作者" align="center" prop="author" width="120" />
+         <el-table-column label="素材类型" align="center" prop="materialType" width="100">
+            <template #default="scope">
+               <el-tag :type="scope.row.materialType === 'post' ? 'primary' : 'success'">
+                  {{ scope.row.materialType === 'post' ? '帖子' : '文章' }}
+               </el-tag>
+            </template>
+         </el-table-column>
          <el-table-column label="首页Tab" align="center" width="150">
             <template #default="scope">
                <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tag-list">
