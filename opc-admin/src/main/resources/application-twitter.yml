@@ -5,6 +5,6 @@ twitter:
     base-url: https://api.x.com/2
     timeout: 30000
     # 代理配置
-    proxy-enabled: false
+    proxy-enabled: true
     proxy-host: localhost
     proxy-port: 7899

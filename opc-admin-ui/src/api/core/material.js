@@ -68,3 +68,10 @@ export function saveMaterialMedia(materialId, data) {
     data: data
   })
 }
+
+export function deleteMaterialMedia(mediaId) {
+  return request({
+    url: '/core/material/media/' + mediaId,
+    method: 'delete'
+  })
+}

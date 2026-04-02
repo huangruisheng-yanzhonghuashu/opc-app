@@ -224,19 +224,25 @@ public class CollectSourceFetchService {
                     log.debug("解析短链接: {} -> {}", mediaUrl, resolvedUrl);
                 }
 
-                // 先保存素材，获取素材ID
+                // 执行带代理的下载命令并上传文件，获取内容类型
+                String contentType = CONTENT_TYPE_TEXT;
+                List<String> uploadedUrls = new ArrayList<>();
+                String originalUrl = material.getOriginalUrl();
+                if (originalUrl != null && !originalUrl.isEmpty()) {
+                    uploadedUrls = downloadWithProxyAndUpload(originalUrl, material.getOriginalId());
+                    if (!uploadedUrls.isEmpty()) {
+                        log.info("素材 {} 上传了 {} 个文件到文件服务器", material.getOriginalId(), uploadedUrls.size());
+                        contentType = determineContentType(uploadedUrls);
+                    }
+                }
+                // 设置内容类型并保存素材
+                material.setContentType(contentType);
                 materialService.insertMaterial(material);
                 Long materialId = material.getId();
 
-                // 执行带代理的下载命令并上传文件
-                String originalUrl = material.getOriginalUrl();
-                if (originalUrl != null && !originalUrl.isEmpty()) {
-                    List<String> uploadedUrls = downloadWithProxyAndUpload(originalUrl, material.getOriginalId());
-                    // 保存素材媒体文件信息
-                    if (!uploadedUrls.isEmpty()) {
-                        log.info("素材 {} 上传了 {} 个文件到文件服务器", material.getOriginalId(), uploadedUrls.size());
-                        saveMaterialMediaFiles(materialId, uploadedUrls);
-                    }
+                // 保存素材媒体文件信息
+                if (!uploadedUrls.isEmpty()) {
+                    saveMaterialMediaFiles(materialId, uploadedUrls);
                 }
 
                 successCount++;
@@ -353,6 +359,36 @@ public class CollectSourceFetchService {
             }
         } catch (Exception e) {
             log.error("保存素材媒体文件失败, materialId: {}", materialId, e);
+        }
+    }
+
+    /**
+     * 根据文件URL列表判断内容类型
+     *
+     * @param uploadedUrls 上传后的文件URL列表
+     * @return 内容类型（video/image/text）
+     */
+    private String determineContentType(List<String> uploadedUrls) {
+        if (uploadedUrls == null || uploadedUrls.isEmpty()) {
+            return CONTENT_TYPE_TEXT;
+        }
+        boolean hasVideo = false;
+        boolean hasImage = false;
+        for (String fileUrl : uploadedUrls) {
+            String mediaType = determineMediaType(fileUrl);
+            if ("video".equals(mediaType)) {
+                hasVideo = true;
+            } else {
+                hasImage = true;
+            }
+        }
+        // 有视频=video，有图片无视频=image，无媒体=text
+        if (hasVideo) {
+            return CONTENT_TYPE_VIDEO;
+        } else if (hasImage) {
+            return CONTENT_TYPE_IMAGE;
+        } else {
+            return CONTENT_TYPE_TEXT;
         }
     }
 

@@ -675,7 +675,7 @@
 </template>
 
 <script setup name="Material">
-import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia, saveMaterialMedia } from "@/api/core/material"
+import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia, saveMaterialMedia, deleteMaterialMedia } from "@/api/core/material"
 import { getAllActiveTags } from "@/api/core/tag"
 import { listCategoryByPackageType, listMaterialCategory, addMaterialCategory, getMaterialCategory, updateMaterialCategory, delMaterialCategory } from "@/api/core/materialCategory"
 import { User, Star, Medal, Sunrise } from '@element-plus/icons-vue'
@@ -1027,7 +1027,19 @@ function beforeMediaUpload(file) {
 }
 
 function removeMedia(index) {
-  form.value.mediaList.splice(index, 1)
+  const media = form.value.mediaList[index]
+  // 如果媒体有ID，则从服务器删除
+  if (media.id) {
+    proxy.$modal.confirm('确认要删除该媒体文件吗？').then(function() {
+      return deleteMaterialMedia(media.id)
+    }).then(() => {
+      form.value.mediaList.splice(index, 1)
+      proxy.$modal.msgSuccess("删除成功")
+    }).catch(() => {})
+  } else {
+    // 新上传的媒体，直接从列表中删除
+    form.value.mediaList.splice(index, 1)
+  }
 }
 
 function moveMedia(index, direction) {

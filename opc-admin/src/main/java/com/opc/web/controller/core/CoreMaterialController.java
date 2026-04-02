@@ -133,4 +133,14 @@ public class CoreMaterialController extends BaseController
     {
         return toAjax(materialMediaService.batchSaveMaterialMedia(materialId, mediaList));
     }
+
+    @Operation(summary = "删除素材媒体", description = "根据媒体ID删除媒体文件")
+    @Parameter(name = "mediaId", description = "媒体文件ID", required = true)
+    @PreAuthorize("@ss.hasPermi('core:material:edit')")
+    @Log(title = "素材管理", businessType = BusinessType.DELETE)
+    @DeleteMapping("/media/{mediaId}")
+    public AjaxResult deleteMaterialMedia(@PathVariable Long mediaId)
+    {
+        return toAjax(materialMediaService.deleteMaterialMediaById(mediaId));
+    }
 }
