@@ -311,7 +311,7 @@
                </el-col>
             </el-row>
             <el-row>
-               <el-col :span="12">
+               <el-col :span="12" v-if="form.materialType === 'post'">
                   <el-form-item label="内容类型" prop="contentType">
                      <el-select v-model="form.contentType" placeholder="请选择内容类型" style="width: 100%">
                         <el-option label="纯文本" value="text" />
@@ -357,15 +357,8 @@
             <el-form-item label="原ID" prop="originalId">
                <el-input v-model="form.originalId" placeholder="请输入原ID" />
             </el-form-item>
-            <el-form-item label="封面图" prop="coverImage">
-               <image-upload v-model="form.coverImage" :limit="1" />
-            </el-form-item>
-            <!-- 正文编辑器：所有类型都显示 -->
-            <el-form-item label="正文" prop="content">
-               <Editor v-model="form.content" :min-height="300" />
-            </el-form-item>
-            <!-- 帖子类型（VIP素材、超级VIP）：图文/视频显示媒体文件上传 -->
-            <el-form-item label="媒体文件" prop="mediaList" v-if="form.materialType === 'post' && (form.packageType === 2 || form.packageType === 3) && form.contentType !== 'text'">
+            <!-- 帖子类型：图文/视频显示媒体文件上传 -->
+            <el-form-item label="媒体文件" prop="mediaList" v-if="form.materialType === 'post' && form.contentType !== 'text'">
                <div class="media-upload-container">
                   <div v-for="(media, index) in form.mediaList" :key="index" class="media-upload-item">
                      <div class="media-preview">
@@ -386,12 +379,21 @@
                         :show-file-list="false"
                         :on-success="handleMediaUploadSuccess"
                         :before-upload="beforeMediaUpload"
-                        accept="image/*,video/*"
+                        :accept="form.contentType === 'image' ? 'image/*' : form.contentType === 'video' ? 'video/*' : 'image/*,video/*'"
                      >
-                        <el-button type="primary" plain icon="Plus">添加图片/视频</el-button>
+                        <el-button type="primary" plain icon="Plus">
+                           {{ form.contentType === 'image' ? '添加图片' : form.contentType === 'video' ? '添加视频' : '添加图片/视频' }}
+                        </el-button>
                      </el-upload>
                   </div>
                </div>
+            </el-form-item>
+            <!-- 正文编辑器：所有类型都显示 -->
+            <el-form-item label="正文" prop="content">
+               <Editor v-model="form.content" :min-height="300" />
+            </el-form-item>
+            <el-form-item label="封面图" prop="coverImage">
+               <image-upload v-model="form.coverImage" :limit="1" />
             </el-form-item>
             <!-- 文章类型：视频显示视频上传 -->
             <el-form-item label="视频上传" prop="videoUrl" v-if="form.materialType === 'article' && form.contentType === 'video'">
@@ -999,10 +1001,24 @@ function beforeMediaUpload(file) {
   const isVideo = file.type.startsWith('video/')
   const isLt50M = file.size / 1024 / 1024 < 50
 
-  if (!isImage && !isVideo) {
-    proxy.$modal.msgError('只能上传图片或视频文件!')
-    return false
+  // 根据内容类型限制上传文件类型
+  if (form.value.contentType === 'image') {
+    if (!isImage) {
+      proxy.$modal.msgError('内容类型为图文时，只能上传图片文件!')
+      return false
+    }
+  } else if (form.value.contentType === 'video') {
+    if (!isVideo) {
+      proxy.$modal.msgError('内容类型为视频时，只能上传视频文件!')
+      return false
+    }
+  } else {
+    if (!isImage && !isVideo) {
+      proxy.$modal.msgError('只能上传图片或视频文件!')
+      return false
+    }
   }
+
   if (!isLt50M) {
     proxy.$modal.msgError('文件大小不能超过 50MB!')
     return false
