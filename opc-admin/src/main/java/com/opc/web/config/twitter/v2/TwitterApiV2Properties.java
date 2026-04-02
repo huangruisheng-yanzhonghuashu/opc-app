@@ -32,7 +32,7 @@ public class TwitterApiV2Properties {
     /**
      * 是否启用代理
      */
-    private boolean proxyEnabled = false;
+    private boolean proxyEnabled = true;
 
     /**
      * 代理主机
@@ -42,7 +42,7 @@ public class TwitterApiV2Properties {
     /**
      * 代理端口
      */
-    private int proxyPort = 11301;
+    private int proxyPort = 7899;
 
     public String getBearerToken() {
         return bearerToken;

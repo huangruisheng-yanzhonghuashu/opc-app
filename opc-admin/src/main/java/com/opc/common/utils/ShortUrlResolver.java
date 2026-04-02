@@ -1,45 +1,44 @@
 package com.opc.common.utils;
 
+import com.opc.web.config.twitter.v2.TwitterApiV2Properties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 
+@Component
 public class ShortUrlResolver {
 
-    /**
-     * 代理配置
-     */
-    private static final boolean PROXY_ENABLED = true;
-    private static final String PROXY_HOST = "localhost";
-    private static final int PROXY_PORT = 7899;
+    private static TwitterApiV2Properties twitterApiV2Properties;
 
-    /**
-     * 将短链接展开为最终的长链接
-     *
-     * @param shortUrl 短链接 URL 字符串
-     * @return 最终重定向后的长链接 URL 字符串
-     * @throws Exception 网络错误、无效 URL 或重定向次数过多
-     */
+    @Autowired
+    public void setTwitterApiV2Properties(TwitterApiV2Properties properties) {
+        ShortUrlResolver.twitterApiV2Properties = properties;
+    }
+
     public static String expandShortUrl(String shortUrl) throws Exception {
-        int maxRedirects = 10;        // 防止无限循环
+        int maxRedirects = 10;
         int redirectCount = 0;
         String currentUrl = shortUrl;
+
+        boolean proxyEnabled = twitterApiV2Properties != null && twitterApiV2Properties.isProxyEnabled();
+        String proxyHost = twitterApiV2Properties != null ? twitterApiV2Properties.getProxyHost() : "localhost";
+        int proxyPort = twitterApiV2Properties != null ? twitterApiV2Properties.getProxyPort() : 7899;
 
         while (redirectCount < maxRedirects) {
             HttpURLConnection connection = null;
             try {
                 URL url = new URL(currentUrl);
                 
-                // 根据是否启用代理创建连接
-                if (PROXY_ENABLED) {
-                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, PROXY_PORT));
+                if (proxyEnabled) {
+                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
                     connection = (HttpURLConnection) url.openConnection(proxy);
                 } else {
                     connection = (HttpURLConnection) url.openConnection();
                 }
                 
-                // 禁止自动重定向，手动获取 Location 头
                 connection.setInstanceFollowRedirects(false);
                 connection.setRequestMethod("GET");
                 connection.setConnectTimeout(5000);
@@ -48,15 +47,12 @@ public class ShortUrlResolver {
                 int statusCode = connection.getResponseCode();
                 String location = connection.getHeaderField("Location");
 
-                // 判断是否为重定向响应
                 if (statusCode >= 300 && statusCode < 400 && location != null) {
-                    // 处理相对路径的 Location 头，转换为绝对 URL
                     URL newUrl = new URL(url, location);
                     currentUrl = newUrl.toString();
                     redirectCount++;
-                    continue;   // 继续循环，处理下一跳
+                    continue;
                 } else {
-                    // 不是重定向，当前 URL 即为最终链接
                     return currentUrl;
                 }
             } finally {
@@ -69,9 +65,8 @@ public class ShortUrlResolver {
     }
 
     public static void main(String[] args) throws Exception {
-        String shortUrl = "https://t.co/AiGjkp3513";
+        String shortUrl = "https://t.co/HtWe54gHgR";
         String longUrl = expandShortUrl(shortUrl);
         System.out.println("长链接: " + longUrl);
-        // 输出示例: 长链接: https://x.com/thedankoe/status/2010042119121957316
     }
 }

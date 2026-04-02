@@ -3,24 +3,28 @@ package com.opc.web.service.core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opc.common.core.domain.AjaxResult;
+import com.opc.common.utils.http.HttpUtils;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.service.ICoreMaterialMediaService;
 import com.opc.core.service.ICoreMaterialService;
 import com.opc.web.config.opencli.OpenCliProperties;
 import com.opc.web.controller.common.OpenCliCommandBuilder;
 import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchResponseDTO;
 import com.opc.web.service.twitter.v2.TwitterApiV2Service;
+import com.opc.common.utils.ShortUrlResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.opc.web.controller.common.OpenCliConstants.*;
 
@@ -42,6 +46,9 @@ public class CollectSourceFetchService {
     private ICoreMaterialService materialService;
 
     @Autowired
+    private ICoreMaterialMediaService materialMediaService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -57,10 +64,8 @@ public class CollectSourceFetchService {
      * @param keyword 搜索关键词
      * @return 导入结果
      */
-    public AjaxResult fetchTwitterDataByApiV2(String keyword)
-    {
-        try
-        {
+    public AjaxResult fetchTwitterDataByApiV2(String keyword) {
+        try {
             TwitterSearchRequestDTO request = new TwitterSearchRequestDTO();
             request.setQuery(keyword);
             request.setMaxResults(10);
@@ -75,9 +80,7 @@ public class CollectSourceFetchService {
             ajaxResult.put("apiVersion", "v2");
             ajaxResult.put("resultCount", resultCount);
             return ajaxResult;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return AjaxResult.error("导入失败: " + e.getMessage());
         }
     }
@@ -214,13 +217,28 @@ public class CollectSourceFetchService {
                     }
                 }
 
-                // 执行带代理的下载命令
-                String originalUrl = material.getOriginalUrl();
-                if (originalUrl != null && !originalUrl.isEmpty()) {
-                    downloadWithProxy(originalUrl,material.getOriginalId());
+                // 解析短链接
+                List<String> mediaUrls = extractUrls(material.getContent());
+                for (String mediaUrl : mediaUrls) {
+                    String resolvedUrl = resolveShortUrl(mediaUrl);
+                    log.debug("解析短链接: {} -> {}", mediaUrl, resolvedUrl);
                 }
 
+                // 先保存素材，获取素材ID
                 materialService.insertMaterial(material);
+                Long materialId = material.getId();
+
+                // 执行带代理的下载命令并上传文件
+                String originalUrl = material.getOriginalUrl();
+                if (originalUrl != null && !originalUrl.isEmpty()) {
+                    List<String> uploadedUrls = downloadWithProxyAndUpload(originalUrl, material.getOriginalId());
+                    // 保存素材媒体文件信息
+                    if (!uploadedUrls.isEmpty()) {
+                        log.info("素材 {} 上传了 {} 个文件到文件服务器", material.getOriginalId(), uploadedUrls.size());
+                        saveMaterialMediaFiles(materialId, uploadedUrls);
+                    }
+                }
+
                 successCount++;
             } catch (Exception e) {
                 log.error("导入素材失败, originalId: {}", originalId, e);
@@ -237,8 +255,10 @@ public class CollectSourceFetchService {
      *
      * @param originalUrl 原始URL（Twitter推文链接）
      * @param originalId  素材原始ID
+     * @return 上传后的文件URL列表
      */
-    private void downloadWithProxy(String originalUrl, String originalId) {
+    private List<String> downloadWithProxyAndUpload(String originalUrl, String originalId) {
+        List<String> uploadedUrls = new ArrayList<>();
         try {
             // 构建下载目录路径
             String downloadPath = buildDownloadPath(originalId);
@@ -257,10 +277,35 @@ public class CollectSourceFetchService {
             String result = executeCommand(builder);
             log.info("下载命令执行成功, URL: {}, 下载路径: {}, 结果: {}", originalUrl, downloadPath, result);
 
+            // 上传下载目录下tweets文件夹中的文件到文件服务器
+            String tweetsPath = downloadPath + "tweets/";
+            File tweetsDir = new File(tweetsPath);
+            if (tweetsDir.exists() && tweetsDir.isDirectory()) {
+                File[] files = tweetsDir.listFiles();
+                if (files != null && files.length > 0) {
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            String url = HttpUtils.uploadToFileServer(file, file.getName());
+                            if (url != null) {
+                                uploadedUrls.add(url);
+                                log.info("文件上传成功: {}, URL: {}", file.getName(), url);
+                            } else {
+                                log.error("文件上传失败: {}", file.getName());
+                            }
+                        }
+                    }
+                } else {
+                    log.warn("tweets目录下没有文件: {}", tweetsPath);
+                }
+            } else {
+                log.warn("tweets目录不存在: {}", tweetsPath);
+            }
+
         } catch (Exception e) {
             log.error("下载命令执行失败, URL: {}", originalUrl, e);
             // 下载失败不影响素材导入，只记录日志
         }
+        return uploadedUrls;
     }
 
     /**
@@ -289,6 +334,48 @@ public class CollectSourceFetchService {
     }
 
     /**
+     * 保存素材媒体文件信息
+     *
+     * @param materialId  素材ID
+     * @param uploadedUrls 上传后的文件URL列表
+     */
+    private void saveMaterialMediaFiles(Long materialId, List<String> uploadedUrls) {
+        if (materialId == null || uploadedUrls == null || uploadedUrls.isEmpty()) {
+            return;
+        }
+        try {
+            int sortOrder = 1;
+            for (String fileUrl : uploadedUrls) {
+                // 根据文件扩展名判断媒体类型
+                String mediaType = determineMediaType(fileUrl);
+                materialMediaService.saveMaterialMedia(materialId, mediaType, fileUrl, sortOrder++);
+                log.info("保存素材媒体文件成功, materialId: {}, mediaType: {}, url: {}", materialId, mediaType, fileUrl);
+            }
+        } catch (Exception e) {
+            log.error("保存素材媒体文件失败, materialId: {}", materialId, e);
+        }
+    }
+
+    /**
+     * 根据文件URL判断媒体类型
+     *
+     * @param fileUrl 文件URL
+     * @return 媒体类型（image/video）
+     */
+    private String determineMediaType(String fileUrl) {
+        if (fileUrl == null) {
+            return "image";
+        }
+        String lowerUrl = fileUrl.toLowerCase();
+        if (lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".avi") || lowerUrl.endsWith(".mov")
+                || lowerUrl.endsWith(".wmv") || lowerUrl.endsWith(".flv") || lowerUrl.endsWith(".mkv")
+                || lowerUrl.endsWith(".webm") || lowerUrl.contains("/video/")) {
+            return "video";
+        }
+        return "image";
+    }
+
+    /**
      * 构建下载目录路径
      *
      * @param originalId 素材原始ID
@@ -298,13 +385,13 @@ public class CollectSourceFetchService {
         // 使用应用当前目录 + twitter_downloads/originalId 子目录
         String currentDir = System.getProperty("user.dir");
         String downloadDir = currentDir + "/twitter_downloads/" + originalId + "/";
-        
+
         // 确保目录存在
         java.io.File dir = new java.io.File(downloadDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        
+
         return downloadDir;
     }
 
@@ -359,7 +446,7 @@ public class CollectSourceFetchService {
      */
     private String executeCommand(OpenCliCommandBuilder builder) throws Exception {
         ProcessBuilder processBuilder = builder.createProcessBuilder(openCliProperties);
-        
+
         // 获取实际应用的代理设置（builder 中的优先级高于配置）
         String effectiveProxy = builder.getProxyUrl();
         if (effectiveProxy == null || effectiveProxy.isEmpty()) {
@@ -367,7 +454,7 @@ public class CollectSourceFetchService {
                 effectiveProxy = openCliProperties.getProxyUrl();
             }
         }
-        
+
         // 打印实际设置的环境变量（用于调试）
         String proxyDebug = (effectiveProxy != null && !effectiveProxy.isEmpty()) ? effectiveProxy : "未启用";
         if (effectiveProxy != null && !effectiveProxy.isEmpty()) {
@@ -376,12 +463,12 @@ public class CollectSourceFetchService {
             String httpsProxy = env.get("HTTPS_PROXY");
             log.debug("环境变量 HTTP_PROXY={}, HTTPS_PROXY={}", httpProxy, httpsProxy);
         }
-        
-        log.info("执行命令: {} (OS: {}, 代理: {})", 
-                builder.toFullCommandString(), 
+
+        log.info("执行命令: {} (OS: {}, 代理: {})",
+                builder.toFullCommandString(),
                 builder.isWindows() ? "Windows" : "Unix",
                 proxyDebug);
-        
+
         // 调试：打印完整的命令列表
         if (log.isDebugEnabled()) {
             log.debug("ProcessBuilder 命令: {}", processBuilder.command());
@@ -472,8 +559,9 @@ public class CollectSourceFetchService {
 
         // 设置内容
         String originalText = getTextValue(node, "text");
-        String text = convertNewLineToBr(originalText);
-        material.setContent(text);
+        //String text = convertNewLineToBr(originalText);
+        //material.setContent(text);
+        material.setContent(originalText);
 
         // 设置标题：取 text 的前100位
         if (originalText != null && !originalText.isEmpty()) {
@@ -618,6 +706,37 @@ public class CollectSourceFetchService {
             return node.get(fieldName).asText();
         }
         return null;
+    }
+
+    /**
+     * 从文本中提取所有 URL
+     */
+    private List<String> extractUrls(String text) {
+        List<String> urls = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            return urls;
+        }
+        Pattern pattern = Pattern.compile("https?://[^\\s<\"'<>]+");
+        Matcher matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            urls.add(matcher.group());
+        }
+        return urls;
+    }
+
+    /**
+     * 解析短链接为完整 URL
+     */
+    private String resolveShortUrl(String shortUrl) {
+        if (shortUrl == null || shortUrl.isEmpty()) {
+            return shortUrl;
+        }
+        try {
+            return ShortUrlResolver.expandShortUrl(shortUrl);
+        } catch (Exception e) {
+            log.debug("解析短链接失败: {}, 错误: {}", shortUrl, e.getMessage());
+            return shortUrl;
+        }
     }
 
     /**
