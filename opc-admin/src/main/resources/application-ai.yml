@@ -4,7 +4,7 @@ spring:
     xai:
       # xAI API Key (建议通过环境变量传入)
       #api-key: xai-Mu1EVXMbfeiEPToexIUcnaoaIlvpm4xmwc8apW2FuZbBiYAB14UFUA0Gya30jG6bzqCQVF5xmJorsPJR
-      api-key: xai-Mu1EVXMbfeiEPToexIUcnaoaIlvpm4xmwc8apW2FuZbBiYAB14UFUA0Gya30jG6bzqCQVF5xmJorsPJR
+      api-key:
       # xAI API 基础地址 (不要带 /v1 后缀，Spring AI 会自动添加)
       base-url: https://api.x.ai
       # 默认模型
@@ -14,7 +14,7 @@ spring:
     minimax:
       # Minimax API Key (必填)
       # api-key: sk-api-TWPBVEDtyvfFqjCk2Vn5K74CJM6KBWxCdPpVOup6GwI89fgS6snAKg5XkCtRxlpB9DRB-j4SXpxWK3Amh7MvHi3aWfMAHUBCQ-TCaJE4rmXtqKnmFW1Oskc
-      api-key: sk-api-TWPBVEDtyvfFqjCk2Vn5K74CJM6KBWxCdPpVOup6GwI89fgS6snAKg5XkCtRxlpB9DRB-j4SXpxWK3Amh7MvHi3aWfMAHUBCQ-TCaJE4rmXtqKnmFW1Oskc
+      api-key:
       # Minimax API 基础 URL (可选，默认: https://api.minimax.chat)
       base-url: https://api.minimax.chat
       # 模型名称 (可选，默认: MiniMax-Text-01)
