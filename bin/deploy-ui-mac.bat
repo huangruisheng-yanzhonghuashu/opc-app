@@ -20,7 +20,15 @@ echo UI directory: %UI_DIR%
 echo Remote target: %REMOTE_USER%@%REMOTE_HOST%:%REMOTE_DIR%/dist
 echo.
 
-
+echo [Step 1/3] Building UI project...
+cd /d "%UI_DIR%"
+call yarn build:stage
+if errorlevel 1 (
+    echo [ERROR] Build failed!
+    pause
+    exit /b 1
+)
+echo Build completed!
 echo.
 
 if not exist "%DIST_DIR%" (

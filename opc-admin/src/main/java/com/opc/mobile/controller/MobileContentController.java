@@ -88,9 +88,11 @@ public class MobileContentController extends BaseController
         // 增加查看数
         materialService.incrementViewCount(id);
 
-        // 包装content为完整HTML，适配移动端WebView显示
-        String wrappedContent = HtmlWrapperUtils.wrapContent(material.getContent());
-        material.setContent(wrappedContent);
+        // 包装content为完整HTML，适配移动端WebView显示（仅文章类型需要转换）
+        if ("article".equals(material.getMaterialType())) {
+            String wrappedContent = HtmlWrapperUtils.wrapContent(material.getContent());
+            material.setContent(wrappedContent);
+        }
 
         Map<String, Object> result = new HashMap<>();
         result.put("material", material);
