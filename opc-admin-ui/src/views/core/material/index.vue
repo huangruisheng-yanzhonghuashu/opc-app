@@ -106,9 +106,9 @@
                <span>{{ parseTime(scope.row.createTime) || '-' }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true">
+         <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true" width="300">
             <template #default="scope">
-               <el-button link type="primary" @click="handleView(scope.row)">{{ scope.row.title }}</el-button>
+               <el-button link type="primary" @click="handleView(scope.row)">{{ scope.row.title && scope.row.title.length > 50 ? scope.row.title.substring(0, 50) + '...' : scope.row.title }}</el-button>
             </template>
          </el-table-column>
          <el-table-column label="作者" align="center" prop="author" width="120" />

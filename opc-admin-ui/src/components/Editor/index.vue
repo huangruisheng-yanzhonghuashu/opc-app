@@ -40,8 +40,28 @@ const DirectionStyle = Quill.import("attributors/style/direction")
 const FontStyle = Quill.import("attributors/style/font")
 const SizeStyle = Quill.import("attributors/style/size")
 
-// 字体大小白名单 - 使用 rem 单位适配移动端
-SizeStyle.whitelist = ["0.625rem", "0.875rem", "1.125rem", "2rem"]
+// 字体大小白名单 - 使用 rem 单位适配移动端 (14px-32px)
+SizeStyle.whitelist = [
+  "0.875rem",   // 14px
+  "0.9375rem",  // 15px
+  "1rem",       // 16px
+  "1.0625rem",  // 17px
+  "1.125rem",   // 18px
+  "1.1875rem",  // 19px
+  "1.25rem",    // 20px
+  "1.3125rem",  // 21px
+  "1.375rem",   // 22px
+  "1.4375rem",  // 23px
+  "1.5rem",     // 24px
+  "1.5625rem",  // 25px
+  "1.625rem",   // 26px
+  "1.6875rem",  // 27px
+  "1.75rem",    // 28px
+  "1.8125rem",  // 29px
+  "1.875rem",   // 30px
+  "1.9375rem",  // 31px
+  "2rem"        // 32px
+]
 
 // 注册为内联样式（true 表示覆盖已有定义）
 Quill.register(SizeStyle, true)
@@ -103,7 +123,7 @@ const options = ref({
       ["blockquote", "code-block"],                   // 引用  代码块
       [{ list: "ordered" }, { list: "bullet" }],      // 有序、无序列表
       [{ indent: "-1" }, { indent: "+1" }],           // 缩进
-      [{ size: ["0.625rem", "0.875rem", "1.125rem", "2rem"] }],  // 字体大小（10px, 14px, 18px, 32px）
+      [{ size: ["0.875rem", "0.9375rem", "1rem", "1.0625rem", "1.125rem", "1.1875rem", "1.25rem", "1.3125rem", "1.375rem", "1.4375rem", "1.5rem", "1.5625rem", "1.625rem", "1.6875rem", "1.75rem", "1.8125rem", "1.875rem", "1.9375rem", "2rem"] }],  // 字体大小（14px-32px）
       [{ header: [1, 2, 3, 4, 5, 6, false] }],        // 标题
       [{ color: [] }, { background: [] }],            // 字体颜色、字体背景颜色
       [{ align: [] }],                                // 对齐方式
@@ -149,10 +169,25 @@ function convertClassToInlineStyle(html) {
     })
   })
 
-  // 处理旧的 px 格式字体大小，转换为 rem
-  result = result.replace(/style="font-size:\s*10px;?"/g, 'style="font-size: 0.625rem;"')
+  // 处理旧的 px 格式字体大小，转换为 rem (14px-32px)
   result = result.replace(/style="font-size:\s*14px;?"/g, 'style="font-size: 0.875rem;"')
+  result = result.replace(/style="font-size:\s*15px;?"/g, 'style="font-size: 0.9375rem;"')
+  result = result.replace(/style="font-size:\s*16px;?"/g, 'style="font-size: 1rem;"')
+  result = result.replace(/style="font-size:\s*17px;?"/g, 'style="font-size: 1.0625rem;"')
   result = result.replace(/style="font-size:\s*18px;?"/g, 'style="font-size: 1.125rem;"')
+  result = result.replace(/style="font-size:\s*19px;?"/g, 'style="font-size: 1.1875rem;"')
+  result = result.replace(/style="font-size:\s*20px;?"/g, 'style="font-size: 1.25rem;"')
+  result = result.replace(/style="font-size:\s*21px;?"/g, 'style="font-size: 1.3125rem;"')
+  result = result.replace(/style="font-size:\s*22px;?"/g, 'style="font-size: 1.375rem;"')
+  result = result.replace(/style="font-size:\s*23px;?"/g, 'style="font-size: 1.4375rem;"')
+  result = result.replace(/style="font-size:\s*24px;?"/g, 'style="font-size: 1.5rem;"')
+  result = result.replace(/style="font-size:\s*25px;?"/g, 'style="font-size: 1.5625rem;"')
+  result = result.replace(/style="font-size:\s*26px;?"/g, 'style="font-size: 1.625rem;"')
+  result = result.replace(/style="font-size:\s*27px;?"/g, 'style="font-size: 1.6875rem;"')
+  result = result.replace(/style="font-size:\s*28px;?"/g, 'style="font-size: 1.75rem;"')
+  result = result.replace(/style="font-size:\s*29px;?"/g, 'style="font-size: 1.8125rem;"')
+  result = result.replace(/style="font-size:\s*30px;?"/g, 'style="font-size: 1.875rem;"')
+  result = result.replace(/style="font-size:\s*31px;?"/g, 'style="font-size: 1.9375rem;"')
   result = result.replace(/style="font-size:\s*32px;?"/g, 'style="font-size: 2rem;"')
 
   // 处理缩进 class
@@ -305,13 +340,73 @@ function insertImage(file) {
 .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="0.875rem"]::before {
   content: "14px";
 }
-.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="0.625rem"]::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="0.625rem"]::before {
-  content: "10px";
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="0.9375rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="0.9375rem"]::before {
+  content: "15px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1rem"]::before {
+  content: "16px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.0625rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.0625rem"]::before {
+  content: "17px";
 }
 .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.125rem"]::before,
 .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.125rem"]::before {
   content: "18px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.1875rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.1875rem"]::before {
+  content: "19px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.25rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.25rem"]::before {
+  content: "20px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.3125rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.3125rem"]::before {
+  content: "21px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.375rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.375rem"]::before {
+  content: "22px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.4375rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.4375rem"]::before {
+  content: "23px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.5rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.5rem"]::before {
+  content: "24px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.5625rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.5625rem"]::before {
+  content: "25px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.625rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.625rem"]::before {
+  content: "26px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.6875rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.6875rem"]::before {
+  content: "27px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.75rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.75rem"]::before {
+  content: "28px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.8125rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.8125rem"]::before {
+  content: "29px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.875rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.875rem"]::before {
+  content: "30px";
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="1.9375rem"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="1.9375rem"]::before {
+  content: "31px";
 }
 .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="2rem"]::before,
 .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="2rem"]::before {

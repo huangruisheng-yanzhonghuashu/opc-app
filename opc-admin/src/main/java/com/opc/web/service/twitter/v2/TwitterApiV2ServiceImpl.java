@@ -439,11 +439,11 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             }
             material.setContent(content);
 
-            // 设置标题（取前50字符）
-            /*String title = info.getText() != null && !info.getText().isEmpty()
-                    ? (info.getText().length() > 50 ? info.getText().substring(0, 50) + "..." : info.getText())
-                    : "Twitter 内容";
-            material.setTitle(title);*/
+            // 设置标题：取 text 的前100位
+            if (info.getText() != null && !info.getText().isEmpty()) {
+                String title = info.getText().length() > 100 ? info.getText().substring(0, 100) : info.getText();
+                material.setTitle(title);
+            }
 
             // 设置作者
             material.setAuthor(info.getAuthorUsername());

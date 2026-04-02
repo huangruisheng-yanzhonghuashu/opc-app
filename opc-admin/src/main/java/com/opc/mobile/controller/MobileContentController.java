@@ -6,6 +6,7 @@ import java.util.Map;
 import com.opc.common.annotation.MemberLogin;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
+import com.opc.common.utils.HtmlWrapperUtils;
 import com.opc.core.domain.CoreMaterial;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.domain.vo.MemberLoginVO;
@@ -86,6 +87,10 @@ public class MobileContentController extends BaseController
 
         // 增加查看数
         materialService.incrementViewCount(id);
+
+        // 包装content为完整HTML，适配移动端WebView显示
+        String wrappedContent = HtmlWrapperUtils.wrapContent(material.getContent());
+        material.setContent(wrappedContent);
 
         Map<String, Object> result = new HashMap<>();
         result.put("material", material);

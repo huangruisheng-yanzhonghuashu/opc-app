@@ -475,6 +475,12 @@ public class CollectSourceFetchService {
         String text = convertNewLineToBr(originalText);
         material.setContent(text);
 
+        // 设置标题：取 text 的前100位
+        if (originalText != null && !originalText.isEmpty()) {
+            String title = originalText.length() > 100 ? originalText.substring(0, 100) : originalText;
+            material.setTitle(title);
+        }
+
         material.setAuthor(getTextValue(node, "author"));
         material.setOriginalUrl(getTextValue(node, "url"));
 
