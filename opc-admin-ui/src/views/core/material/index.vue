@@ -98,46 +98,46 @@
          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
 
-      <el-table v-loading="loading" :data="materialList" @selection-change="handleSelectionChange">
-         <el-table-column type="selection" width="55" align="center" />
+      <el-table v-loading="loading" :data="materialList" @selection-change="handleSelectionChange" style="width: 100%">
+         <el-table-column type="selection" width="55" align="center" fixed="left" />
          <el-table-column label="素材ID" align="center" prop="id" width="80" />
          <el-table-column label="创建时间" align="center" prop="createTime" width="160">
             <template #default="scope">
                <span>{{ parseTime(scope.row.createTime) || '-' }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true" width="300">
+         <el-table-column label="标题" align="center" prop="title" :show-overflow-tooltip="true" min-width="200">
             <template #default="scope">
-               <el-button link type="primary" @click="handleView(scope.row)">{{ scope.row.title && scope.row.title.length > 50 ? scope.row.title.substring(0, 50) + '...' : scope.row.title }}</el-button>
+               <el-button link type="primary" @click="handleView(scope.row)" style="max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ scope.row.title }}</el-button>
             </template>
          </el-table-column>
          <el-table-column label="作者" align="center" prop="author" width="120" />
-         <el-table-column label="首页Tab" align="center" width="150">
+         <el-table-column label="首页Tab" align="center" width="150" :show-overflow-tooltip="false">
             <template #default="scope">
-               <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tag-list">
+               <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tag-list" style="display: flex; flex-wrap: nowrap; overflow: hidden; justify-content: center;">
                   <span
-                     v-for="tag in scope.row.tags.slice(0, 3)"
+                     v-for="tag in scope.row.tags.slice(0, 2)"
                      :key="tag.id"
-                     :style="{ backgroundColor: tag.tagColor || '#909399', color: getContrastTextColor(tag.tagColor), padding: '2px 8px', borderRadius: '4px', fontSize: '12px', marginRight: '4px', display: 'inline-block', lineHeight: '1.5' }"
+                     :style="{ backgroundColor: tag.tagColor || '#909399', color: getContrastTextColor(tag.tagColor), padding: '2px 6px', borderRadius: '4px', fontSize: '11px', marginRight: '2px', display: 'inline-block', lineHeight: '1.4', whiteSpace: 'nowrap', flexShrink: 0 }"
                   >
                      {{ tag.tagName }}
                   </span>
-                  <span v-if="scope.row.tags.length > 3" style="font-size: 12px; color: #666;">+{{ scope.row.tags.length - 3 }}</span>
+                  <span v-if="scope.row.tags.length > 2" style="font-size: 11px; color: #666; white-space: nowrap;">+{{ scope.row.tags.length - 2 }}</span>
                </div>
                <span v-else>-</span>
             </template>
          </el-table-column>
-         <el-table-column label="内容标签" align="center" width="150">
+         <el-table-column label="内容标签" align="center" width="150" :show-overflow-tooltip="false">
             <template #default="scope">
-               <div v-if="scope.row.tags2 && scope.row.tags2.length > 0" class="tag-list">
+               <div v-if="scope.row.tags2 && scope.row.tags2.length > 0" class="tag-list" style="display: flex; flex-wrap: nowrap; overflow: hidden; justify-content: center;">
                   <span
-                     v-for="tag in scope.row.tags2.slice(0, 3)"
+                     v-for="tag in scope.row.tags2.slice(0, 2)"
                      :key="tag.id"
-                     :style="{ backgroundColor: tag.tagColor || '#409EFF', color: getContrastTextColor(tag.tagColor || '#409EFF'), padding: '2px 8px', borderRadius: '4px', fontSize: '12px', marginRight: '4px', display: 'inline-block', lineHeight: '1.5' }"
+                     :style="{ backgroundColor: tag.tagColor || '#409EFF', color: getContrastTextColor(tag.tagColor || '#409EFF'), padding: '2px 6px', borderRadius: '4px', fontSize: '11px', marginRight: '2px', display: 'inline-block', lineHeight: '1.4', whiteSpace: 'nowrap', flexShrink: 0 }"
                   >
                      {{ tag.tagName }}
                   </span>
-                  <span v-if="scope.row.tags2.length > 3" style="font-size: 12px; color: #666;">+{{ scope.row.tags2.length - 3 }}</span>
+                  <span v-if="scope.row.tags2.length > 2" style="font-size: 11px; color: #666; white-space: nowrap;">+{{ scope.row.tags2.length - 2 }}</span>
                </div>
                <span v-else>-</span>
             </template>
@@ -214,7 +214,7 @@
                <span>{{ parseTime(scope.row.untopTime) || '-' }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="操作" width="280" align="center" class-name="small-padding fixed-width">
+         <el-table-column label="操作" width="280" align="center" class-name="small-padding fixed-width" fixed="right">
             <template #default="scope">
                <el-button link type="primary" icon="View" @click="handleView(scope.row)" v-hasPermi="['core:material:query']">详情</el-button>
                <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['core:material:edit']">编辑</el-button>
@@ -246,19 +246,16 @@
 
       <el-dialog :title="title" v-model="open" width="1000px" append-to-body>
          <el-form ref="materialRef" :model="form" :rules="rules" label-width="100px">
+            <!-- 标题：整行显示 -->
+            <el-form-item label="标题" prop="title">
+               <el-input v-model="form.title" placeholder="请输入标题" />
+            </el-form-item>
             <el-row>
-               <el-col :span="12">
-                  <el-form-item label="标题" prop="title">
-                     <el-input v-model="form.title" placeholder="请输入标题" />
-                  </el-form-item>
-               </el-col>
                <el-col :span="12">
                   <el-form-item label="作者" prop="author">
                      <el-input v-model="form.author" placeholder="请输入作者（注明出处）" />
                   </el-form-item>
                </el-col>
-            </el-row>
-            <el-row>
                <el-col :span="12">
                   <el-form-item label="来源" prop="source">
                      <el-select v-model="form.source" placeholder="请选择来源" style="width: 100%">
@@ -267,6 +264,8 @@
                      </el-select>
                   </el-form-item>
                </el-col>
+            </el-row>
+            <el-row>
                <el-col :span="12">
                   <el-form-item label="套餐分类" prop="packageType">
                      <el-select v-model="form.packageType" placeholder="请选择套餐分类" style="width: 100%" @change="handlePackageTypeChange">
@@ -274,6 +273,15 @@
                         <el-option label="普通素材" :value="1" />
                         <el-option label="VIP素材" :value="2" />
                         <el-option label="超级VIP" :value="3" />
+                     </el-select>
+                  </el-form-item>
+               </el-col>
+               <el-col :span="12">
+                  <el-form-item label="内容类型" prop="contentType">
+                     <el-select v-model="form.contentType" placeholder="请选择内容类型" style="width: 100%">
+                        <el-option label="纯文本" value="text" />
+                        <el-option label="图文" value="image" />
+                        <el-option label="视频" value="video" />
                      </el-select>
                   </el-form-item>
                </el-col>
@@ -311,15 +319,6 @@
                </el-col>
             </el-row>
             <el-row>
-               <el-col :span="12" v-if="form.materialType === 'post'">
-                  <el-form-item label="内容类型" prop="contentType">
-                     <el-select v-model="form.contentType" placeholder="请选择内容类型" style="width: 100%">
-                        <el-option label="纯文本" value="text" />
-                        <el-option label="图文" value="image" />
-                        <el-option label="视频" value="video" />
-                     </el-select>
-                  </el-form-item>
-               </el-col>
                <el-col :span="12">
                   <el-form-item label="状态" prop="status">
                      <el-radio-group v-model="form.status">
@@ -357,18 +356,21 @@
             <el-form-item label="原ID" prop="originalId">
                <el-input v-model="form.originalId" placeholder="请输入原ID" />
             </el-form-item>
-            <!-- 帖子类型：图文/视频显示媒体文件上传 -->
-            <el-form-item label="媒体文件" prop="mediaList" v-if="form.materialType === 'post' && form.contentType !== 'text'">
+            <!-- 正文编辑器 -->
+            <el-form-item label="正文" prop="content">
+               <Editor v-model="form.content" :min-height="300" />
+            </el-form-item>
+            <!-- 帖子类型：图文显示图片上传（在正文后面） -->
+            <el-form-item label="图片" prop="mediaList" v-if="form.materialType === 'post' && form.contentType === 'image'">
                <div class="media-upload-container">
-                  <div v-for="(media, index) in form.mediaList" :key="index" class="media-upload-item">
+                  <div v-for="(media, index) in form.mediaList.filter(m => m.mediaType === 'image')" :key="index" class="media-upload-item">
                      <div class="media-preview">
-                        <el-image v-if="media.mediaType === 'image'" :src="media.fileUrl" fit="cover" style="width: 100%; height: 100%;" />
-                        <video v-else-if="media.mediaType === 'video'" :src="media.fileUrl" controls style="width: 100%; height: 100%;" />
+                        <el-image :src="media.fileUrl" fit="cover" style="width: 100%; height: 100%;" />
                      </div>
                      <div class="media-actions">
-                        <el-button link type="danger" icon="Delete" size="small" @click="removeMedia(index)">删除</el-button>
-                        <el-button link type="primary" icon="Top" size="small" @click="moveMedia(index, -1)" :disabled="index === 0">上移</el-button>
-                        <el-button link type="primary" icon="Bottom" size="small" @click="moveMedia(index, 1)" :disabled="index === form.mediaList.length - 1">下移</el-button>
+                        <el-button link type="danger" icon="Delete" size="small" @click="removeMedia(form.mediaList.indexOf(media))">删除</el-button>
+                        <el-button link type="primary" icon="Top" size="small" @click="moveMedia(form.mediaList.indexOf(media), -1)" :disabled="index === 0">上移</el-button>
+                        <el-button link type="primary" icon="Bottom" size="small" @click="moveMedia(form.mediaList.indexOf(media), 1)" :disabled="index === form.mediaList.filter(m => m.mediaType === 'image').length - 1">下移</el-button>
                      </div>
                   </div>
                   <div class="media-upload-add">
@@ -377,20 +379,40 @@
                         :action="uploadUrl"
                         :headers="uploadHeaders"
                         :show-file-list="false"
-                        :on-success="handleMediaUploadSuccess"
-                        :before-upload="beforeMediaUpload"
-                        :accept="form.contentType === 'image' ? 'image/*' : form.contentType === 'video' ? 'video/*' : 'image/*,video/*'"
+                        :on-success="(res, file) => handleMediaUploadSuccess(res, file, 'image')"
+                        :before-upload="(file) => beforeMediaUpload(file, 'image')"
+                        accept="image/*"
                      >
-                        <el-button type="primary" plain icon="Plus">
-                           {{ form.contentType === 'image' ? '添加图片' : form.contentType === 'video' ? '添加视频' : '添加图片/视频' }}
-                        </el-button>
+                        <el-button type="primary" plain icon="Plus">添加图片</el-button>
                      </el-upload>
                   </div>
                </div>
             </el-form-item>
-            <!-- 正文编辑器：所有类型都显示 -->
-            <el-form-item label="正文" prop="content">
-               <Editor v-model="form.content" :min-height="300" />
+            <!-- 帖子类型：视频显示视频上传（在正文后面） -->
+            <el-form-item label="视频" prop="mediaList" v-if="form.materialType === 'post' && form.contentType === 'video'">
+               <div class="media-upload-container">
+                  <div v-for="(media, index) in form.mediaList.filter(m => m.mediaType === 'video')" :key="index" class="media-upload-item">
+                     <div class="media-preview">
+                        <video :src="media.fileUrl" controls style="width: 100%; height: 100%;" />
+                     </div>
+                     <div class="media-actions">
+                        <el-button link type="danger" icon="Delete" size="small" @click="removeMedia(form.mediaList.indexOf(media))">删除</el-button>
+                     </div>
+                  </div>
+                  <div class="media-upload-add" v-if="form.mediaList.filter(m => m.mediaType === 'video').length === 0">
+                     <el-upload
+                        class="media-uploader"
+                        :action="uploadUrl"
+                        :headers="uploadHeaders"
+                        :show-file-list="false"
+                        :on-success="(res, file) => handleMediaUploadSuccess(res, file, 'video')"
+                        :before-upload="(file) => beforeMediaUpload(file, 'video')"
+                        accept="video/*"
+                     >
+                        <el-button type="primary" plain icon="Plus">添加视频</el-button>
+                     </el-upload>
+                  </div>
+               </div>
             </el-form-item>
             <el-form-item label="封面图" prop="coverImage">
                <image-upload v-model="form.coverImage" :limit="1" />
@@ -417,7 +439,6 @@
       <el-dialog title="素材详情" v-model="detailOpen" width="800px" append-to-body>
          <el-descriptions :column="2" border v-if="detailData">
             <el-descriptions-item label="素材ID" :span="1">{{ detailData.id }}</el-descriptions-item>
-            <el-descriptions-item label="标题" :span="1">{{ detailData.title }}</el-descriptions-item>
             <el-descriptions-item label="作者" :span="1">{{ detailData.author || '-' }}</el-descriptions-item>
             <el-descriptions-item label="来源" :span="1">
                <span>{{ getSourceLabel(detailData.source) }}</span>
@@ -429,6 +450,7 @@
             </el-descriptions-item>
             <el-descriptions-item label="原ID" :span="1">{{ detailData.originalId || '-' }}</el-descriptions-item>
             <el-descriptions-item label="套餐分类" :span="1">{{ getPackageTypeLabel(detailData.packageType) }}</el-descriptions-item>
+            <el-descriptions-item label="期数" :span="1">{{ detailData.issueNo || 0 }}</el-descriptions-item>
             <el-descriptions-item label="内容类型" :span="1">
                <span>{{ getContentTypeLabel(detailData.contentType) }}</span>
             </el-descriptions-item>
@@ -473,32 +495,43 @@
                <a v-if="detailData.originalUrl" :href="detailData.originalUrl" target="_blank">{{ detailData.originalUrl }}</a>
                <span v-else>-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="视频" :span="2" v-if="detailData.contentType === 'video'">
-               <video v-if="detailData.videoUrl" controls style="max-width: 100%; max-height: 400px;">
-                  <source :src="detailData.videoUrl" type="video/mp4">
-                  您的浏览器不支持视频播放
-               </video>
+            <!-- 标题：整行显示，放在正文上面 -->
+            <el-descriptions-item label="标题" :span="2">
+               <div style="font-weight: bold; font-size: 16px; max-width: 600px; word-break: break-all;">{{ detailData.title }}</div>
+            </el-descriptions-item>
+            <!-- 正文 -->
+            <el-descriptions-item label="正文" :span="2">
+               <div v-if="detailData.content" style="max-height: 400px; overflow-y: auto; border: 1px solid #e4e7ed; padding: 10px; border-radius: 4px;" v-html="detailData.content"></div>
                <span v-else>-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="封面图" :span="2">
-               <el-image v-if="detailData.coverImage" :src="detailData.coverImage" style="max-width: 200px; max-height: 200px;" fit="cover" />
-               <span v-else>-</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="媒体文件" :span="2" v-if="detailMediaList && detailMediaList.length > 0">
+            <!-- 媒体文件：放在正文后面 -->
+            <!-- 帖子类型：根据contentType过滤显示，图文只显示图片，视频只显示视频 -->
+            <el-descriptions-item label="媒体文件" :span="2" v-if="detailData.materialType === 'post' && detailData.contentType === 'image' && detailMediaList && detailMediaList.filter(m => m.mediaType === 'image').length > 0">
                <div class="media-list">
-                  <div v-for="(media, index) in detailMediaList" :key="media.id" class="media-item">
+                  <div v-for="(media, index) in detailMediaList.filter(m => m.mediaType === 'image')" :key="media.id" class="media-item">
                      <div class="media-index">{{ index + 1 }}</div>
                      <div class="media-content">
                         <el-image 
-                           v-if="media.mediaType === 'image'" 
                            :src="media.fileUrl" 
                            style="max-width: 150px; max-height: 150px;" 
                            fit="cover"
                            :preview-src-list="detailMediaList.filter(m => m.mediaType === 'image').map(m => m.fileUrl)"
                            :initial-index="detailMediaList.filter(m => m.mediaType === 'image').indexOf(media)"
                         />
+                     </div>
+                     <div class="media-info">
+                        <el-tag size="small" type="success">图片</el-tag>
+                        <span class="media-sort">排序: {{ media.sortOrder }}</span>
+                     </div>
+                  </div>
+               </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="媒体文件" :span="2" v-if="detailData.materialType === 'post' && detailData.contentType === 'video' && detailMediaList && detailMediaList.filter(m => m.mediaType === 'video').length > 0">
+               <div class="media-list">
+                  <div v-for="(media, index) in detailMediaList.filter(m => m.mediaType === 'video')" :key="media.id" class="media-item">
+                     <div class="media-index">{{ index + 1 }}</div>
+                     <div class="media-content">
                         <video 
-                           v-else-if="media.mediaType === 'video'" 
                            controls 
                            style="max-width: 300px; max-height: 200px;"
                         >
@@ -507,22 +540,33 @@
                         </video>
                      </div>
                      <div class="media-info">
-                        <el-tag size="small" :type="media.mediaType === 'image' ? 'success' : 'warning'">
-                           {{ media.mediaType === 'image' ? '图片' : '视频' }}
-                        </el-tag>
+                        <el-tag size="small" type="warning">视频</el-tag>
                         <span class="media-sort">排序: {{ media.sortOrder }}</span>
                      </div>
                   </div>
                </div>
             </el-descriptions-item>
-            <el-descriptions-item label="总结" :span="2">{{ detailData.summary || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="正文" :span="2">
-               <div v-if="detailData.content" style="max-height: 400px; overflow-y: auto; border: 1px solid #e4e7ed; padding: 10px; border-radius: 4px;" v-html="detailData.content"></div>
+            <!-- 封面图：放在媒体后面 -->
+            <el-descriptions-item label="封面图" :span="2">
+               <el-image v-if="detailData.coverImage" :src="detailData.coverImage" style="max-width: 200px; max-height: 200px;" fit="cover" />
                <span v-else>-</span>
             </el-descriptions-item>
+            <!-- 文章类型的视频 -->
+            <el-descriptions-item label="视频" :span="2" v-if="detailData.materialType === 'article' && detailData.contentType === 'video'">
+               <video v-if="detailData.videoUrl" controls style="max-width: 100%; max-height: 400px;">
+                  <source :src="detailData.videoUrl" type="video/mp4">
+                  您的浏览器不支持视频播放
+               </video>
+               <span v-else>-</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="总结" :span="2">{{ detailData.summary || '-' }}</el-descriptions-item>
             <el-descriptions-item label="创建时间" :span="1">{{ parseTime(detailData.createTime) || '-' }}</el-descriptions-item>
             <el-descriptions-item label="更新时间" :span="1">{{ parseTime(detailData.updateTime) || '-' }}</el-descriptions-item>
             <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="上线时间" :span="1">{{ parseTime(detailData.onlineTime) || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="下线时间" :span="1">{{ parseTime(detailData.offlineTime) || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="置顶时间" :span="1">{{ parseTime(detailData.topTime) || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="取消置顶时间" :span="1">{{ parseTime(detailData.untopTime) || '-' }}</el-descriptions-item>
             <el-descriptions-item label="回复数" :span="1">{{ detailData.replyCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="点赞数" :span="1">{{ detailData.likeCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="查看数" :span="1">{{ detailData.viewCount || 0 }}</el-descriptions-item>
@@ -979,46 +1023,39 @@ function reset() {
 }
 
 // 媒体文件上传相关方法
-function handleMediaUploadSuccess(response, file) {
+function handleMediaUploadSuccess(response, file, mediaType) {
   if (response.code !== 200) {
     proxy.$modal.msgError(response.msg || '上传失败')
     return
   }
-  const fileType = file.raw.type.startsWith('video/') ? 'video' : 'image'
   if (!form.value.mediaList) {
     form.value.mediaList = []
   }
+  // 如果是视频类型，先清空列表（只能有一个视频）
+  if (mediaType === 'video') {
+    form.value.mediaList = form.value.mediaList.filter(m => m.mediaType !== 'video')
+  }
   form.value.mediaList.push({
-    mediaType: fileType,
+    mediaType: mediaType,
     fileUrl: response.url,
     status: '0'
   })
   proxy.$modal.msgSuccess('上传成功')
 }
 
-function beforeMediaUpload(file) {
+function beforeMediaUpload(file, mediaType) {
   const isImage = file.type.startsWith('image/')
   const isVideo = file.type.startsWith('video/')
   const isLt50M = file.size / 1024 / 1024 < 50
 
-  // 根据内容类型限制上传文件类型
-  if (form.value.contentType === 'image') {
-    if (!isImage) {
-      proxy.$modal.msgError('内容类型为图文时，只能上传图片文件!')
-      return false
-    }
-  } else if (form.value.contentType === 'video') {
-    if (!isVideo) {
-      proxy.$modal.msgError('内容类型为视频时，只能上传视频文件!')
-      return false
-    }
-  } else {
-    if (!isImage && !isVideo) {
-      proxy.$modal.msgError('只能上传图片或视频文件!')
-      return false
-    }
+  if (mediaType === 'image' && !isImage) {
+    proxy.$modal.msgError('只能上传图片文件!')
+    return false
   }
-
+  if (mediaType === 'video' && !isVideo) {
+    proxy.$modal.msgError('只能上传视频文件!')
+    return false
+  }
   if (!isLt50M) {
     proxy.$modal.msgError('文件大小不能超过 50MB!')
     return false
