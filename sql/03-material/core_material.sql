@@ -19,6 +19,7 @@ CREATE TABLE core_material (
     publish_time        DATETIME        DEFAULT NULL               COMMENT '发布时间',
     content_type        VARCHAR(20)     DEFAULT 'text'             COMMENT '内容类型（text/image/video）',
     package_type        INT             DEFAULT NULL               COMMENT '套餐分类（0晨报 1普通会员 2VIP会员 3超级VIP会员）',
+    category_id         BIGINT(20)      DEFAULT NULL               COMMENT '二级分类ID',
     status              CHAR(1)         DEFAULT '0'                COMMENT '状态（0上线 1下线）',
     is_top              CHAR(1)         DEFAULT '0'                COMMENT '是否置顶（0否 1是）',
     source              VARCHAR(50)     DEFAULT NULL               COMMENT '来源（对应core_collect_source表的source_type：twitter/telegram/youtube等，manual表示手动添加）',
@@ -37,5 +38,6 @@ CREATE TABLE core_material (
     KEY idx_status (status),
     KEY idx_is_top (is_top),
     KEY idx_package_type (package_type),
+    KEY idx_category_id (category_id),
     KEY idx_publish_time (publish_time)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 COMMENT='素材表';

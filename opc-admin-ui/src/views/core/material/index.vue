@@ -251,12 +251,29 @@
                </el-col>
                <el-col :span="12">
                   <el-form-item label="套餐分类" prop="packageType">
-                     <el-select v-model="form.packageType" placeholder="请选择套餐分类" style="width: 100%">
+                     <el-select v-model="form.packageType" placeholder="请选择套餐分类" style="width: 100%" @change="handlePackageTypeChange">
                         <el-option label="晨报" :value="0" />
-                        <el-option label="普通会员" :value="1" />
-                        <el-option label="VIP会员" :value="2" />
-                        <el-option label="超级VIP会员" :value="3" />
+                        <el-option label="普通素材" :value="1" />
+                        <el-option label="VIP素材" :value="2" />
+                        <el-option label="超级VIP" :value="3" />
                      </el-select>
+                  </el-form-item>
+               </el-col>
+            </el-row>
+            <el-row v-if="form.packageType === 2 || form.packageType === 3">
+               <el-col :span="24">
+                  <el-form-item label="二级分类" prop="categoryId">
+                     <div style="display: flex; gap: 8px; width: calc(100% - 100px);">
+                        <el-select v-model="form.categoryId" placeholder="请选择二级分类" style="flex: 1;" clearable>
+                           <el-option
+                              v-for="category in categoryOptions"
+                              :key="category.id"
+                              :label="category.categoryName"
+                              :value="category.id"
+                           />
+                        </el-select>
+                        <el-button type="primary" plain @click="handleManageCategory">管理</el-button>
+                     </div>
                   </el-form-item>
                </el-col>
             </el-row>
@@ -448,12 +465,148 @@
             </div>
          </template>
       </el-dialog>
+
+      <!-- 二级分类管理弹窗 -->
+      <el-dialog :title="categoryTitle" v-model="categoryOpen" width="900px" append-to-body :close-on-click-modal="false">
+         <el-form :model="categoryQueryParams" ref="categoryQueryRef" :inline="true" v-show="true">
+            <el-form-item label="分类名称" prop="categoryName">
+               <el-input
+                  v-model="categoryQueryParams.categoryName"
+                  placeholder="请输入分类名称"
+                  clearable
+                  style="width: 180px"
+                  @keyup.enter="handleCategoryQuery"
+               />
+            </el-form-item>
+            <el-form-item label="套餐分类" prop="packageType">
+               <el-select v-model="categoryQueryParams.packageType" placeholder="全部" clearable style="width: 120px">
+                  <el-option label="VIP素材" :value="2" />
+                  <el-option label="超级VIP" :value="3" />
+               </el-select>
+            </el-form-item>
+            <el-form-item label="状态" prop="status">
+               <el-select v-model="categoryQueryParams.status" placeholder="全部" clearable style="width: 100px">
+                  <el-option label="正常" value="0" />
+                  <el-option label="停用" value="1" />
+               </el-select>
+            </el-form-item>
+            <el-form-item>
+               <el-button type="primary" icon="Search" @click="handleCategoryQuery">搜索</el-button>
+               <el-button icon="Refresh" @click="resetCategoryQuery">重置</el-button>
+            </el-form-item>
+         </el-form>
+
+         <el-row :gutter="10" class="mb8">
+            <el-col :span="1.5">
+               <el-button
+                  type="primary"
+                  plain
+                  icon="Plus"
+                  @click="handleCategoryAdd"
+               >新增</el-button>
+            </el-col>
+            <el-col :span="1.5">
+               <el-button
+                  type="danger"
+                  plain
+                  icon="Delete"
+                  :disabled="categoryMultiple"
+                  @click="handleCategoryDelete"
+               >删除</el-button>
+            </el-col>
+         </el-row>
+
+         <el-table v-loading="categoryLoading" :data="categoryList" @selection-change="handleCategorySelectionChange" height="300">
+            <el-table-column type="selection" width="55" align="center" />
+            <el-table-column label="分类ID" align="center" prop="id" width="70" />
+            <el-table-column label="分类名称" align="center" prop="categoryName" />
+            <el-table-column label="套餐分类" align="center" prop="packageType" width="90">
+               <template #default="scope">
+                  <el-tag v-if="scope.row.packageType === 2" type="success" size="small">VIP素材</el-tag>
+                  <el-tag v-else-if="scope.row.packageType === 3" type="warning" size="small">超级VIP</el-tag>
+                  <span v-else>-</span>
+               </template>
+            </el-table-column>
+            <el-table-column label="排序" align="center" prop="sortOrder" width="60" />
+            <el-table-column label="状态" align="center" prop="status" width="70">
+               <template #default="scope">
+                  <el-tag :type="scope.row.status === '0' ? 'success' : 'danger'" size="small">
+                     {{ scope.row.status === '0' ? '正常' : '停用' }}
+                  </el-tag>
+               </template>
+            </el-table-column>
+            <el-table-column label="操作" width="150" align="center" class-name="small-padding fixed-width">
+               <template #default="scope">
+                  <el-button link type="primary" icon="Edit" size="small" @click="handleCategoryUpdate(scope.row)">编辑</el-button>
+                  <el-button link type="danger" icon="Delete" size="small" @click="handleCategoryDelete(scope.row)">删除</el-button>
+               </template>
+            </el-table-column>
+         </el-table>
+
+         <pagination
+            v-show="categoryTotal > 0"
+            :total="categoryTotal"
+            v-model:page="categoryQueryParams.pageNum"
+            v-model:limit="categoryQueryParams.pageSize"
+            @pagination="getCategoryList"
+         />
+
+         <!-- 二级分类表单 -->
+         <el-divider content-position="left">{{ categoryForm.id ? '修改' : '新增' }}分类</el-divider>
+         <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryRules" label-width="100px">
+            <el-row>
+               <el-col :span="12">
+                  <el-form-item label="分类名称" prop="categoryName">
+                     <el-input v-model="categoryForm.categoryName" placeholder="请输入分类名称" />
+                  </el-form-item>
+               </el-col>
+               <el-col :span="12">
+                  <el-form-item label="套餐分类" prop="packageType">
+                     <el-select v-model="categoryForm.packageType" placeholder="请选择套餐分类" style="width: 100%">
+                        <el-option label="VIP素材" :value="2" />
+                        <el-option label="超级VIP" :value="3" />
+                     </el-select>
+                  </el-form-item>
+               </el-col>
+            </el-row>
+            <el-row>
+               <el-col :span="12">
+                  <el-form-item label="排序" prop="sortOrder">
+                     <el-input-number v-model="categoryForm.sortOrder" :min="0" :max="999" placeholder="请输入排序" style="width: 100%" />
+                  </el-form-item>
+               </el-col>
+               <el-col :span="12">
+                  <el-form-item label="状态" prop="status">
+                     <el-radio-group v-model="categoryForm.status">
+                        <el-radio label="0">正常</el-radio>
+                        <el-radio label="1">停用</el-radio>
+                     </el-radio-group>
+                  </el-form-item>
+               </el-col>
+            </el-row>
+            <el-row>
+               <el-col :span="24">
+                  <el-form-item label="备注" prop="remark">
+                     <el-input v-model="categoryForm.remark" type="textarea" placeholder="请输入备注" :rows="2" />
+                  </el-form-item>
+               </el-col>
+            </el-row>
+         </el-form>
+
+         <template #footer>
+            <div class="dialog-footer">
+               <el-button type="primary" @click="submitCategoryForm">保 存</el-button>
+               <el-button @click="cancelCategory">关 闭</el-button>
+            </div>
+         </template>
+      </el-dialog>
    </div>
 </template>
 
 <script setup name="Material">
 import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia } from "@/api/core/material"
 import { getAllActiveTags } from "@/api/core/tag"
+import { listCategoryByPackageType, listMaterialCategory, addMaterialCategory, getMaterialCategory, updateMaterialCategory, delMaterialCategory } from "@/api/core/materialCategory"
 import { User, Star, Medal, Sunrise } from '@element-plus/icons-vue'
 import Editor from "@/components/Editor/index.vue"
 import FileUpload from "@/components/FileUpload/index.vue"
@@ -463,6 +616,8 @@ const { proxy } = getCurrentInstance()
 const materialList = ref([])
 const open = ref(false)
 const detailOpen = ref(false)
+const categoryOpen = ref(false)
+const categoryLoading = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
 const ids = ref([])
@@ -470,10 +625,17 @@ const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
+const categoryTitle = ref("")
 const activeTab = ref("0")
 const detailData = ref({})
 const detailMediaList = ref([])
 const tagOptions = ref([])
+const categoryOptions = ref([])
+const categoryList = ref([])
+const categoryTotal = ref(0)
+const categoryIds = ref([])
+const categorySingle = ref(true)
+const categoryMultiple = ref(true)
 
 const data = reactive({
   form: {},
@@ -490,13 +652,30 @@ const data = reactive({
   }
 })
 
+const categoryData = reactive({
+  categoryForm: {},
+  categoryQueryParams: {
+    pageNum: 1,
+    pageSize: 10,
+    categoryName: undefined,
+    packageType: undefined,
+    status: undefined
+  },
+  categoryRules: {
+    categoryName: [{ required: true, message: "分类名称不能为空", trigger: "blur" }],
+    packageType: [{ required: true, message: "套餐分类不能为空", trigger: "change" }],
+    sortOrder: [{ required: true, message: "排序不能为空", trigger: "blur" }]
+  }
+})
+
 const { queryParams, form, rules } = toRefs(data)
+const { categoryQueryParams, categoryForm, categoryRules } = toRefs(categoryData)
 
 function getPackageTypeLabel(packageType) {
   if (packageType === 0) return '晨报'
-  if (packageType === 1) return '普通会员'
-  if (packageType === 2) return 'VIP会员'
-  if (packageType === 3) return '超级VIP会员'
+  if (packageType === 1) return '普通素材'
+  if (packageType === 2) return 'VIP素材'
+  if (packageType === 3) return '超级VIP'
   return '-'
 }
 
@@ -540,6 +719,134 @@ function getContrastTextColor(bgColor) {
   // 计算亮度 (YIQ公式)
   const brightness = (r * 299 + g * 587 + b * 114) / 1000
   return brightness > 128 ? '#333' : '#fff'
+}
+
+// 根据套餐分类获取二级分类
+function getCategoryOptions(packageType) {
+  if (packageType === 2 || packageType === 3) {
+    listCategoryByPackageType(packageType).then(response => {
+      categoryOptions.value = response.data || []
+    })
+  } else {
+    categoryOptions.value = []
+  }
+}
+
+// 套餐分类改变时
+function handlePackageTypeChange(packageType) {
+  // 清空已选的二级分类
+  form.value.categoryId = undefined
+  getCategoryOptions(packageType)
+}
+
+// 打开二级分类管理弹窗
+function handleManageCategory() {
+  categoryOpen.value = true
+  categoryTitle.value = "二级分类管理"
+  getCategoryList()
+}
+
+// 查询二级分类列表
+function getCategoryList() {
+  categoryLoading.value = true
+  listMaterialCategory(categoryQueryParams.value).then(response => {
+    categoryList.value = response.data
+    categoryTotal.value = response.total
+    categoryLoading.value = false
+  })
+}
+
+// 二级分类搜索
+function handleCategoryQuery() {
+  categoryQueryParams.value.pageNum = 1
+  getCategoryList()
+}
+
+// 重置二级分类搜索
+function resetCategoryQuery() {
+  categoryQueryParams.value.categoryName = undefined
+  categoryQueryParams.value.packageType = undefined
+  categoryQueryParams.value.status = undefined
+  handleCategoryQuery()
+}
+
+// 二级分类选择变化
+function handleCategorySelectionChange(selection) {
+  categoryIds.value = selection.map(item => item.id)
+  categorySingle.value = selection.length != 1
+  categoryMultiple.value = !selection.length
+}
+
+// 重置二级分类表单
+function resetCategoryForm() {
+  categoryForm.value = {
+    id: undefined,
+    categoryName: undefined,
+    packageType: undefined,
+    sortOrder: 0,
+    status: '0',
+    remark: undefined
+  }
+  proxy.resetForm("categoryFormRef")
+}
+
+// 取消二级分类弹窗
+function cancelCategory() {
+  categoryOpen.value = false
+  resetCategoryForm()
+}
+
+// 新增二级分类
+function handleCategoryAdd() {
+  resetCategoryForm()
+  categoryTitle.value = "添加二级分类"
+  categoryForm.value.status = '0'
+}
+
+// 修改二级分类
+function handleCategoryUpdate(row) {
+  resetCategoryForm()
+  const id = row.id || categoryIds.value[0]
+  getMaterialCategory(id).then(response => {
+    categoryForm.value = response.data
+    categoryTitle.value = "修改二级分类"
+  })
+}
+
+// 删除二级分类
+function handleCategoryDelete(row) {
+  const ids = row.id ? [row.id] : categoryIds.value
+  proxy.$modal.confirm('是否确认删除二级分类编号为"' + ids + '"的数据项？').then(function() {
+    return delMaterialCategory(ids)
+  }).then(() => {
+    getCategoryList()
+    proxy.$modal.msgSuccess("删除成功")
+  }).catch(() => {})
+}
+
+// 提交二级分类表单
+function submitCategoryForm() {
+  proxy.$refs["categoryFormRef"].validate(valid => {
+    if (valid) {
+      if (categoryForm.value.id != undefined) {
+        updateMaterialCategory(categoryForm.value).then(() => {
+          proxy.$modal.msgSuccess("修改成功")
+          resetCategoryForm()
+          getCategoryList()
+          // 刷新当前素材表单的二级分类选项
+          getCategoryOptions(form.value.packageType)
+        })
+      } else {
+        addMaterialCategory(categoryForm.value).then(() => {
+          proxy.$modal.msgSuccess("新增成功")
+          resetCategoryForm()
+          getCategoryList()
+          // 刷新当前素材表单的二级分类选项
+          getCategoryOptions(form.value.packageType)
+        })
+      }
+    }
+  })
 }
 
 function getList() {
@@ -626,6 +933,7 @@ function handleAdd() {
     form.value.packageType = 3
   }
   getTagOptions()
+  getCategoryOptions(form.value.packageType)
   open.value = true
   title.value = "添加素材"
 }
@@ -653,6 +961,8 @@ function handleUpdate(row) {
     } else {
       form.value.tagIds = []
     }
+    // 获取二级分类选项
+    getCategoryOptions(form.value.packageType)
     open.value = true
     title.value = "修改素材"
   })

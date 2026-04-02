@@ -58,8 +58,11 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "内容类型" , readConverterExp = "text/image/video")
     private String contentType;
 
-    @Excel(name = "套餐分类", readConverterExp = "0=晨报,1=普通会员,2=VIP会员,3=超级VIP会员")
+    @Excel(name = "套餐分类", readConverterExp = "0=晨报,1=普通素材,2=VIP素材,3=超级VIP")
     private Integer packageType;
+
+    /** 二级分类ID */
+    private Long categoryId;
 
     @Excel(name = "状态", readConverterExp = "0=上线,1=下线")
     private String status;
@@ -258,6 +261,16 @@ public class CoreMaterial extends BaseEntity
         this.packageType = packageType;
     }
 
+    public Long getCategoryId()
+    {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId)
+    {
+        this.categoryId = categoryId;
+    }
+
     public String getStatus()
     {
         return status;
@@ -407,6 +420,7 @@ public class CoreMaterial extends BaseEntity
             .append("publishTime", getPublishTime())
             .append("contentType", getContentType())
             .append("packageType", getPackageType())
+            .append("categoryId", getCategoryId())
             .append("status", getStatus())
             .append("isTop", getIsTop())
             .append("source", getSource())
