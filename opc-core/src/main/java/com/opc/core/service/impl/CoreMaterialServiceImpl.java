@@ -321,6 +321,18 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         return materialMapper.selectMaterialByOriginalId(originalId);
     }
 
+    @Override
+    public CoreMaterial selectLatestMaterialByCategoryId(Long categoryId, String status)
+    {
+        return materialMapper.selectLatestMaterialByCategoryId(categoryId, status);
+    }
+
+    @Override
+    public List<CoreMaterial> selectMaterialListByCategoryIdExcludeLatest(Long categoryId, String status)
+    {
+        return materialMapper.selectMaterialListByCategoryIdExcludeLatest(categoryId, status);
+    }
+
     /**
      * 自动匹配内容中的标签并建立关联
      * 

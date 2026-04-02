@@ -75,4 +75,22 @@ public interface ICoreMaterialService
      * @return 素材对象
      */
     CoreMaterial selectMaterialByOriginalId(String originalId);
+
+    /**
+     * 根据二级分类查询最新期数的素材（期数最大的记录）
+     *
+     * @param categoryId 二级分类ID
+     * @param status 状态
+     * @return 最新期数素材
+     */
+    CoreMaterial selectLatestMaterialByCategoryId(Long categoryId, String status);
+
+    /**
+     * 根据二级分类查询素材列表（排除期数最大的记录）
+     *
+     * @param categoryId 二级分类ID
+     * @param status 状态
+     * @return 素材列表（排除最新期数）
+     */
+    List<CoreMaterial> selectMaterialListByCategoryIdExcludeLatest(Long categoryId, String status);
 }

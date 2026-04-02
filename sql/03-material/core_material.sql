@@ -23,6 +23,8 @@ CREATE TABLE core_material (
     status              CHAR(1)         DEFAULT '0'                COMMENT '状态（0上线 1下线）',
     is_top              CHAR(1)         DEFAULT '0'                COMMENT '是否置顶（0否 1是）',
     source              VARCHAR(50)     DEFAULT NULL               COMMENT '来源（对应core_collect_source表的source_type：twitter/telegram/youtube等，manual表示手动添加）',
+    material_type       VARCHAR(20)     DEFAULT 'post'             COMMENT '素材类型（post帖子/article文章）',
+    issue_no            INT             DEFAULT 0                  COMMENT '期数（排序号）',
     cover_image         VARCHAR(500)    DEFAULT NULL               COMMENT '封面图URL',
     video_url           VARCHAR(1000)   DEFAULT NULL               COMMENT '视频URL',
     online_time         DATETIME        DEFAULT NULL               COMMENT '上线时间',

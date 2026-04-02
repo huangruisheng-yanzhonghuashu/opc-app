@@ -112,13 +112,6 @@
             </template>
          </el-table-column>
          <el-table-column label="作者" align="center" prop="author" width="120" />
-         <el-table-column label="素材类型" align="center" prop="materialType" width="100">
-            <template #default="scope">
-               <el-tag :type="scope.row.materialType === 'post' ? 'primary' : 'success'">
-                  {{ scope.row.materialType === 'post' ? '帖子' : '文章' }}
-               </el-tag>
-            </template>
-         </el-table-column>
          <el-table-column label="首页Tab" align="center" width="150">
             <template #default="scope">
                <div v-if="scope.row.tags && scope.row.tags.length > 0" class="tag-list">
@@ -152,6 +145,19 @@
          <el-table-column label="套餐分类" align="center" prop="packageType" width="100">
             <template #default="scope">
                <span>{{ getPackageTypeLabel(scope.row.packageType) }}</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="素材类型" align="center" prop="materialType" width="100">
+            <template #default="scope">
+               <el-tag v-if="scope.row.materialType" :type="scope.row.materialType === 'post' ? 'primary' : 'success'">
+                  {{ scope.row.materialType === 'post' ? '帖子' : '文章' }}
+               </el-tag>
+               <span v-else>-</span>
+            </template>
+         </el-table-column>
+         <el-table-column label="期数" align="center" prop="issueNo" width="80">
+            <template #default="scope">
+               <span>{{ scope.row.issueNo || 0 }}</span>
             </template>
          </el-table-column>
          <el-table-column label="来源" align="center" prop="source" width="80">
@@ -273,6 +279,21 @@
                </el-col>
             </el-row>
             <el-row v-if="form.packageType === 2 || form.packageType === 3">
+               <el-col :span="12">
+                  <el-form-item label="素材类型" prop="materialType">
+                     <el-select v-model="form.materialType" placeholder="请选择素材类型" style="width: 100%">
+                        <el-option label="帖子" value="post" />
+                        <el-option label="文章" value="article" />
+                     </el-select>
+                  </el-form-item>
+               </el-col>
+               <el-col :span="12">
+                  <el-form-item label="期数" prop="issueNo">
+                     <el-input-number v-model="form.issueNo" :min="0" :max="99999" placeholder="请输入期数" style="width: 100%" />
+                  </el-form-item>
+               </el-col>
+            </el-row>
+            <el-row v-if="form.packageType === 2 || form.packageType === 3">
                <el-col :span="24">
                   <el-form-item label="二级分类" prop="categoryId">
                      <div style="display: flex; gap: 8px; width: calc(100% - 100px);">
@@ -339,10 +360,41 @@
             <el-form-item label="封面图" prop="coverImage">
                <image-upload v-model="form.coverImage" :limit="1" />
             </el-form-item>
-            <el-form-item label="正文" prop="content" v-if="form.contentType !== 'video'">
+            <!-- 正文编辑器：所有类型都显示 -->
+            <el-form-item label="正文" prop="content">
                <Editor v-model="form.content" :min-height="300" />
             </el-form-item>
-            <el-form-item label="视频上传" prop="videoUrl" v-if="form.contentType === 'video'">
+            <!-- 帖子类型（VIP素材、超级VIP）：图文/视频显示媒体文件上传 -->
+            <el-form-item label="媒体文件" prop="mediaList" v-if="form.materialType === 'post' && (form.packageType === 2 || form.packageType === 3) && form.contentType !== 'text'">
+               <div class="media-upload-container">
+                  <div v-for="(media, index) in form.mediaList" :key="index" class="media-upload-item">
+                     <div class="media-preview">
+                        <el-image v-if="media.mediaType === 'image'" :src="media.fileUrl" fit="cover" style="width: 100%; height: 100%;" />
+                        <video v-else-if="media.mediaType === 'video'" :src="media.fileUrl" controls style="width: 100%; height: 100%;" />
+                     </div>
+                     <div class="media-actions">
+                        <el-button link type="danger" icon="Delete" size="small" @click="removeMedia(index)">删除</el-button>
+                        <el-button link type="primary" icon="Top" size="small" @click="moveMedia(index, -1)" :disabled="index === 0">上移</el-button>
+                        <el-button link type="primary" icon="Bottom" size="small" @click="moveMedia(index, 1)" :disabled="index === form.mediaList.length - 1">下移</el-button>
+                     </div>
+                  </div>
+                  <div class="media-upload-add">
+                     <el-upload
+                        class="media-uploader"
+                        :action="uploadUrl"
+                        :headers="uploadHeaders"
+                        :show-file-list="false"
+                        :on-success="handleMediaUploadSuccess"
+                        :before-upload="beforeMediaUpload"
+                        accept="image/*,video/*"
+                     >
+                        <el-button type="primary" plain icon="Plus">添加图片/视频</el-button>
+                     </el-upload>
+                  </div>
+               </div>
+            </el-form-item>
+            <!-- 文章类型：视频显示视频上传 -->
+            <el-form-item label="视频上传" prop="videoUrl" v-if="form.materialType === 'article' && form.contentType === 'video'">
                <file-upload v-model="form.videoUrl" :limit="1" :file-size="500" :file-type="['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv']" :is-full-url="true" />
             </el-form-item>
             <el-form-item label="总结" prop="summary">
@@ -367,6 +419,11 @@
             <el-descriptions-item label="作者" :span="1">{{ detailData.author || '-' }}</el-descriptions-item>
             <el-descriptions-item label="来源" :span="1">
                <span>{{ getSourceLabel(detailData.source) }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="素材类型" :span="1">
+               <el-tag :type="detailData.materialType === 'post' ? 'primary' : 'success'">
+                  {{ detailData.materialType === 'post' ? '帖子' : '文章' }}
+               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="原ID" :span="1">{{ detailData.originalId || '-' }}</el-descriptions-item>
             <el-descriptions-item label="套餐分类" :span="1">{{ getPackageTypeLabel(detailData.packageType) }}</el-descriptions-item>
@@ -616,12 +673,13 @@
 </template>
 
 <script setup name="Material">
-import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia } from "@/api/core/material"
+import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia, saveMaterialMedia } from "@/api/core/material"
 import { getAllActiveTags } from "@/api/core/tag"
 import { listCategoryByPackageType, listMaterialCategory, addMaterialCategory, getMaterialCategory, updateMaterialCategory, delMaterialCategory } from "@/api/core/materialCategory"
 import { User, Star, Medal, Sunrise } from '@element-plus/icons-vue'
 import Editor from "@/components/Editor/index.vue"
 import FileUpload from "@/components/FileUpload/index.vue"
+import { getToken } from "@/utils/auth"
 
 const { proxy } = getCurrentInstance()
 
@@ -648,6 +706,12 @@ const categoryTotal = ref(0)
 const categoryIds = ref([])
 const categorySingle = ref(true)
 const categoryMultiple = ref(true)
+
+// 上传相关
+const uploadUrl = ref(import.meta.env.VITE_APP_BASE_API + '/common/uploadToServer')
+const uploadHeaders = ref({
+  Authorization: 'Bearer ' + getToken()
+})
 
 const data = reactive({
   form: {},
@@ -901,12 +965,62 @@ function reset() {
     status: '0',
     isTop: '0',
     source: 'manual',
+    materialType: 'post',
+    issueNo: 0,
     coverImage: undefined,
     videoUrl: undefined,
     tagIds: [],
+    mediaList: [],
     remark: undefined
   }
   proxy.resetForm("materialRef")
+}
+
+// 媒体文件上传相关方法
+function handleMediaUploadSuccess(response, file) {
+  if (response.code !== 200) {
+    proxy.$modal.msgError(response.msg || '上传失败')
+    return
+  }
+  const fileType = file.raw.type.startsWith('video/') ? 'video' : 'image'
+  if (!form.value.mediaList) {
+    form.value.mediaList = []
+  }
+  form.value.mediaList.push({
+    mediaType: fileType,
+    fileUrl: response.url,
+    status: '0'
+  })
+  proxy.$modal.msgSuccess('上传成功')
+}
+
+function beforeMediaUpload(file) {
+  const isImage = file.type.startsWith('image/')
+  const isVideo = file.type.startsWith('video/')
+  const isLt50M = file.size / 1024 / 1024 < 50
+
+  if (!isImage && !isVideo) {
+    proxy.$modal.msgError('只能上传图片或视频文件!')
+    return false
+  }
+  if (!isLt50M) {
+    proxy.$modal.msgError('文件大小不能超过 50MB!')
+    return false
+  }
+  return true
+}
+
+function removeMedia(index) {
+  form.value.mediaList.splice(index, 1)
+}
+
+function moveMedia(index, direction) {
+  const list = form.value.mediaList
+  const newIndex = index + direction
+  if (newIndex < 0 || newIndex >= list.length) return
+  const temp = list[index]
+  list[index] = list[newIndex]
+  list[newIndex] = temp
 }
 
 function handleQuery() {
@@ -973,6 +1087,12 @@ function handleUpdate(row) {
     } else {
       form.value.tagIds = []
     }
+    // 加载媒体列表
+    if (form.value.materialType === 'post' && (form.value.packageType === 2 || form.value.packageType === 3)) {
+      getMaterialMedia(id).then(mediaResponse => {
+        form.value.mediaList = mediaResponse.data || []
+      })
+    }
     // 获取二级分类选项
     getCategoryOptions(form.value.packageType)
     open.value = true
@@ -1015,14 +1135,26 @@ function handleChangeTop(row) {
 function submitForm() {
   proxy.$refs["materialRef"].validate(valid => {
     if (valid) {
+      const isPost = form.value.materialType === 'post' && (form.value.packageType === 2 || form.value.packageType === 3)
       if (form.value.id != undefined) {
         updateMaterial(form.value).then(() => {
+          // 如果是帖子类型，保存媒体列表
+          if (isPost && form.value.mediaList) {
+            saveMaterialMedia(form.value.id, form.value.mediaList)
+          }
           proxy.$modal.msgSuccess("修改成功")
           open.value = false
           getList()
         })
       } else {
-        addMaterial(form.value).then(() => {
+        addMaterial(form.value).then(response => {
+          // 如果是帖子类型，保存媒体列表
+          if (isPost && form.value.mediaList && form.value.mediaList.length > 0) {
+            const materialId = response.data?.id || response.id
+            if (materialId) {
+              saveMaterialMedia(materialId, form.value.mediaList)
+            }
+          }
           proxy.$modal.msgSuccess("新增成功")
           open.value = false
           getList()
@@ -1119,5 +1251,58 @@ getList()
 .media-sort {
   font-size: 12px;
   color: #909399;
+}
+.media-upload-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.media-upload-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  background-color: #f5f7fa;
+  width: 150px;
+}
+.media-preview {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: #fff;
+}
+.media-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.media-upload-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #dcdfe6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+.media-upload-add:hover {
+  border-color: #409eff;
+}
+.media-uploader {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

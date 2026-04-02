@@ -124,4 +124,13 @@ public class CoreMaterialController extends BaseController
         List<CoreMaterialMedia> mediaList = materialMediaService.selectMaterialMediaByMaterialId(materialId);
         return success(mediaList);
     }
+
+    @Operation(summary = "批量保存素材媒体", description = "批量保存或更新素材的媒体文件列表")
+    @PreAuthorize("@ss.hasPermi('core:material:edit')")
+    @Log(title = "素材管理", businessType = BusinessType.UPDATE)
+    @PostMapping("/media/{materialId}")
+    public AjaxResult saveMaterialMedia(@PathVariable Long materialId, @RequestBody List<CoreMaterialMedia> mediaList)
+    {
+        return toAjax(materialMediaService.batchSaveMaterialMedia(materialId, mediaList));
+    }
 }

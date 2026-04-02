@@ -73,6 +73,12 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "来源")
     private String source;
 
+    @Excel(name = "素材类型", readConverterExp = "post=帖子,article=文章")
+    private String materialType;
+
+    @Excel(name = "期数", cellType = ColumnType.NUMERIC)
+    private Integer issueNo;
+
     @Excel(name = "封面图")
     private String coverImage;
 
@@ -301,6 +307,26 @@ public class CoreMaterial extends BaseEntity
         this.source = source;
     }
 
+    public String getMaterialType()
+    {
+        return materialType;
+    }
+
+    public void setMaterialType(String materialType)
+    {
+        this.materialType = materialType;
+    }
+
+    public Integer getIssueNo()
+    {
+        return issueNo;
+    }
+
+    public void setIssueNo(Integer issueNo)
+    {
+        this.issueNo = issueNo;
+    }
+
     public String getCoverImage()
     {
         return coverImage;
@@ -424,6 +450,8 @@ public class CoreMaterial extends BaseEntity
             .append("status", getStatus())
             .append("isTop", getIsTop())
             .append("source", getSource())
+            .append("materialType", getMaterialType())
+            .append("issueNo", getIssueNo())
             .append("coverImage", getCoverImage())
             .append("videoUrl", getVideoUrl())
             .append("onlineTime", getOnlineTime())

@@ -60,3 +60,11 @@ export function getMaterialMedia(materialId) {
     method: 'get'
   })
 }
+
+export function saveMaterialMedia(materialId, data) {
+  return request({
+    url: '/core/material/media/' + materialId,
+    method: 'post',
+    data: data
+  })
+}

@@ -84,4 +84,13 @@ public interface ICoreMaterialMediaService {
      * @return 结果
      */
     public int saveMaterialMedia(Long materialId, String mediaType, String fileUrl, Integer sortOrder);
+
+    /**
+     * 批量保存素材媒体文件
+     * 
+     * @param materialId 素材ID
+     * @param mediaList 媒体文件列表
+     * @return 结果
+     */
+    public int batchSaveMaterialMedia(Long materialId, List<CoreMaterialMedia> mediaList);
 }

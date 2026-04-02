@@ -84,4 +84,22 @@ public interface CoreMaterialMapper
      * @return 素材对象
      */
     CoreMaterial selectMaterialByOriginalId(@Param("originalId") String originalId);
+
+    /**
+     * 根据二级分类查询最新期数的素材（期数最大的记录）
+     *
+     * @param categoryId 二级分类ID
+     * @param status 状态
+     * @return 最新期数素材
+     */
+    CoreMaterial selectLatestMaterialByCategoryId(@Param("categoryId") Long categoryId, @Param("status") String status);
+
+    /**
+     * 根据二级分类查询素材列表（排除期数最大的记录）
+     *
+     * @param categoryId 二级分类ID
+     * @param status 状态
+     * @return 素材列表（排除最新期数）
+     */
+    List<CoreMaterial> selectMaterialListByCategoryIdExcludeLatest(@Param("categoryId") Long categoryId, @Param("status") String status);
 }

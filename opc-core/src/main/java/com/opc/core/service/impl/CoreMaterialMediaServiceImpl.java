@@ -28,6 +28,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -145,6 +146,30 @@ public class CoreMaterialMediaServiceImpl implements ICoreMaterialMediaService
         media.setSortOrder(sortOrder);
         media.setStatus("0");
         return materialMediaMapper.insertMaterialMedia(media);
+    }
+
+    /**
+     * 批量保存素材媒体文件
+     */
+    @Override
+    @Transactional
+    public int batchSaveMaterialMedia(Long materialId, List<CoreMaterialMedia> mediaList)
+    {
+        if (materialId == null || mediaList == null || mediaList.isEmpty()) {
+            return 0;
+        }
+        // 先删除该素材下的所有媒体文件
+        materialMediaMapper.deleteMaterialMediaByMaterialId(materialId);
+        // 批量插入新的媒体文件
+        int count = 0;
+        for (int i = 0; i < mediaList.size(); i++) {
+            CoreMaterialMedia media = mediaList.get(i);
+            media.setMaterialId(materialId);
+            media.setSortOrder(i + 1);
+            media.setStatus("0");
+            count += materialMediaMapper.insertMaterialMedia(media);
+        }
+        return count;
     }
 
     /**
