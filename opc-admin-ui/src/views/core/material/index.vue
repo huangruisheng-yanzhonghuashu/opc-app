@@ -286,7 +286,7 @@
                   </el-form-item>
                </el-col>
             </el-row>
-            <el-row v-if="form.packageType === 2 || form.packageType === 3">
+            <el-row>
                <el-col :span="12">
                   <el-form-item label="素材类型" prop="materialType">
                      <el-select v-model="form.materialType" placeholder="请选择素材类型" style="width: 100%">
@@ -350,14 +350,17 @@
                   </el-option>
                </el-select>
             </el-form-item>
-            <el-form-item label="原链接" prop="originalUrl">
-               <el-input v-model="form.originalUrl" placeholder="请输入原链接" />
-            </el-form-item>
-            <el-form-item label="原ID" prop="originalId">
-               <el-input v-model="form.originalId" placeholder="请输入原ID" />
-            </el-form-item>
             <!-- 正文编辑器 -->
-            <el-form-item label="正文" prop="content">
+            <!-- 帖子类型：正文使用textarea -->
+            <el-form-item label="正文" prop="content" v-if="form.materialType === 'post'">
+               <el-input v-model="form.content" type="textarea" placeholder="请输入正文" :rows="6" />
+            </el-form-item>
+            <!-- 文章类型：正文使用富文本框 -->
+            <el-form-item label="正文" prop="content" v-if="form.materialType === 'article'">
+               <Editor v-model="form.content" :min-height="300" />
+            </el-form-item>
+            <!-- 默认情况（素材类型未选择）：使用富文本框 -->
+            <el-form-item label="正文" prop="content" v-if="!form.materialType">
                <Editor v-model="form.content" :min-height="300" />
             </el-form-item>
             <!-- 帖子类型：图文显示图片上传（在正文后面） -->
