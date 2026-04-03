@@ -1,4 +1,4 @@
-package com.opc.web.controller.common;
+package com.opc.web.service.common.opecli;
 
 import com.opc.web.controller.core.RedditImportController;
 import com.opc.web.controller.core.TwitterImportController;
@@ -74,28 +74,9 @@ public final class OpenCliConstants {
     /** Twitter 推文 URL 参数 */
     public static final String PARAM_TWEET_URL = "--tweet-url";
 
-    /** Reddit URL 参数 */
-    public static final String PARAM_URL = "--url";
-
     /** 输出目录参数 */
     public static final String PARAM_OUTPUT = "--output";
 
-    // ==================== 路径常量 ====================
-
-    /** 默认上传路径 */
-    public static final String DEFAULT_UPLOAD_PATH = "/upload";
-
-    /** 默认配置文件路径 */
-    public static final String DEFAULT_PROFILE_PATH = "/profile";
-
-    /** Twitter 媒体存储子目录 */
-    public static final String DIR_TWITTER = "twitter";
-
-    /** Reddit 媒体存储子目录 */
-    public static final String DIR_REDDIT = "reddit";
-
-    /** Reddit 临时下载目录前缀 */
-    public static final String TEMP_DIR_REDDIT_PREFIX = "reddit_download_";
 
     // ==================== 来源类型 ====================
 
@@ -123,40 +104,6 @@ public final class OpenCliConstants {
 
     /** 套餐类型 - 普通会员 */
     public static final int PACKAGE_TYPE_NORMAL = 1;
-
-    // ==================== 文件扩展名 ====================
-
-    /** 图片扩展名 - JPG */
-    public static final String EXT_JPG = "jpg";
-
-    /** 图片扩展名 - JPEG */
-    public static final String EXT_JPEG = "jpeg";
-
-    /** 图片扩展名 - PNG */
-    public static final String EXT_PNG = "png";
-
-    /** 图片扩展名 - GIF */
-    public static final String EXT_GIF = "gif";
-
-    /** 图片扩展名 - WEBP */
-    public static final String EXT_WEBP = "webp";
-
-    /** 视频扩展名 - MP4 */
-    public static final String EXT_MP4 = "mp4";
-
-    /** 视频扩展名 - MOV */
-    public static final String EXT_MOV = "mov";
-
-    // ==================== 日志消息 ====================
-
-    /** 日志前缀 - 执行命令 */
-    public static final String LOG_EXECUTE_COMMAND = "执行命令: ";
-
-    /** 日志前缀 - 命令退出码 */
-    public static final String LOG_EXIT_CODE = "命令退出码: {}";
-
-    /** 日志前缀 - 获取数据 */
-    public static final String LOG_DATA_RECEIVED = "获取到 {} 字节数据";
 
     // ==================== 代理设置 ====================
 

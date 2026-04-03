@@ -1,4 +1,4 @@
-package com.opc.web.controller.common;
+package com.opc.web.service.common.opecli;
 
 import com.opc.web.config.opencli.OpenCliProperties;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.opc.web.controller.common.OpenCliConstants.*;
+import static com.opc.web.service.common.opecli.OpenCliConstants.*;
 
 /**
  * OpenCLI 命令构建器

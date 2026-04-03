@@ -4,11 +4,7 @@ import com.opc.common.annotation.Log;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.enums.BusinessType;
-import com.opc.core.domain.CoreMaterial;
-import com.opc.core.service.ICoreMaterialService;
-import com.opc.web.dto.twitter.v2.TweetDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
-import com.opc.web.dto.twitter.v2.TwitterSearchResponseDTO;
 import com.opc.web.service.twitter.v2.TwitterApiV2Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,14 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.opc.web.controller.common.OpenCliConstants.*;
 
 /**
  * Twitter API v2 控制器
