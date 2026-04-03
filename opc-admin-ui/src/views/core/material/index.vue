@@ -351,17 +351,15 @@
                </el-select>
             </el-form-item>
             <!-- 正文编辑器 -->
-            <!-- 帖子类型：正文使用textarea -->
+            <!-- 根据素材类型选择不同的编辑器 -->
             <el-form-item label="正文" prop="content" v-if="form.materialType === 'post'">
                <el-input v-model="form.content" type="textarea" placeholder="请输入正文" :rows="6" />
             </el-form-item>
-            <!-- 文章类型：正文使用富文本框 -->
-            <el-form-item label="正文" prop="content" v-if="form.materialType === 'article'">
-               <Editor v-model="form.content" :min-height="300" />
+            <el-form-item label="正文" prop="content" v-else-if="form.materialType === 'article'">
+               <Editor v-model="form.content" :min-height="300" :key="'editor-article-' + form.id" />
             </el-form-item>
-            <!-- 默认情况（素材类型未选择）：使用富文本框 -->
-            <el-form-item label="正文" prop="content" v-if="!form.materialType">
-               <Editor v-model="form.content" :min-height="300" />
+            <el-form-item label="正文" prop="content" v-else>
+               <Editor v-model="form.content" :min-height="300" :key="'editor-other-' + form.id" />
             </el-form-item>
             <!-- 帖子类型：图文显示图片上传（在正文后面） -->
             <el-form-item label="图片" prop="mediaList" v-if="form.materialType === 'post' && form.contentType === 'image'">
@@ -440,7 +438,7 @@
       </el-dialog>
 
       <el-dialog title="素材详情" v-model="detailOpen" width="800px" append-to-body>
-         <el-descriptions :column="2" border v-if="detailData">
+         <el-descriptions :column="2" border v-if="detailData" style="table-layout: fixed; width: 100%;">
             <el-descriptions-item label="素材ID" :span="1">{{ detailData.id }}</el-descriptions-item>
             <el-descriptions-item label="作者" :span="1">{{ detailData.author || '-' }}</el-descriptions-item>
             <el-descriptions-item label="来源" :span="1">
@@ -504,7 +502,7 @@
             </el-descriptions-item>
             <!-- 正文 -->
             <el-descriptions-item label="正文" :span="2">
-               <div v-if="detailData.content" style="max-height: 400px; overflow-y: auto; border: 1px solid #e4e7ed; padding: 10px; border-radius: 4px;" v-html="detailData.content"></div>
+               <div v-if="detailData.content" style="max-height: 400px; max-width: 100%; width: 700px; overflow-y: auto; overflow-x: hidden; word-break: break-all; border: 1px solid #e4e7ed; padding: 10px; border-radius: 4px; box-sizing: border-box;" v-html="detailData.content"></div>
                <span v-else>-</span>
             </el-descriptions-item>
             <!-- 媒体文件：放在正文后面 -->
@@ -726,6 +724,7 @@ import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, ch
 import { getAllActiveTags } from "@/api/core/tag"
 import { listCategoryByPackageType, listMaterialCategory, addMaterialCategory, getMaterialCategory, updateMaterialCategory, delMaterialCategory } from "@/api/core/materialCategory"
 import { User, Star, Medal, Sunrise } from '@element-plus/icons-vue'
+import { nextTick } from 'vue'
 import Editor from "@/components/Editor/index.vue"
 import FileUpload from "@/components/FileUpload/index.vue"
 import { getToken } from "@/utils/auth"
@@ -1144,25 +1143,31 @@ function handleView(row) {
 }
 
 function handleUpdate(row) {
-  reset()
   const id = row.id || ids.value
   getTagOptions()
   getMaterial(id).then(response => {
-    form.value = response.data
+    // 先获取数据
+    const data = response.data
     // 确保materialType有默认值（兼容旧数据）
-    if (!form.value.materialType) {
-      form.value.materialType = 'post'
+    if (data.materialType === undefined || data.materialType === null || data.materialType === '') {
+      data.materialType = 'post'
     }
     // 确保issueNo有默认值
-    if (form.value.issueNo === undefined || form.value.issueNo === null) {
-      form.value.issueNo = 0
+    if (data.issueNo === undefined || data.issueNo === null) {
+      data.issueNo = 0
+    }
+    // 确保mediaList有默认值
+    if (!data.mediaList) {
+      data.mediaList = []
     }
     // 将标签转换为id数组
-    if (form.value.tags && form.value.tags.length > 0) {
-      form.value.tagIds = form.value.tags.map(tag => tag.id)
+    if (data.tags && data.tags.length > 0) {
+      data.tagIds = data.tags.map(tag => tag.id)
     } else {
-      form.value.tagIds = []
+      data.tagIds = []
     }
+    // 先设置表单数据（确保materialType正确）
+    form.value = data
     // 加载媒体列表
     if (form.value.materialType === 'post' && (form.value.packageType === 2 || form.value.packageType === 3)) {
       getMaterialMedia(id).then(mediaResponse => {
@@ -1171,8 +1176,9 @@ function handleUpdate(row) {
     }
     // 获取二级分类选项
     getCategoryOptions(form.value.packageType)
-    open.value = true
+    // 最后打开弹窗
     title.value = "修改素材"
+    open.value = true
   })
 }
 
@@ -1380,5 +1386,15 @@ getList()
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* 详情页样式修复 */
+:deep(.el-descriptions__body .el-descriptions__table) {
+  table-layout: fixed;
+  width: 100%;
+}
+:deep(.el-descriptions__body .el-descriptions__cell) {
+  word-break: break-all;
+  max-width: 700px;
 }
 </style>
