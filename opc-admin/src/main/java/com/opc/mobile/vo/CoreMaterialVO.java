@@ -150,6 +150,10 @@ public class CoreMaterialVO
     @Schema(description = "标签列表")
     private List<CoreTagVO> tags;
 
+    /** 标签2列表 */
+    @Schema(description = "标签2列表")
+    private List<CoreTag2VO> tags2;
+
     public Long getId()
     {
         return id;
@@ -468,5 +472,15 @@ public class CoreMaterialVO
     public void setTags(List<CoreTagVO> tags)
     {
         this.tags = tags;
+    }
+
+    public List<CoreTag2VO> getTags2()
+    {
+        return tags2;
+    }
+
+    public void setTags2(List<CoreTag2VO> tags2)
+    {
+        this.tags2 = tags2;
     }
 }
