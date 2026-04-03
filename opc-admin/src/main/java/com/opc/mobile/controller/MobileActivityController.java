@@ -94,14 +94,6 @@ public class MobileActivityController extends BaseController
         CoreActivity activity = new CoreActivity();
         // 只查询正常状态的活动
         activity.setStatus("0");
-        // 省份筛选
-        if (queryDTO.getProvince() != null && !queryDTO.getProvince().isEmpty()) {
-            activity.setProvince(queryDTO.getProvince());
-        }
-        // 城市筛选
-        if (queryDTO.getCity() != null && !queryDTO.getCity().isEmpty()) {
-            activity.setCity(queryDTO.getCity());
-        }
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
         // 按活动时间倒序排序
