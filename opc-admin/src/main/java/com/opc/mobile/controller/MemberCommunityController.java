@@ -30,6 +30,9 @@ import com.opc.mobile.dto.CommunityMemberDTO;
 import com.opc.mobile.dto.CommunityQueryDTO;
 import com.opc.mobile.dto.CommunityReviewDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -55,6 +58,7 @@ public class MemberCommunityController extends BaseController
     private MemberTokenService memberTokenService;
 
     @Operation(summary = "社区列表", description = "查询全部社区列表，按省份分组")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreCommunityVO.class)))
     @PostMapping("/list")
     public AjaxResult list(@RequestBody CommunityQueryDTO dto)
     {
@@ -65,17 +69,22 @@ public class MemberCommunityController extends BaseController
         community.setStatus("0");
         List<CoreCommunity> list = communityService.selectCommunityList(community);
 
-        // 按省份分组
-        Map<String, List<CoreCommunity>> groupedByProvince = list.stream()
+        // 按省份分组并转换为VO
+        Map<String, List<CoreCommunityVO>> groupedByProvince = list.stream()
                 .collect(Collectors.groupingBy(
                         c -> c.getProvince() != null ? c.getProvince() : "其他",
-                        Collectors.toList()
+                        Collectors.mapping(c -> {
+                            CoreCommunityVO vo = new CoreCommunityVO();
+                            BeanUtils.copyProperties(c, vo);
+                            return vo;
+                        }, Collectors.toList())
                 ));
 
         return AjaxResult.success(groupedByProvince);
     }
 
     @Operation(summary = "社区详情", description = "根据社区ID获取详细信息，需要会员登录")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreCommunityVO.class)))
     @MemberLogin
     @PostMapping("/detail")
     public AjaxResult getInfo(@RequestBody CommunityIdDTO dto, HttpServletRequest request)

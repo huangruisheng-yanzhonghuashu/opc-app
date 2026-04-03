@@ -1,7 +1,10 @@
 package com.opc.mobile.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import com.github.pagehelper.PageHelper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,8 +19,13 @@ import com.opc.core.service.ICoreMaterialService;
 import com.opc.core.service.ICoreSearchHotwordService;
 import com.opc.mobile.dto.MaterialSearchDTO;
 import com.opc.mobile.dto.SearchHotwordQueryDTO;
+import com.opc.mobile.vo.CoreMaterialVO;
+import com.opc.mobile.vo.CoreSearchHotwordVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -44,6 +52,7 @@ public class MobileSearchController extends BaseController
      * @return 分页数据
      */
     @Operation(summary = "获取搜索热词列表", description = "分页查询搜索热词列表，支持按名称模糊查询")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreSearchHotwordVO.class)))
     @PostMapping("/hotword/list")
     public TableDataInfo hotwordList(@RequestBody SearchHotwordQueryDTO queryDTO)
     {
@@ -53,7 +62,15 @@ public class MobileSearchController extends BaseController
 
         PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
         List<CoreSearchHotword> list = searchHotwordService.selectSearchHotwordList(searchHotword);
-        return getDataTable(list);
+
+        // 转换为VO列表
+        List<CoreSearchHotwordVO> voList = list.stream().map(h -> {
+            CoreSearchHotwordVO vo = new CoreSearchHotwordVO();
+            BeanUtils.copyProperties(h, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return getDataTable(voList);
     }
 
     /**
@@ -63,6 +80,7 @@ public class MobileSearchController extends BaseController
      * @return 分页数据
      */
     @Operation(summary = "全局搜索列表", description = "根据关键字模糊搜索素材标题，分页返回结果")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreMaterialVO.class)))
     @PostMapping("")
     public TableDataInfo searchMaterial(@RequestBody MaterialSearchDTO searchDTO)
     {
@@ -76,6 +94,14 @@ public class MobileSearchController extends BaseController
         String orderBy = searchDTO.getOrderByColumn() + " " + (searchDTO.getIsAsc() ? "asc" : "desc");
         PageHelper.orderBy(orderBy);
         List<CoreMaterial> list = materialService.selectMaterialList(material);
-        return getDataTable(list);
+
+        // 转换为VO列表
+        List<CoreMaterialVO> voList = list.stream().map(m -> {
+            CoreMaterialVO vo = new CoreMaterialVO();
+            BeanUtils.copyProperties(m, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return getDataTable(voList);
     }
 }

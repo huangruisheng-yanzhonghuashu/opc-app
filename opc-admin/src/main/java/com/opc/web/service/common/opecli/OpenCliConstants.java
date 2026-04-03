@@ -43,6 +43,9 @@ public final class OpenCliConstants {
     /** Reddit 模块 */
     public static final String MODULE_REDDIT = "reddit";
 
+    /** YouTube 模块 */
+    public static final String MODULE_YOUTUBE = "youtube";
+
     /** yt-dlp 命令 */
     public static final String CMD_YT_DLP = "yt-dlp";
 
@@ -81,21 +84,24 @@ public final class OpenCliConstants {
     // ==================== 来源类型 ====================
 
     /** Twitter 来源类型 */
-    public static final String SOURCE_TWITTER = "twitter";
+    public static final String SOURCE_TWITTER = com.opc.web.enums.SourceType.TWITTER.getValue();
 
     /** Reddit 来源类型 */
-    public static final String SOURCE_REDDIT = "reddit";
+    public static final String SOURCE_REDDIT = com.opc.web.enums.SourceType.REDDIT.getValue();
+
+    /** YouTube 来源类型 */
+    public static final String SOURCE_YOUTUBE = com.opc.web.enums.SourceType.YOUTUBE.getValue();
 
     // ==================== 内容类型 ====================
 
     /** 文本内容类型 */
-    public static final String CONTENT_TYPE_TEXT = "text";
+    public static final String CONTENT_TYPE_TEXT = com.opc.web.enums.ContentType.TEXT.getValue();
 
     /** 图片内容类型 */
-    public static final String CONTENT_TYPE_IMAGE = "image";
+    public static final String CONTENT_TYPE_IMAGE = com.opc.web.enums.ContentType.IMAGE.getValue();
 
     /** 视频内容类型 */
-    public static final String CONTENT_TYPE_VIDEO = "video";
+    public static final String CONTENT_TYPE_VIDEO = com.opc.web.enums.ContentType.VIDEO.getValue();
 
     // ==================== 状态值 ====================
 

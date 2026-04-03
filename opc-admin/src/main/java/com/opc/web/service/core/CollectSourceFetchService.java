@@ -3,6 +3,7 @@ package com.opc.web.service.core;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.web.service.reddit.RedditFetchService;
 import com.opc.web.service.twitter.TwitterFetchService;
+import com.opc.web.service.youtube.YoutubeFetchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class CollectSourceFetchService {
 
     @Autowired
     private RedditFetchService redditFetchService;
+
+    @Autowired
+    private YoutubeFetchService youtubeFetchService;
 
     /**
      * 使用 Twitter API v2 获取数据
@@ -69,5 +73,25 @@ public class CollectSourceFetchService {
      */
     public AjaxResult fetchRedditData(String keyword) {
         return redditFetchService.fetchRedditData(keyword);
+    }
+
+    /**
+     * 搜索 YouTube 视频并导入
+     *
+     * @param keyword 搜索关键词
+     * @return 导入结果
+     */
+    public AjaxResult fetchYoutubeData(String keyword) {
+        return youtubeFetchService.fetchYoutubeData(keyword);
+    }
+
+    /**
+     * 根据视频 URL 导入 YouTube 视频
+     *
+     * @param videoUrl YouTube 视频 URL
+     * @return 导入结果
+     */
+    public AjaxResult fetchYoutubeVideoByUrl(String videoUrl) {
+        return youtubeFetchService.fetchYoutubeVideoByUrl(videoUrl);
     }
 }

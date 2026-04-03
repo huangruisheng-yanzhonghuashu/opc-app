@@ -15,9 +15,14 @@ import com.opc.core.service.ICoreMemberService;
 import com.opc.core.service.MemberTokenService;
 import com.opc.mobile.dto.MaterialActionDTO;
 import com.opc.mobile.dto.MaterialIdDTO;
+import com.opc.mobile.vo.CoreMaterialVO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,6 +56,7 @@ public class MobileContentController extends BaseController
      * @return 素材详情
      */
     @Operation(summary = "获取内容详情", description = "根据内容ID获取详情，需要校验会员套餐权限，同时增加查看数")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreMaterialVO.class)))
     @MemberLogin
     @PostMapping("/material/detail")
     public AjaxResult getMaterialDetail(@RequestBody MaterialIdDTO dto, HttpServletRequest request)
@@ -94,8 +100,12 @@ public class MobileContentController extends BaseController
             material.setContent(wrappedContent);
         }
 
+        // 转换为VO
+        CoreMaterialVO vo = new CoreMaterialVO();
+        BeanUtils.copyProperties(material, vo);
+
         Map<String, Object> result = new HashMap<>();
-        result.put("material", material);
+        result.put("material", vo);
 
         return AjaxResult.success(result);
     }

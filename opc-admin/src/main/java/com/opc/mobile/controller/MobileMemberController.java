@@ -22,6 +22,8 @@ import com.opc.common.utils.file.FileUtils;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.domain.CoreMemberConfig;
 import com.opc.core.domain.CorePackage;
+import com.opc.core.domain.CorePackageOrder;
+import com.opc.core.domain.CoreFeedback;
 import com.opc.core.domain.vo.MemberLoginVO;
 import com.opc.core.service.ICoreBannerService;
 import com.opc.core.service.ICoreFeedbackService;
@@ -37,19 +39,27 @@ import com.opc.mobile.dto.MemberCancelDTO;
 import com.opc.mobile.dto.MemberBindEmailDTO;
 import com.opc.mobile.dto.EmailCodeRequestDTO;
 import com.opc.mobile.dto.OrderIdDTO;
-import com.opc.core.domain.CoreFeedback;
-import com.opc.core.domain.CorePackageOrder;
 import com.opc.mobile.dto.FeedbackSubmitDTO;
 import com.opc.mobile.dto.FeedbackIdDTO;
+import com.opc.mobile.vo.CoreFeedbackVO;
+import com.opc.mobile.vo.CoreMemberConfigVO;
+import com.opc.mobile.vo.CorePackageOrderVO;
+import com.opc.mobile.vo.CorePackageVO;
 import com.opc.web.dto.EmailDTO;
 import com.opc.web.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 移动端会员接口
@@ -504,6 +514,7 @@ public class MobileMemberController {
      * 购买记录列表接口
      */
     @Operation(summary = "购买记录列表", description = "获取当前登录会员的购买记录列表")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CorePackageOrderVO.class)))
     @PostMapping("/order/list")
     public AjaxResult getOrderList(HttpServletRequest request) {
         MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
@@ -516,9 +527,16 @@ public class MobileMemberController {
             queryOrder.setMemberId(memberLoginVO.getMemberId());
             List<CorePackageOrder> orderList = packageOrderService.selectOrderList(queryOrder);
 
-            log.info("会员查询购买记录列表：memberId={}, 记录数={}", memberLoginVO.getMemberId(), orderList.size());
+            // 转换为VO列表
+            List<CorePackageOrderVO> voList = orderList.stream().map(o -> {
+                CorePackageOrderVO vo = new CorePackageOrderVO();
+                BeanUtils.copyProperties(o, vo);
+                return vo;
+            }).collect(Collectors.toList());
 
-            return AjaxResult.success(orderList);
+            log.info("会员查询购买记录列表：memberId={}, 记录数={}", memberLoginVO.getMemberId(), voList.size());
+
+            return AjaxResult.success(voList);
         } catch (Exception e) {
             log.error("查询购买记录列表失败：memberId={}", memberLoginVO.getMemberId(), e);
             return AjaxResult.error("查询购买记录失败：" + e.getMessage());
@@ -529,6 +547,7 @@ public class MobileMemberController {
      * 购买记录详情接口
      */
     @Operation(summary = "购买记录详情", description = "根据订单ID获取购买记录详情")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CorePackageOrderVO.class)))
     @PostMapping("/order/detail")
     public AjaxResult getOrderDetail(@RequestBody OrderIdDTO orderIdDTO, HttpServletRequest request) {
         MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
@@ -552,9 +571,13 @@ public class MobileMemberController {
                 return AjaxResult.error("无权查看该订单");
             }
 
+            // 转换为VO
+            CorePackageOrderVO vo = new CorePackageOrderVO();
+            BeanUtils.copyProperties(order, vo);
+
             log.info("会员查询购买记录详情：memberId={}, orderId={}", memberLoginVO.getMemberId(), id);
 
-            return AjaxResult.success(order);
+            return AjaxResult.success(vo);
         } catch (Exception e) {
             log.error("查询购买记录详情失败：memberId={}, orderId={}", memberLoginVO.getMemberId(), id, e);
             return AjaxResult.error("查询订单详情失败：" + e.getMessage());
@@ -603,6 +626,7 @@ public class MobileMemberController {
      * 获取反馈列表
      */
     @Operation(summary = "获取反馈列表", description = "获取当前登录会员的反馈列表")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreFeedbackVO.class)))
     @PostMapping("/feedback/list")
     public AjaxResult feedbackList(HttpServletRequest request) {
         MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
@@ -614,15 +638,23 @@ public class MobileMemberController {
         feedback.setMemberId(memberLoginVO.getMemberId());
         List<CoreFeedback> list = feedbackService.selectFeedbackList(feedback);
 
-        log.info("会员查询反馈列表：memberId={}, 记录数={}", memberLoginVO.getMemberId(), list.size());
+        // 转换为VO列表
+        List<CoreFeedbackVO> voList = list.stream().map(f -> {
+            CoreFeedbackVO vo = new CoreFeedbackVO();
+            BeanUtils.copyProperties(f, vo);
+            return vo;
+        }).collect(Collectors.toList());
 
-        return AjaxResult.success(list);
+        log.info("会员查询反馈列表：memberId={}, 记录数={}", memberLoginVO.getMemberId(), voList.size());
+
+        return AjaxResult.success(voList);
     }
 
     /**
      * 获取反馈详情
      */
     @Operation(summary = "获取反馈详情", description = "根据反馈ID获取详细信息")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreFeedbackVO.class)))
     @PostMapping("/feedback/detail")
     public AjaxResult feedbackDetail(@Valid @RequestBody FeedbackIdDTO feedbackIdDTO, HttpServletRequest request) {
         MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
@@ -641,15 +673,20 @@ public class MobileMemberController {
             return AjaxResult.error("无权查看该反馈");
         }
 
+        // 转换为VO
+        CoreFeedbackVO vo = new CoreFeedbackVO();
+        BeanUtils.copyProperties(feedback, vo);
+
         log.info("会员查询反馈详情：memberId={}, feedbackId={}", memberLoginVO.getMemberId(), id);
 
-        return AjaxResult.success(feedback);
+        return AjaxResult.success(vo);
     }
 
     /**
      * 会员banner图列表（不需要分页）
      */
     @Operation(summary = "会员banner图列表", description = "获取会员页banner图列表，按sortOrder升序排序")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreMemberConfigVO.class)))
     @PostMapping("/banner/list")
     public AjaxResult memberBannerList() {
         CoreMemberConfig config = new CoreMemberConfig();
@@ -657,13 +694,22 @@ public class MobileMemberController {
         // 只查询启用的配置
         config.setStatus("0");
         List<CoreMemberConfig> list = memberConfigService.selectConfigList(config);
-        return AjaxResult.success(list);
+
+        // 转换为VO列表
+        List<CoreMemberConfigVO> voList = list.stream().map(c -> {
+            CoreMemberConfigVO vo = new CoreMemberConfigVO();
+            BeanUtils.copyProperties(c, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return AjaxResult.success(voList);
     }
 
     /**
      * VIP引导图片接口（不需要分页）
      */
     @Operation(summary = "VIP引导图片列表", description = "获取VIP引导图片配置列表")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreMemberConfigVO.class)))
     @PostMapping("/vip/guide/list")
     public AjaxResult vipGuideList() {
         CoreMemberConfig config = new CoreMemberConfig();
@@ -671,20 +717,37 @@ public class MobileMemberController {
         // 只查询启用的配置
         config.setStatus("0");
         List<CoreMemberConfig> list = memberConfigService.selectConfigList(config);
-        return AjaxResult.success(list);
+
+        // 转换为VO列表
+        List<CoreMemberConfigVO> voList = list.stream().map(c -> {
+            CoreMemberConfigVO vo = new CoreMemberConfigVO();
+            BeanUtils.copyProperties(c, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return AjaxResult.success(voList);
     }
 
     /**
      * 套餐配置列表接口（不需要分页）
      */
     @Operation(summary = "套餐配置列表", description = "获取所有上架的套餐配置列表")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CorePackageVO.class)))
     @PostMapping("/package/list")
     public AjaxResult packageList() {
         CorePackage pkg = new CorePackage();
         // 只查询上架的套餐
         pkg.setStatus("0");
         List<CorePackage> list = packageService.selectPackageList(pkg);
-        return AjaxResult.success(list);
+
+        // 转换为VO列表
+        List<CorePackageVO> voList = list.stream().map(p -> {
+            CorePackageVO vo = new CorePackageVO();
+            BeanUtils.copyProperties(p, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return AjaxResult.success(voList);
     }
 
 }

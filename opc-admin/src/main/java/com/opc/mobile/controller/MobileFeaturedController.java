@@ -3,6 +3,7 @@ package com.opc.mobile.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.github.pagehelper.PageHelper;
 import com.opc.common.annotation.MemberLogin;
@@ -20,10 +21,16 @@ import com.opc.core.service.MemberTokenService;
 import com.opc.mobile.dto.CategoryQueryDTO;
 import com.opc.mobile.dto.FeaturedMaterialQueryDTO;
 import com.opc.mobile.dto.LatestMaterialQueryDTO;
+import com.opc.mobile.vo.CoreMaterialCategoryVO;
+import com.opc.mobile.vo.CoreMaterialVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,6 +67,7 @@ public class MobileFeaturedController extends BaseController
      * @return 分类列表
      */
     @Operation(summary = "获取素材二级分类列表", description = "根据套餐分类查询启用的素材二级分类列表")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreMaterialCategoryVO.class)))
     @Parameter(name = "queryDTO", description = "分类查询参数")
     @PostMapping("/category/list")
     public AjaxResult categoryList(@RequestBody CategoryQueryDTO queryDTO)
@@ -70,7 +78,15 @@ public class MobileFeaturedController extends BaseController
         category.setStatus("0");
 
         List<CoreMaterialCategory> list = categoryService.selectCoreMaterialCategoryList(category);
-        return success(list);
+
+        // 转换为VO
+        List<CoreMaterialCategoryVO> voList = list.stream().map(c -> {
+            CoreMaterialCategoryVO vo = new CoreMaterialCategoryVO();
+            BeanUtils.copyProperties(c, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return success(voList);
     }
 
     /**
@@ -81,6 +97,7 @@ public class MobileFeaturedController extends BaseController
      * @return 最新期数素材
      */
     @Operation(summary = "获取最新期数素材", description = "根据二级分类查询期数最大的素材记录")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreMaterialVO.class)))
     @Parameter(name = "queryDTO", description = "最新期数素材查询参数")
     @PostMapping("/material/latest")
     public AjaxResult getLatestMaterial(@RequestBody LatestMaterialQueryDTO queryDTO, HttpServletRequest request)
@@ -106,8 +123,12 @@ public class MobileFeaturedController extends BaseController
             return AjaxResult.error("暂无素材");
         }
 
+        // 转换为VO
+        CoreMaterialVO vo = new CoreMaterialVO();
+        BeanUtils.copyProperties(material, vo);
+
         Map<String, Object> result = new HashMap<>();
-        result.put("material", material);
+        result.put("material", vo);
 
         return AjaxResult.success(result);
     }
@@ -120,6 +141,7 @@ public class MobileFeaturedController extends BaseController
      * @return 分页素材列表
      */
     @Operation(summary = "获取历史素材列表", description = "根据二级分类查询素材列表，排除最新期数，按期数降序分页")
+    @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreMaterialVO.class)))
     @Parameter(name = "queryDTO", description = "精选素材查询参数")
     @PostMapping("/material/list")
     public TableDataInfo getMaterialList(@RequestBody FeaturedMaterialQueryDTO queryDTO, HttpServletRequest request)
@@ -143,6 +165,14 @@ public class MobileFeaturedController extends BaseController
                 queryDTO.getCategoryId(),
                 "0"
         );
-        return getDataTable(list);
+
+        // 转换为VO列表
+        List<CoreMaterialVO> voList = list.stream().map(m -> {
+            CoreMaterialVO vo = new CoreMaterialVO();
+            BeanUtils.copyProperties(m, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
+        return getDataTable(voList);
     }
 }

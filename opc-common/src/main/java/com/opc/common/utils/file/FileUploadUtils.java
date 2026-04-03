@@ -29,6 +29,14 @@ public class FileUploadUtils
     public static final long DEFAULT_MAX_SIZE = 50 * 1024 * 1024L;
 
     /**
+     * 获取最大文件大小（从配置读取，默认 500MB）
+     */
+    public static long getMaxSize()
+    {
+        return SopConfig.getMaxFileSize() * 1024L * 1024L;
+    }
+
+    /**
      * 默认的文件名最大长度 100
      */
     public static final int DEFAULT_FILE_NAME_LENGTH = 100;
@@ -187,9 +195,10 @@ public class FileUploadUtils
             throws FileSizeLimitExceededException, InvalidExtensionException
     {
         long size = file.getSize();
-        if (size > DEFAULT_MAX_SIZE)
+        long maxSize = getMaxSize();
+        if (size > maxSize)
         {
-            throw new FileSizeLimitExceededException(DEFAULT_MAX_SIZE / 1024 / 1024);
+            throw new FileSizeLimitExceededException(maxSize / 1024 / 1024);
         }
 
         String fileName = file.getOriginalFilename();

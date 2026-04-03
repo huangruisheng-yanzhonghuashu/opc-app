@@ -22,11 +22,18 @@ import com.opc.common.enums.BusinessType;
 import com.opc.common.utils.poi.ExcelUtil;
 import com.opc.core.domain.CoreCollectSource;
 import com.opc.core.service.ICoreCollectSourceService;
+import com.opc.web.enums.SourceType;
 import com.opc.web.service.core.CollectSourceFetchService;
 import com.opc.web.service.twitter.v2.TwitterApiV2Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Tag(name = "采集信息源", description = "采集信息源相关操作")
 @RestController
@@ -40,19 +47,6 @@ public class CoreCollectSourceController extends BaseController {
 
     @Autowired
     private TwitterApiV2Service twitterApiV2Service;
-
-    private static final String SOURCE_TWITTER = "twitter";
-    private static final String SOURCE_REDDIT = "reddit";
-
-    /**
-     * Twitter API v2 搜索最近推文端点
-     */
-    private static final String TWITTER_API_V2_SEARCH_RECENT = "https://api.x.com/2/tweets/search/recent";
-
-    /**
-     * Twitter 用户主页 URL 前缀
-     */
-    private static final String TWITTER_X_COM_PREFIX = "https://x.com/";
 
     @Operation(summary = "获取采集信息源列表", description = "分页查询采集信息源列表")
     @PreAuthorize("@ss.hasPermi('core:collect:list')")
@@ -115,6 +109,21 @@ public class CoreCollectSourceController extends BaseController {
         return toAjax(collectSourceService.changeStatus(collectSource.getId(), collectSource.getStatus()));
     }
 
+    @Operation(summary = "获取来源类型列表", description = "获取所有支持的来源类型，用于前端下拉选择")
+    @PreAuthorize("@ss.hasPermi('core:collect:list')")
+    @GetMapping("/sourceTypes")
+    public AjaxResult getSourceTypes() {
+        List<Map<String, String>> list = Arrays.stream(SourceType.values())
+                .map(type -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("value", type.getValue());
+                    map.put("label", type.getLabel());
+                    return map;
+                })
+                .collect(Collectors.toList());
+        return AjaxResult.success(list);
+    }
+
     @Operation(summary = "获取数据", description = "根据来源类型调用对应接口获取数据")
     @Parameter(name = "id", description = "配置ID", required = true)
     @PreAuthorize("@ss.hasPermi('core:collect:query')")
@@ -135,28 +144,56 @@ public class CoreCollectSourceController extends BaseController {
         }
 
         // 根据来源类型调用不同服务方法
-        if (SOURCE_TWITTER.equalsIgnoreCase(sourceType)) {
-            // 根据信息源链接判断使用哪种方式获取数据
-            if (TWITTER_API_V2_SEARCH_RECENT.equals(sourceUrl)) {
-                // API v2 搜索端点
-                return collectSourceFetchService.fetchTwitterDataByApiV2(keyword);
-            } else if (isTwitterUserUrl(sourceUrl)) {
-                // Twitter 用户主页，提取用户名调用 fetchTwitterDataByUserName
-                String userName = extractUserNameFromUrl(sourceUrl);
-                if (userName != null && !userName.isEmpty()) {
-                    return collectSourceFetchService.fetchTwitterDataByUserName(userName);
-                } else {
-                    return AjaxResult.error("无法从 URL 提取用户名: " + sourceUrl);
-                }
-            } else {
-                // 其他情况使用 opencli
-                return collectSourceFetchService.fetchTwitterData(keyword);
-            }
-        } else if (SOURCE_REDDIT.equalsIgnoreCase(sourceType)) {
-            return collectSourceFetchService.fetchRedditData(keyword);
-        } else {
+        SourceType type = SourceType.fromValue(sourceType);
+        if (type == null) {
             return AjaxResult.error("该来源类型暂且不支持：" + sourceType);
         }
+
+        switch (type) {
+            case TWITTER:
+                return handleTwitterFetch(sourceUrl, keyword);
+            case REDDIT:
+                return collectSourceFetchService.fetchRedditData(keyword);
+            case YOUTUBE:
+                return handleYoutubeFetch(sourceUrl, keyword);
+            default:
+                return AjaxResult.error("该来源类型暂且不支持：" + sourceType);
+        }
+    }
+
+    /**
+     * 处理 Twitter 数据获取
+     */
+    private AjaxResult handleTwitterFetch(String sourceUrl, String keyword) {
+        String TWITTER_API_V2_SEARCH_RECENT = "https://api.x.com/2/tweets/search/recent";
+
+        if (TWITTER_API_V2_SEARCH_RECENT.equals(sourceUrl)) {
+            // API v2 搜索端点
+            return collectSourceFetchService.fetchTwitterDataByApiV2(keyword);
+        } else if (isTwitterUserUrl(sourceUrl)) {
+            // Twitter 用户主页，提取用户名调用 fetchTwitterDataByUserName
+            String userName = extractUserNameFromUrl(sourceUrl);
+            if (userName != null && !userName.isEmpty()) {
+                return collectSourceFetchService.fetchTwitterDataByUserName(userName);
+            } else {
+                return AjaxResult.error("无法从 URL 提取用户名: " + sourceUrl);
+            }
+        } else {
+            // 其他情况使用 opencli
+            return collectSourceFetchService.fetchTwitterData(keyword);
+        }
+    }
+
+    /**
+     * 处理 YouTube 数据获取
+     */
+    private AjaxResult handleYoutubeFetch(String sourceUrl, String keyword) {
+        // 如果是 YouTube 视频链接，直接下载该视频
+        if (sourceUrl != null && (sourceUrl.contains("youtube.com") || sourceUrl.contains("youtu.be"))) {
+            return collectSourceFetchService.fetchYoutubeVideoByUrl(sourceUrl);
+        }
+        // 否则使用关键词搜索
+        return collectSourceFetchService.fetchYoutubeData(keyword);
     }
 
     /**

@@ -1,0 +1,409 @@
+package com.opc.web.service.youtube;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.opc.common.core.domain.AjaxResult;
+import com.opc.common.utils.http.HttpUtils;
+import com.opc.core.domain.CoreMaterial;
+import com.opc.core.service.ICoreMaterialMediaService;
+import com.opc.web.service.common.AbstractCollectFetchService;
+import com.opc.web.service.common.opecli.OpenCliCommandBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.opc.web.service.common.opecli.OpenCliConstants.*;
+
+/**
+ * YouTube 数据获取服务
+ * <p>
+ * 封装 YouTube 的数据获取、视频下载和导入逻辑
+ * </p>
+ *
+ * @author opc
+ * @since 3.9.1
+ */
+@Service
+public class YoutubeFetchService extends AbstractCollectFetchService {
+
+    @Autowired
+    private ICoreMaterialMediaService materialMediaService;
+
+    /**
+     * 搜索 YouTube 视频并导入
+     *
+     * @param keyword 搜索关键词
+     * @return 导入结果
+     */
+    public AjaxResult fetchYoutubeData(String keyword) {
+        try {
+            String sourceType = SOURCE_YOUTUBE;
+
+            // 执行 opencli 命令获取 YouTube 搜索数据
+            String jsonResult = executeOpenCliYoutubeCommand(keyword);
+            if (jsonResult == null || jsonResult.isEmpty()) {
+                return AjaxResult.error("未获取到 YouTube 数据");
+            }
+
+            // 解析并保存数据
+            List<CoreMaterial> materials = parseYoutubeJson(jsonResult, sourceType);
+            ImportResult result = importMaterialsWithMedia(materials);
+
+            AjaxResult ajaxResult = AjaxResult.success("导入完成");
+            ajaxResult.put("keyword", keyword);
+            ajaxResult.put("sourceType", sourceType);
+            ajaxResult.put("apiVersion", "opencli");
+            ajaxResult.put("total", result.total);
+            ajaxResult.put("successCount", result.successCount);
+            ajaxResult.put("failCount", result.failCount);
+            return ajaxResult;
+
+        } catch (Exception e) {
+            log.error("YouTube 搜索导入失败", e);
+            return AjaxResult.error("导入失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 根据视频 URL 下载并导入单个视频
+     *
+     * @param videoUrl YouTube 视频 URL
+     * @return 导入结果
+     */
+    public AjaxResult fetchYoutubeVideoByUrl(String videoUrl) {
+        try {
+            String sourceType = SOURCE_YOUTUBE;
+
+            // 从 URL 提取视频 ID
+            String videoId = extractVideoId(videoUrl);
+            if (videoId == null || videoId.isEmpty()) {
+                return AjaxResult.error("无法从 URL 提取视频 ID");
+            }
+
+            // 检查素材是否已存在
+            CoreMaterial existingMaterial = materialService.selectMaterialByOriginalId(videoId);
+            if (existingMaterial != null) {
+                AjaxResult ajaxResult = AjaxResult.success("素材已存在");
+                ajaxResult.put("videoId", videoId);
+                ajaxResult.put("materialId", existingMaterial.getId());
+                return ajaxResult;
+            }
+
+            // 创建素材对象
+            CoreMaterial material = new CoreMaterial();
+            material.setOriginalId(videoId);
+            material.setOriginalUrl(videoUrl);
+            material.setTitle("YouTube Video " + videoId);
+            material.setAuthor("Unknown");
+            material.setContent(videoUrl);
+            material.setPackageType(PACKAGE_TYPE_NORMAL);
+            material.setStatus(STATUS_OFFLINE);
+            material.setSource(sourceType);
+            material.setContentType(CONTENT_TYPE_VIDEO);
+
+            // 下载视频并上传
+            List<String> uploadedUrls = downloadAndUploadVideo(videoUrl, videoId);
+            if (!uploadedUrls.isEmpty()) {
+                material.setVideoUrl(uploadedUrls.get(0));
+            }
+
+            // 保存素材
+            materialService.insertMaterial(material);
+            Long materialId = material.getId();
+
+            // 保存素材媒体文件信息
+            if (!uploadedUrls.isEmpty()) {
+                saveMaterialMediaFiles(materialId, uploadedUrls);
+            }
+
+            AjaxResult ajaxResult = AjaxResult.success("导入完成");
+            ajaxResult.put("videoId", videoId);
+            ajaxResult.put("sourceType", sourceType);
+            ajaxResult.put("materialId", materialId);
+            ajaxResult.put("uploadedFiles", uploadedUrls.size());
+            return ajaxResult;
+
+        } catch (Exception e) {
+            log.error("YouTube 视频导入失败, URL: {}", videoUrl, e);
+            return AjaxResult.error("导入失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 执行 opencli youtube search 命令
+     */
+    private String executeOpenCliYoutubeCommand(String keyword) throws Exception {
+        OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
+                .withModule(MODULE_YOUTUBE)
+                .withSubCommand(SUBCOMMAND_SEARCH)
+                .withArg(keyword)
+                .withOption("--limit", "10")
+                .withOption(OPTION_FORMAT_JSON, VALUE_JSON);
+
+        return executeCommand(builder);
+    }
+
+    /**
+     * 导入素材列表（带媒体处理）
+     */
+    private ImportResult importMaterialsWithMedia(List<CoreMaterial> materials) {
+        int successCount = 0;
+        int failCount = 0;
+        int skipCount = 0;
+
+        for (CoreMaterial material : materials) {
+            String originalId = material.getOriginalId();
+            try {
+                // 根据 originId 判断数据是否已存在
+                if (originalId != null && !originalId.isEmpty()) {
+                    CoreMaterial existingMaterial = materialService.selectMaterialByOriginalId(originalId);
+                    if (existingMaterial != null) {
+                        log.info("素材已存在，跳过导入, originalId: {}", originalId);
+                        skipCount++;
+                        continue;
+                    }
+                }
+
+                // 下载视频并上传
+                String originalUrl = material.getOriginalUrl();
+                List<String> uploadedUrls = new ArrayList<>();
+                if (originalUrl != null && !originalUrl.isEmpty()) {
+                    uploadedUrls = downloadAndUploadVideo(originalUrl, originalId);
+                    if (!uploadedUrls.isEmpty()) {
+                        log.info("素材 {} 上传了 {} 个文件到文件服务器", originalId, uploadedUrls.size());
+                        material.setVideoUrl(uploadedUrls.get(0));
+                    }
+                }
+
+                // 设置内容类型并保存素材
+                material.setContentType(CONTENT_TYPE_VIDEO);
+                materialService.insertMaterial(material);
+                Long materialId = material.getId();
+
+                // 保存素材媒体文件信息
+                if (!uploadedUrls.isEmpty()) {
+                    saveMaterialMediaFiles(materialId, uploadedUrls);
+                }
+
+                successCount++;
+            } catch (Exception e) {
+                log.error("导入素材失败, originalId: {}", originalId, e);
+                failCount++;
+            }
+        }
+
+        log.info("导入完成: 总计={}, 成功={}, 跳过={}, 失败={}", materials.size(), successCount, skipCount, failCount);
+        return new ImportResult(materials.size(), successCount, failCount, skipCount);
+    }
+
+    /**
+     * 使用 yt-dlp 下载视频并上传到文件服务器
+     */
+    private List<String> downloadAndUploadVideo(String videoUrl, String videoId) {
+        List<String> uploadedUrls = new ArrayList<>();
+        try {
+            String downloadPath = buildDownloadPath(videoId);
+            log.info("使用 yt-dlp 下载视频, URL: {}, 下载路径: {}", videoUrl, downloadPath);
+
+            OpenCliCommandBuilder builder = OpenCliCommandBuilder
+                    .buildYtDlpDownloadWithConfigProxy(videoUrl, downloadPath, openCliProperties);
+
+            String result = executeCommand(builder);
+            log.info("yt-dlp 下载命令执行成功, URL: {}, 结果: {}", videoUrl, result);
+
+            // 上传下载目录中的文件到文件服务器
+            File downloadDir = new File(downloadPath);
+            if (downloadDir.exists() && downloadDir.isDirectory()) {
+                File[] files = downloadDir.listFiles();
+                if (files != null && files.length > 0) {
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            String url = HttpUtils.uploadToFileServer(file, file.getName());
+                            if (url != null) {
+                                uploadedUrls.add(url);
+                                log.info("文件上传成功: {}, URL: {}", file.getName(), url);
+                            } else {
+                                log.error("文件上传失败: {}", file.getName());
+                            }
+                        }
+                    }
+                } else {
+                    log.warn("下载目录下没有文件: {}", downloadPath);
+                }
+            } else {
+                log.warn("下载目录不存在: {}", downloadPath);
+            }
+
+        } catch (Exception e) {
+            log.error("下载视频失败, URL: {}", videoUrl, e);
+        }
+        return uploadedUrls;
+    }
+
+    /**
+     * 保存素材媒体文件信息
+     */
+    private void saveMaterialMediaFiles(Long materialId, List<String> uploadedUrls) {
+        if (materialId == null || uploadedUrls == null || uploadedUrls.isEmpty()) {
+            return;
+        }
+        try {
+            int sortOrder = 1;
+            for (String fileUrl : uploadedUrls) {
+                String mediaType = determineMediaType(fileUrl);
+                materialMediaService.saveMaterialMedia(materialId, mediaType, fileUrl, sortOrder++);
+                log.info("保存素材媒体文件成功, materialId: {}, mediaType: {}, url: {}", materialId, mediaType, fileUrl);
+            }
+        } catch (Exception e) {
+            log.error("保存素材媒体文件失败, materialId: {}", materialId, e);
+        }
+    }
+
+    /**
+     * 根据文件URL判断媒体类型
+     */
+    private String determineMediaType(String fileUrl) {
+        if (fileUrl == null) {
+            return "image";
+        }
+        String lowerUrl = fileUrl.toLowerCase();
+        if (lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".avi") || lowerUrl.endsWith(".mov")
+                || lowerUrl.endsWith(".wmv") || lowerUrl.endsWith(".flv") || lowerUrl.endsWith(".mkv")
+                || lowerUrl.endsWith(".webm") || lowerUrl.contains("/video/")) {
+            return "video";
+        }
+        return "image";
+    }
+
+    /**
+     * 构建下载目录路径
+     */
+    private String buildDownloadPath(String videoId) {
+        String currentDir = System.getProperty("user.dir");
+        String downloadDir = currentDir + "/youtube_downloads/" + videoId + "/";
+
+        java.io.File dir = new java.io.File(downloadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        return downloadDir;
+    }
+
+    /**
+     * 解析 YouTube JSON 数据
+     */
+    private List<CoreMaterial> parseYoutubeJson(String youtubeJson, String sourceType) throws Exception {
+        List<CoreMaterial> materials = new ArrayList<>();
+        JsonNode rootNode = objectMapper.readTree(youtubeJson);
+
+        if (rootNode.isArray()) {
+            for (JsonNode node : rootNode) {
+                CoreMaterial material = convertYoutubeToMaterial(node, sourceType);
+                if (material != null) {
+                    materials.add(material);
+                }
+            }
+        } else {
+            CoreMaterial material = convertYoutubeToMaterial(rootNode, sourceType);
+            if (material != null) {
+                materials.add(material);
+            }
+        }
+
+        return materials;
+    }
+
+    /**
+     * 将 YouTube JSON 节点转换为 CoreMaterial
+     */
+    private CoreMaterial convertYoutubeToMaterial(JsonNode node, String sourceType) {
+        if (node == null) {
+            return null;
+        }
+
+        CoreMaterial material = new CoreMaterial();
+
+        // 设置标题
+        String title = getTextValue(node, "title");
+        material.setTitle(title != null ? title : "YouTube Video");
+
+        // 设置作者（频道）
+        material.setAuthor(getTextValue(node, "channel"));
+
+        // 设置原始 URL
+        String url = getTextValue(node, "url");
+        material.setOriginalUrl(url);
+
+        // 从 URL 提取视频 ID 作为 originalId
+        String videoId = extractVideoId(url);
+        material.setOriginalId(videoId != null ? videoId : url);
+
+        // 设置内容描述
+        //String content = buildContentDescription(node);
+        //material.setContent(content);
+
+        // 设置观看数（移除 "次观看" 等字符，只保留数字）
+       /* String viewsStr = getTextValue(node, "views");
+        if (viewsStr != null) {
+            try {
+                String numericViews = viewsStr.replaceAll("[^0-9]", "");
+                if (!numericViews.isEmpty()) {
+                    material.setViewCount(Long.parseLong(numericViews));
+                }
+            } catch (NumberFormatException e) {
+                log.warn("解析观看数失败: {}", viewsStr);
+            }
+        }*/
+
+        // 设置其他字段
+        material.setPackageType(PACKAGE_TYPE_NORMAL);
+        material.setStatus(STATUS_OFFLINE);
+        material.setContentType(CONTENT_TYPE_VIDEO);
+        material.setSource(sourceType != null ? sourceType : SOURCE_YOUTUBE);
+
+        return material;
+    }
+
+    /**
+     * 从 YouTube URL 中提取视频 ID
+     */
+    private String extractVideoId(String url) {
+        if (url == null || url.isEmpty()) {
+            return null;
+        }
+        try {
+            // 处理 https://www.youtube.com/watch?v=VIDEO_ID
+            if (url.contains("v=")) {
+                String[] parts = url.split("v=");
+                if (parts.length > 1) {
+                    String id = parts[1];
+                    // 处理可能存在的其他参数
+                    int ampersandIndex = id.indexOf("&");
+                    if (ampersandIndex > 0) {
+                        id = id.substring(0, ampersandIndex);
+                    }
+                    return id;
+                }
+            }
+            // 处理 https://youtu.be/VIDEO_ID
+            if (url.contains("youtu.be/")) {
+                String[] parts = url.split("youtu.be/");
+                if (parts.length > 1) {
+                    String id = parts[1];
+                    // 处理可能存在的其他参数
+                    int questionIndex = id.indexOf("?");
+                    if (questionIndex > 0) {
+                        id = id.substring(0, questionIndex);
+                    }
+                    return id;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("提取 YouTube 视频 ID 失败: {}", url);
+        }
+        return null;
+    }
+}

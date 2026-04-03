@@ -36,6 +36,9 @@ public class SopConfig
     /** 文件服务器上传地址 */
     private static String fileServer;
 
+    /** 最大文件上传大小（MB） */
+    private static int maxFileSize = 500;
+
     public String getName()
     {
         return name;
@@ -108,6 +111,14 @@ public class SopConfig
 
     public void setFileServer(String fileServer) {
         SopConfig.fileServer = fileServer;
+    }
+
+    public static int getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    public void setMaxFileSize(int maxFileSize) {
+        SopConfig.maxFileSize = maxFileSize;
     }
 
     /**

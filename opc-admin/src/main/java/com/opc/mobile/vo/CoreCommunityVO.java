@@ -32,6 +32,10 @@ public class CoreCommunityVO
     @Schema(description = "社区地址")
     private String address;
 
+    /** 省份 */
+    @Schema(description = "省份")
+    private String province;
+
     /** 经度 */
     @Schema(description = "经度")
     private BigDecimal longitude;
@@ -68,18 +72,10 @@ public class CoreCommunityVO
     @Schema(description = "排序")
     private Integer sortOrder;
 
-    /** 创建者 */
-    @Schema(description = "创建者")
-    private String createBy;
-
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "创建时间")
     private Date createTime;
-
-    /** 更新者 */
-    @Schema(description = "更新者")
-    private String updateBy;
 
     /** 更新时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -144,6 +140,16 @@ public class CoreCommunityVO
     public void setAddress(String address)
     {
         this.address = address;
+    }
+
+    public String getProvince()
+    {
+        return province;
+    }
+
+    public void setProvince(String province)
+    {
+        this.province = province;
     }
 
     public BigDecimal getLongitude()
@@ -236,16 +242,6 @@ public class CoreCommunityVO
         this.sortOrder = sortOrder;
     }
 
-    public String getCreateBy()
-    {
-        return createBy;
-    }
-
-    public void setCreateBy(String createBy)
-    {
-        this.createBy = createBy;
-    }
-
     public Date getCreateTime()
     {
         return createTime;
@@ -254,16 +250,6 @@ public class CoreCommunityVO
     public void setCreateTime(Date createTime)
     {
         this.createTime = createTime;
-    }
-
-    public String getUpdateBy()
-    {
-        return updateBy;
-    }
-
-    public void setUpdateBy(String updateBy)
-    {
-        this.updateBy = updateBy;
     }
 
     public Date getUpdateTime()

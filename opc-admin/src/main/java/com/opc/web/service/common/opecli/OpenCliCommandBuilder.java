@@ -46,11 +46,37 @@ public class OpenCliCommandBuilder {
 
     /**
      * 创建命令构建器（使用配置）
+     * <p>
+     * Windows 系统不需要使用 executablePath 配置，直接使用默认命令名
+     * </p>
      *
      * @param properties OpenCLI 配置属性
      */
     public OpenCliCommandBuilder(OpenCliProperties properties) {
-        this(true, properties != null ? properties.getExecutablePath() : null);
+        this(true, getEffectiveExecutablePath(properties));
+    }
+
+    /**
+     * 获取有效的可执行路径
+     * <p>
+     * Windows 系统返回 null（使用默认命令名）
+     * Mac/Linux 返回配置的路径
+     * </p>
+     *
+     * @param properties OpenCLI 配置属性
+     * @return Windows 返回 null，其他系统返回配置的路径
+     */
+    private static String getEffectiveExecutablePath(OpenCliProperties properties) {
+        if (properties == null) {
+            return null;
+        }
+        String osName = System.getProperty("os.name").toLowerCase();
+        boolean isWindows = osName.contains("win");
+        // Windows 不需要使用 executablePath，直接返回 null
+        if (isWindows) {
+            return null;
+        }
+        return properties.getExecutablePath();
     }
 
     /**
@@ -536,6 +562,9 @@ public class OpenCliCommandBuilder {
 
     /**
      * 构建 yt-dlp 下载命令（带输出目录）
+     * <p>
+     * 强制下载为 MP4 格式，避免 webm 格式不被文件服务器支持
+     * </p>
      *
      * @param videoUrl 视频 URL
      * @param outputPath 输出目录
@@ -544,16 +573,21 @@ public class OpenCliCommandBuilder {
     public static OpenCliCommandBuilder buildYtDlpDownload(String videoUrl, String outputPath) {
         OpenCliCommandBuilder builder = new OpenCliCommandBuilder(false)
                 .withModule(CMD_YT_DLP);
-        
+
+        // 强制指定格式为 MP4，避免下载 webm
+        builder.withOption("--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best");
+        builder.withOption("--merge-output-format", "mp4");
+        builder.withOption("--remux-video", "mp4");
+
         // yt-dlp 使用 -o 指定输出模板，这里使用目录+默认文件名
         if (outputPath != null && !outputPath.isEmpty()) {
             // 确保路径以 / 或 \ 结尾
-            String path = outputPath.endsWith("/") || outputPath.endsWith("\\") 
-                    ? outputPath 
+            String path = outputPath.endsWith("/") || outputPath.endsWith("\\")
+                    ? outputPath
                     : outputPath + "/";
-            builder.withOption("-o", path + "%(title)s.%(ext)s");
+            builder.withOption("-o", path + "%(title)s.mp4");
         }
-        
+
         builder.withArg(videoUrl);
         return builder;
     }

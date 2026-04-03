@@ -52,3 +52,10 @@ export function fetchCollectSourceData(id) {
     method: 'post'
   })
 }
+
+export function getSourceTypes() {
+  return request({
+    url: '/core/collect/sourceTypes',
+    method: 'get'
+  })
+}

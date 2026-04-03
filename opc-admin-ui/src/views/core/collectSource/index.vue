@@ -12,10 +12,12 @@
          </el-form-item>
          <el-form-item label="来源类型" prop="sourceType">
             <el-select v-model="queryParams.sourceType" placeholder="请选择来源类型" clearable style="width: 200px">
-               <el-option label="Twitter" value="twitter" />
-               <el-option label="Reddit" value="reddit" />
-               <el-option label="Telegram" value="telegram" />
-               <el-option label="YouTube" value="youtube" />
+               <el-option
+                  v-for="item in sourceTypeOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+               />
             </el-select>
          </el-form-item>
          <el-form-item label="状态" prop="status">
@@ -79,11 +81,9 @@
          <el-table-column label="信息源链接" align="center" prop="sourceUrl" :show-overflow-tooltip="true" />
          <el-table-column label="来源类型" align="center" prop="sourceType" width="120">
             <template #default="scope">
-               <el-tag v-if="scope.row.sourceType === 'twitter'" type="primary">Twitter</el-tag>
-               <el-tag v-else-if="scope.row.sourceType === 'reddit'" color="#FF4500" style="color: white">Reddit</el-tag>
-               <el-tag v-else-if="scope.row.sourceType === 'telegram'" type="success">Telegram</el-tag>
-               <el-tag v-else-if="scope.row.sourceType === 'youtube'" type="danger">YouTube</el-tag>
-               <span v-else>{{ scope.row.sourceType }}</span>
+               <el-tag :type="getSourceTypeTagType(scope.row.sourceType)">
+                  {{ getSourceTypeLabel(scope.row.sourceType) }}
+               </el-tag>
             </template>
          </el-table-column>
          <el-table-column label="状态" align="center" prop="status" width="80">
@@ -131,10 +131,12 @@
             </el-form-item>
             <el-form-item label="来源类型" prop="sourceType">
                <el-select v-model="form.sourceType" placeholder="请选择来源类型" style="width: 100%">
-                  <el-option label="Twitter" value="twitter" />
-                  <el-option label="Reddit" value="reddit" />
-                  <el-option label="Telegram" value="telegram" />
-                  <el-option label="YouTube" value="youtube" />
+                  <el-option
+                     v-for="item in sourceTypeOptions"
+                     :key="item.value"
+                     :label="item.label"
+                     :value="item.value"
+                  />
                </el-select>
             </el-form-item>
             <el-form-item label="状态" prop="status">
@@ -162,11 +164,9 @@
             <el-descriptions-item label="关键词" :span="1">{{ detailData.keyword || '-' }}</el-descriptions-item>
             <el-descriptions-item label="信息源链接" :span="2">{{ detailData.sourceUrl || '-' }}</el-descriptions-item>
             <el-descriptions-item label="来源类型" :span="1">
-               <el-tag v-if="detailData.sourceType === 'twitter'" type="primary">Twitter</el-tag>
-               <el-tag v-else-if="detailData.sourceType === 'reddit'" color="#FF4500" style="color: white">Reddit</el-tag>
-               <el-tag v-else-if="detailData.sourceType === 'telegram'" type="success">Telegram</el-tag>
-               <el-tag v-else-if="detailData.sourceType === 'youtube'" type="danger">YouTube</el-tag>
-               <span v-else>{{ detailData.sourceType || '-' }}</span>
+               <el-tag :type="getSourceTypeTagType(detailData.sourceType)">
+                  {{ getSourceTypeLabel(detailData.sourceType) }}
+               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="状态" :span="1">
                <el-tag :type="detailData.status === '0' ? 'success' : 'danger'">
@@ -187,7 +187,17 @@
 </template>
 
 <script setup name="CollectSource">
-import { listCollectSource, getCollectSource, addCollectSource, updateCollectSource, delCollectSource, changeCollectSourceStatus, fetchCollectSourceData } from "@/api/core/collectSource"
+import { listCollectSource, getCollectSource, addCollectSource, updateCollectSource, delCollectSource, changeCollectSourceStatus, fetchCollectSourceData, getSourceTypes } from "@/api/core/collectSource"
+
+// 来源类型列表
+const sourceTypeOptions = ref([])
+
+// 加载来源类型列表
+function loadSourceTypes() {
+  getSourceTypes().then(response => {
+    sourceTypeOptions.value = response.data || []
+  })
+}
 
 const { proxy } = getCurrentInstance()
 
@@ -202,6 +212,26 @@ const multiple = ref(true)
 const total = ref(0)
 const title = ref("")
 const detailData = ref({})
+
+/** 获取来源类型标签 */
+function getSourceTypeLabel(value) {
+  const item = sourceTypeOptions.value.find(item => item.value === value)
+  return item ? item.label : value
+}
+
+/** 获取来源类型标签样式 */
+function getSourceTypeTagType(value) {
+  switch (value) {
+    case 'twitter':
+      return 'primary'
+    case 'reddit':
+      return 'warning'
+    case 'youtube':
+      return 'danger'
+    default:
+      return 'info'
+  }
+}
 
 const data = reactive({
   form: {},
@@ -270,7 +300,8 @@ function reset() {
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
-  getList()
+  loadSourceTypes()
+getList()
 }
 
 /** 重置按钮操作 */
@@ -339,7 +370,8 @@ function handleDelete(row) {
   proxy.$modal.confirm('是否确认删除采集信息源编号为"' + sourceIds + '"的数据项？').then(() => {
     return delCollectSource(sourceIds)
   }).then(() => {
-    getList()
+    loadSourceTypes()
+getList()
     proxy.$modal.msgSuccess("删除成功")
   }).catch(() => {})
 }
@@ -364,13 +396,15 @@ function submitForm() {
         updateCollectSource(form.value).then(() => {
           proxy.$modal.msgSuccess("修改成功")
           open.value = false
-          getList()
+          loadSourceTypes()
+getList()
         })
       } else {
         addCollectSource(form.value).then(() => {
           proxy.$modal.msgSuccess("新增成功")
           open.value = false
-          getList()
+          loadSourceTypes()
+getList()
         })
       }
     }
@@ -384,5 +418,6 @@ function handleExport() {
   }, `collectSource_${new Date().getTime()}.xlsx`)
 }
 
+loadSourceTypes()
 getList()
 </script>
