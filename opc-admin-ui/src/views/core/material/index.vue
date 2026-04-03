@@ -351,16 +351,24 @@
                </el-select>
             </el-form-item>
             <!-- 正文编辑器 -->
-            <!-- 根据素材类型选择不同的编辑器 -->
-            <el-form-item label="正文" prop="content" v-if="form.materialType === 'post'">
-               <el-input v-model="form.content" type="textarea" placeholder="请输入正文" :rows="6" />
-            </el-form-item>
-            <el-form-item label="正文" prop="content" v-else-if="form.materialType === 'article'">
-               <Editor v-model="form.content" :min-height="300" :key="'editor-article-' + form.id" />
-            </el-form-item>
-            <el-form-item label="正文" prop="content" v-else>
-               <Editor v-model="form.content" :min-height="300" :key="'editor-other-' + form.id" />
-            </el-form-item>
+            <!-- 帖子类型：正文使用textarea -->
+            <template v-if="form.materialType === 'post'">
+               <el-form-item label="正文" prop="content">
+                  <el-input v-model="form.content" type="textarea" placeholder="请输入正文" :rows="6" />
+               </el-form-item>
+            </template>
+            <!-- 文章类型：正文使用富文本框 -->
+            <template v-else-if="form.materialType === 'article'">
+               <el-form-item label="正文" prop="content">
+                  <Editor v-model="form.content" :min-height="300" />
+               </el-form-item>
+            </template>
+            <!-- 其他情况：使用富文本框 -->
+            <template v-else>
+               <el-form-item label="正文" prop="content">
+                  <Editor v-model="form.content" :min-height="300" />
+               </el-form-item>
+            </template>
             <!-- 帖子类型：图文显示图片上传（在正文后面） -->
             <el-form-item label="图片" prop="mediaList" v-if="form.materialType === 'post' && form.contentType === 'image'">
                <div class="media-upload-container">
@@ -1013,7 +1021,7 @@ function reset() {
     status: '0',
     isTop: '0',
     source: 'manual',
-    materialType: 'post',
+    materialType: undefined,
     issueNo: 0,
     coverImage: undefined,
     videoUrl: undefined,
@@ -1146,7 +1154,7 @@ function handleUpdate(row) {
   const id = row.id || ids.value
   getTagOptions()
   getMaterial(id).then(response => {
-    // 先获取数据
+    // 获取数据
     const data = response.data
     // 确保materialType有默认值（兼容旧数据）
     if (data.materialType === undefined || data.materialType === null || data.materialType === '') {
@@ -1166,19 +1174,55 @@ function handleUpdate(row) {
     } else {
       data.tagIds = []
     }
-    // 先设置表单数据（确保materialType正确）
-    form.value = data
-    // 加载媒体列表
-    if (form.value.materialType === 'post' && (form.value.packageType === 2 || form.value.packageType === 3)) {
-      getMaterialMedia(id).then(mediaResponse => {
-        form.value.mediaList = mediaResponse.data || []
-      })
-    }
-    // 获取二级分类选项
-    getCategoryOptions(form.value.packageType)
-    // 最后打开弹窗
-    title.value = "修改素材"
-    open.value = true
+    // 关闭弹窗，等待 DOM 更新后再打开
+    open.value = false
+    // 使用 nextTick 确保弹窗关闭后再设置数据
+    nextTick(() => {
+      // 重置表单并设置新数据
+      form.value = {
+        id: undefined,
+        title: undefined,
+        author: undefined,
+        summary: undefined,
+        content: undefined,
+        originalUrl: undefined,
+        originalId: undefined,
+        replyCount: 0,
+        likeCount: 0,
+        dislikeCount: 0,
+        viewCount: 0,
+        shareCount: 0,
+        commentCount: 0,
+        contentType: 'text',
+        packageType: 1,
+        status: '0',
+        isTop: '0',
+        source: 'manual',
+        materialType: undefined,
+        issueNo: 0,
+        coverImage: undefined,
+        videoUrl: undefined,
+        tagIds: [],
+        mediaList: [],
+        remark: undefined,
+        ...data // 展开 data，覆盖默认值
+      }
+      // 再次确保 materialType 正确（防止 data 中有空值覆盖）
+      if (!form.value.materialType) {
+        form.value.materialType = 'post'
+      }
+      // 加载媒体列表（只要是帖子类型就加载）
+      if (form.value.materialType === 'post') {
+        getMaterialMedia(id).then(mediaResponse => {
+          form.value.mediaList = mediaResponse.data || []
+        })
+      }
+      // 获取二级分类选项
+      getCategoryOptions(form.value.packageType)
+      // 最后打开弹窗
+      title.value = "修改素材"
+      open.value = true
+    })
   })
 }
 
@@ -1217,7 +1261,8 @@ function handleChangeTop(row) {
 function submitForm() {
   proxy.$refs["materialRef"].validate(valid => {
     if (valid) {
-      const isPost = form.value.materialType === 'post' && (form.value.packageType === 2 || form.value.packageType === 3)
+      // 只要是帖子类型就保存媒体列表
+      const isPost = form.value.materialType === 'post'
       if (form.value.id != undefined) {
         updateMaterial(form.value).then(() => {
           // 如果是帖子类型，保存媒体列表
