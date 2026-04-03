@@ -46,7 +46,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author opc
  */
-@Tag(name = "会员首页", description = "移动端首页相关接口")
+@Tag(name = "APP首页", description = "移动端首页相关接口")
 @RestController
 @RequestMapping("/mobile/home")
 @MemberLogin
