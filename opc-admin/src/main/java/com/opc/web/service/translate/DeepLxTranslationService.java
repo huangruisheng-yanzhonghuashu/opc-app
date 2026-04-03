@@ -14,11 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * DeepLX 翻译服务实现
+ * DeepLX 翻译服务实现（已禁用，使用 OllamaTranslationService 替代）
  *
  * @author opc
  */
-@Service
+// @Service - 已禁用，只使用 OllamaTranslationService
 public class DeepLxTranslationService implements TranslationService {
 
     private static final Logger log = LoggerFactory.getLogger(DeepLxTranslationService.class);

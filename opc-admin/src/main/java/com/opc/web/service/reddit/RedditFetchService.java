@@ -5,6 +5,7 @@ import com.opc.common.core.domain.AjaxResult;
 import com.opc.core.domain.CoreMaterial;
 import com.opc.web.service.common.opecli.OpenCliCommandBuilder;
 import com.opc.web.service.common.AbstractCollectFetchService;
+import com.opc.web.service.translate.TranslateUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -101,9 +102,12 @@ public class RedditFetchService extends AbstractCollectFetchService {
 
         CoreMaterial material = new CoreMaterial();
 
-        // 设置标题
-        String title = getTextValue(node, "title");
-        material.setTitle(title != null ? title : "Reddit 内容");
+        // 设置原标题
+        String originalTitle = getTextValue(node, "title");
+        material.setOriginalTitle(originalTitle != null ? originalTitle : "Reddit 内容");
+        // 翻译标题
+        String translatedTitle = TranslateUtils.autoTranslateToChinese(originalTitle != null ? originalTitle : "Reddit 内容");
+        material.setTitle(translatedTitle);
         material.setAuthor(getTextValue(node, "author"));
         material.setOriginalUrl(getTextValue(node, "url"));
 
@@ -115,10 +119,17 @@ public class RedditFetchService extends AbstractCollectFetchService {
 
             // 获取详细内容
             String detailText = fetchRedditDetailContent(url);
-            String content = detailText != null && !detailText.isEmpty() ? detailText : (title != null ? title : "");
-            material.setContent(convertNewLineToBr(content));
+            String originalContent = detailText != null && !detailText.isEmpty() ? detailText : (originalTitle != null ? originalTitle : "");
+            material.setOriginalContent(convertNewLineToBr(originalContent));
+            // 翻译为中文后保存到 content
+            String translatedContent = TranslateUtils.autoTranslateToChinese(originalContent);
+            material.setContent(convertNewLineToBr(translatedContent));
         } else {
-            material.setContent(convertNewLineToBr(title != null ? title : ""));
+            String originalContent = originalTitle != null ? originalTitle : "";
+            material.setOriginalContent(convertNewLineToBr(originalContent));
+            // 翻译为中文后保存到 content
+            String translatedContent = TranslateUtils.autoTranslateToChinese(originalContent);
+            material.setContent(convertNewLineToBr(translatedContent));
         }
 
         // 设置点赞数

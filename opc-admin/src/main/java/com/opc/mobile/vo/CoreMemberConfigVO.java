@@ -2,7 +2,7 @@ package com.opc.mobile.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.Instant;
+import java.util.Date;
 
 /**
  * 会员配置 VO
@@ -49,12 +49,12 @@ public class CoreMemberConfigVO
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "创建时间")
-    private Instant createTime;
+    private Date createTime;
 
     /** 更新时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "更新时间")
-    private Instant updateTime;
+    private Date updateTime;
 
     /** 备注 */
     @Schema(description = "备注")
@@ -140,22 +140,22 @@ public class CoreMemberConfigVO
         this.sortOrder = sortOrder;
     }
 
-    public Instant getCreateTime()
+    public Date getCreateTime()
     {
         return createTime;
     }
 
-    public void setCreateTime(Instant createTime)
+    public void setCreateTime(Date createTime)
     {
         this.createTime = createTime;
     }
 
-    public Instant getUpdateTime()
+    public Date getUpdateTime()
     {
         return updateTime;
     }
 
-    public void setUpdateTime(Instant updateTime)
+    public void setUpdateTime(Date updateTime)
     {
         this.updateTime = updateTime;
     }

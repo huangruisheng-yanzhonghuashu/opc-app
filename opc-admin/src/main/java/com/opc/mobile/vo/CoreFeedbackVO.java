@@ -2,7 +2,7 @@ package com.opc.mobile.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.Instant;
+import java.util.Date;
 
 /**
  * 意见反馈 VO
@@ -53,7 +53,7 @@ public class CoreFeedbackVO
     /** 回复时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "回复时间")
-    private Instant replyTime;
+    private Date replyTime;
 
     /** 回复人 */
     @Schema(description = "回复人")
@@ -62,12 +62,12 @@ public class CoreFeedbackVO
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "创建时间")
-    private Instant createTime;
+    private Date createTime;
 
     /** 更新时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "更新时间")
-    private Instant updateTime;
+    private Date updateTime;
 
     /** 备注 */
     @Schema(description = "备注")
@@ -163,12 +163,12 @@ public class CoreFeedbackVO
         this.reply = reply;
     }
 
-    public Instant getReplyTime()
+    public Date getReplyTime()
     {
         return replyTime;
     }
 
-    public void setReplyTime(Instant replyTime)
+    public void setReplyTime(Date replyTime)
     {
         this.replyTime = replyTime;
     }
@@ -183,22 +183,22 @@ public class CoreFeedbackVO
         this.replyBy = replyBy;
     }
 
-    public Instant getCreateTime()
+    public Date getCreateTime()
     {
         return createTime;
     }
 
-    public void setCreateTime(Instant createTime)
+    public void setCreateTime(Date createTime)
     {
         this.createTime = createTime;
     }
 
-    public Instant getUpdateTime()
+    public Date getUpdateTime()
     {
         return updateTime;
     }
 
-    public void setUpdateTime(Instant updateTime)
+    public void setUpdateTime(Date updateTime)
     {
         this.updateTime = updateTime;
     }

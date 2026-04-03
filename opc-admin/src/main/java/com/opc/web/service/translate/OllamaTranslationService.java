@@ -29,6 +29,49 @@ public class OllamaTranslationService implements TranslationService {
     @Autowired
     private OllamaProperties properties;
 
+    private volatile Ollama ollamaClient;
+    private volatile boolean serverAvailable = true;
+    private volatile long lastCheckTime = 0;
+    private static final long CHECK_INTERVAL_MS = 60000; // 1分钟检查一次
+
+    /**
+     * 获取 Ollama 客户端（单例模式）
+     */
+    private Ollama getOllamaClient() {
+        if (ollamaClient == null) {
+            synchronized (this) {
+                if (ollamaClient == null) {
+                    ollamaClient = new Ollama(properties.getUrl());
+                    ollamaClient.setRequestTimeoutSeconds(properties.getRequestTimeoutSeconds());
+                }
+            }
+        }
+        return ollamaClient;
+    }
+
+    /**
+     * 检查服务器是否可用
+     */
+    private boolean isServerAvailable() {
+        long now = System.currentTimeMillis();
+        if (now - lastCheckTime < CHECK_INTERVAL_MS) {
+            return serverAvailable;
+        }
+        lastCheckTime = now;
+
+        try {
+            Ollama client = getOllamaClient();
+            // 简单检查连接
+            client.listModels();
+            serverAvailable = true;
+            return true;
+        } catch (Exception e) {
+            log.error("Ollama 服务器连接检查失败: {}, 错误: {}", properties.getUrl(), e.getMessage(), e);
+            serverAvailable = false;
+            return false;
+        }
+    }
+
     /**
      * 翻译文本
      *
@@ -43,37 +86,62 @@ public class OllamaTranslationService implements TranslationService {
             return text;
         }
 
-        try {
-            Ollama ollama = new Ollama(properties.getUrl());
-            ollama.setRequestTimeoutSeconds(properties.getRequestTimeoutSeconds());
-
-            String prompt = buildPrompt(text, sourceLang, targetLang);
-
-            OllamaGenerateRequest request = new OllamaGenerateRequest(properties.getModel(), prompt);
-
-            OptionsBuilder optionsBuilder = new OptionsBuilder();
-            optionsBuilder.setTemperature(properties.getTemperature());
-            request.setOptions(optionsBuilder.build().getOptionsMap());
-
-            OllamaResult result = ollama.generate(request, (OllamaGenerateStreamObserver) null);
-
-            String translatedText = result.getResponse();
-
-            if (translatedText != null) {
-                translatedText = translatedText.trim();
-                if ((translatedText.startsWith("\"") && translatedText.endsWith("\"")) ||
-                    (translatedText.startsWith("'") && translatedText.endsWith("'"))) {
-                    translatedText = translatedText.substring(1, translatedText.length() - 1);
-                }
-            }
-
-            log.debug("Ollama 翻译成功: {} -> {}", text, translatedText);
-            return translatedText != null ? translatedText : text;
-
-        } catch (Exception e) {
-            log.error("Ollama 翻译异常，原文: {}", text, e);
+        // 检查服务器是否可用
+        if (!isServerAvailable()) {
+            log.warn("Ollama 服务器不可用，跳过翻译，返回原文");
             return text;
         }
+
+        // 重试机制
+        int maxRetries = 2;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return doTranslate(text, sourceLang, targetLang);
+            } catch (Exception e) {
+                log.error("Ollama 翻译失败（尝试 {}/{}），原文: {}", attempt, maxRetries, text, e);
+                if (attempt < maxRetries) {
+                    // 重置客户端，下次重试重新创建
+                    ollamaClient = null;
+                    try {
+                        Thread.sleep(1000); // 等待1秒后重试
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }
+        }
+
+        // 所有重试都失败，返回原文
+        return text;
+    }
+
+    /**
+     * 执行翻译
+     */
+    private String doTranslate(String text, String sourceLang, String targetLang) throws Exception {
+        Ollama ollama = getOllamaClient();
+
+        String prompt = buildPrompt(text, sourceLang, targetLang);
+
+        OllamaGenerateRequest request = new OllamaGenerateRequest(properties.getModel(), prompt);
+
+        OptionsBuilder optionsBuilder = new OptionsBuilder();
+        optionsBuilder.setTemperature(properties.getTemperature());
+        request.setOptions(optionsBuilder.build().getOptionsMap());
+
+        OllamaResult result = ollama.generate(request, (OllamaGenerateStreamObserver) null);
+
+        String translatedText = result.getResponse();
+
+        if (translatedText != null) {
+            translatedText = translatedText.trim();
+            if ((translatedText.startsWith("\"") && translatedText.endsWith("\"")) ||
+                (translatedText.startsWith("'") && translatedText.endsWith("'"))) {
+                translatedText = translatedText.substring(1, translatedText.length() - 1);
+            }
+        }
+
+        log.debug("Ollama 翻译成功: {} -> {}", text, translatedText);
+        return translatedText != null ? translatedText : text;
     }
 
     /**

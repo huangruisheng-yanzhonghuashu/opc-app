@@ -7,6 +7,7 @@ import com.opc.core.domain.CoreMaterial;
 import com.opc.core.service.ICoreMaterialMediaService;
 import com.opc.web.service.common.AbstractCollectFetchService;
 import com.opc.web.service.common.opecli.OpenCliCommandBuilder;
+import com.opc.web.service.translate.TranslateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -95,9 +96,16 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
             CoreMaterial material = new CoreMaterial();
             material.setOriginalId(videoId);
             material.setOriginalUrl(videoUrl);
-            material.setTitle("YouTube Video " + videoId);
+            // 设置原标题和翻译后的标题
+            String originalTitle = "YouTube Video " + videoId;
+            material.setOriginalTitle(originalTitle);
+            String translatedTitle = TranslateUtils.autoTranslateToChinese(originalTitle);
+            material.setTitle(translatedTitle);
             material.setAuthor("Unknown");
-            material.setContent(videoUrl);
+            //material.setOriginalContent(videoUrl);
+            // 翻译为中文后保存到 content（YouTube URL 通常不需要翻译，但为了统一处理）
+            //String translatedContent = TranslateUtils.autoTranslateToChinese(videoUrl);
+            //material.setContent(translatedContent);
             material.setPackageType(PACKAGE_TYPE_NORMAL);
             material.setStatus(STATUS_OFFLINE);
             material.setSource(sourceType);
@@ -326,9 +334,11 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
 
         CoreMaterial material = new CoreMaterial();
 
-        // 设置标题
-        String title = getTextValue(node, "title");
-        material.setTitle(title != null ? title : "YouTube Video");
+        // 设置原标题和翻译后的标题
+        String originalTitle = getTextValue(node, "title");
+        material.setOriginalTitle(originalTitle != null ? originalTitle : "YouTube Video");
+        String translatedTitle = TranslateUtils.autoTranslateToChinese(originalTitle != null ? originalTitle : "YouTube Video");
+        material.setTitle(translatedTitle);
 
         // 设置作者（频道）
         material.setAuthor(getTextValue(node, "channel"));
@@ -342,8 +352,10 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
         material.setOriginalId(videoId != null ? videoId : url);
 
         // 设置内容描述
-        //String content = buildContentDescription(node);
-        //material.setContent(content);
+        //String originalContent = buildContentDescription(node);
+        //material.setOriginalContent(originalContent);
+        //String translatedContent = TranslateUtils.autoTranslateToChinese(originalContent);
+        //material.setContent(translatedContent);
 
         // 设置观看数（移除 "次观看" 等字符，只保留数字）
        /* String viewsStr = getTextValue(node, "views");

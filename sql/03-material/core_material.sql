@@ -4,10 +4,12 @@
 DROP TABLE IF EXISTS core_material;
 CREATE TABLE core_material (
     id                  BIGINT(20)      NOT NULL AUTO_INCREMENT    COMMENT '素材ID',
-    title               VARCHAR(255)    DEFAULT NULL                   COMMENT '标题',
+    title               VARCHAR(255)    DEFAULT NULL                   COMMENT '标题（翻译后）',
+    original_title      VARCHAR(255)    DEFAULT NULL               COMMENT '原标题（从第三方获取的原始标题）',
     author              VARCHAR(100)    DEFAULT NULL               COMMENT '作者（注明出处）',
     summary             TEXT            DEFAULT NULL               COMMENT '总结',
     content             LONGTEXT        DEFAULT NULL               COMMENT '正文',
+    original_content    LONGTEXT        DEFAULT NULL               COMMENT '原文内容（从第三方获取的原始内容）',
     original_url        VARCHAR(500)    DEFAULT NULL               COMMENT '原链接',
     original_id        VARCHAR(100)    DEFAULT NULL               COMMENT '原ID',
     reply_count        BIGINT(20)     DEFAULT 0                  COMMENT '回复数',

@@ -19,6 +19,9 @@ public class CoreMaterial extends BaseEntity
     @Excel(name = "标题")
     private String title;
 
+    @Excel(name = "原标题")
+    private String originalTitle;
+
     @Excel(name = "作者")
     private String author;
 
@@ -27,6 +30,9 @@ public class CoreMaterial extends BaseEntity
 
     @Excel(name = "正文")
     private String content;
+
+    @Excel(name = "原文内容")
+    private String originalContent;
 
     @Excel(name = "原链接")
     private String originalUrl;
@@ -127,6 +133,16 @@ public class CoreMaterial extends BaseEntity
         this.title = title;
     }
 
+    public String getOriginalTitle()
+    {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle)
+    {
+        this.originalTitle = originalTitle;
+    }
+
     public String getAuthor()
     {
         return author;
@@ -155,6 +171,16 @@ public class CoreMaterial extends BaseEntity
     public void setContent(String content)
     {
         this.content = content;
+    }
+
+    public String getOriginalContent()
+    {
+        return originalContent;
+    }
+
+    public void setOriginalContent(String originalContent)
+    {
+        this.originalContent = originalContent;
     }
 
     public String getOriginalUrl()
@@ -432,9 +458,11 @@ public class CoreMaterial extends BaseEntity
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
             .append("title", getTitle())
+            .append("originalTitle", getOriginalTitle())
             .append("author", getAuthor())
             .append("summary", getSummary())
             .append("content", getContent())
+            .append("originalContent", getOriginalContent())
             .append("originalUrl", getOriginalUrl())
             .append("originalId", getOriginalId())
             .append("replyCount", getReplyCount())

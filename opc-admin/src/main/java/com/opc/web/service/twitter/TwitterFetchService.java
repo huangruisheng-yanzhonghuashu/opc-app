@@ -10,6 +10,7 @@ import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchResponseDTO;
 import com.opc.web.service.common.AbstractCollectFetchService;
 import com.opc.web.service.twitter.v2.TwitterApiV2Service;
+import com.opc.web.service.translate.TranslateUtils;
 import com.opc.common.utils.ShortUrlResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -393,11 +394,18 @@ public class TwitterFetchService extends AbstractCollectFetchService {
         material.setOriginalId(getTextValue(node, "id"));
 
         String originalText = getTextValue(node, "text");
-        material.setContent(originalText);
+        material.setOriginalContent(originalText);
+        // 翻译为中文后保存到 content
+        String translatedText = TranslateUtils.autoTranslateToChinese(originalText);
+        material.setContent(translatedText);
 
+        // 设置原标题和翻译后的标题
         if (originalText != null && !originalText.isEmpty()) {
-            String title = originalText.length() > 100 ? originalText.substring(0, 100) : originalText;
-            material.setTitle(title);
+            String originalTitle = originalText.length() > 100 ? originalText.substring(0, 100) : originalText;
+            material.setOriginalTitle(originalTitle);
+            // 翻译标题
+            String translatedTitle = TranslateUtils.autoTranslateToChinese(originalTitle);
+            material.setTitle(translatedTitle);
         }
 
         material.setAuthor(getTextValue(node, "author"));

@@ -10,23 +10,37 @@
                @keyup.enter="handleQuery"
             />
          </el-form-item>
-         <el-form-item label="省份" prop="province">
-            <el-input
-               v-model="queryParams.province"
-               placeholder="请输入省份"
+         <el-form-item label="省份" prop="provinceCode">
+            <el-select
+               v-model="queryParams.provinceCode"
+               placeholder="请选择省份"
                clearable
                style="width: 150px"
-               @keyup.enter="handleQuery"
-            />
+               @change="handleQueryProvinceChange"
+            >
+               <el-option
+                  v-for="item in provinceOptions"
+                  :key="item.code"
+                  :label="item.name"
+                  :value="item.code"
+               />
+            </el-select>
          </el-form-item>
-         <el-form-item label="城市" prop="city">
-            <el-input
-               v-model="queryParams.city"
-               placeholder="请输入城市"
+         <el-form-item label="城市" prop="cityCode">
+            <el-select
+               v-model="queryParams.cityCode"
+               placeholder="请选择城市"
                clearable
                style="width: 150px"
-               @keyup.enter="handleQuery"
-            />
+               :disabled="!queryParams.provinceCode"
+            >
+               <el-option
+                  v-for="item in cityQueryOptions"
+                  :key="item.code"
+                  :label="item.name"
+                  :value="item.code"
+               />
+            </el-select>
          </el-form-item>
          <el-form-item label="状态" prop="status">
             <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 150px">
@@ -206,13 +220,38 @@
             </el-row>
             <el-row :gutter="20">
                <el-col :span="12">
-                  <el-form-item label="省份" prop="province">
-                     <el-input v-model="form.province" placeholder="请输入省份" />
+                  <el-form-item label="省份" prop="provinceCode">
+                     <el-select
+                        v-model="form.provinceCode"
+                        placeholder="请选择省份"
+                        style="width: 100%"
+                        @change="handleFormProvinceChange"
+                     >
+                        <el-option
+                           v-for="item in provinceOptions"
+                           :key="item.code"
+                           :label="item.name"
+                           :value="item.code"
+                        />
+                     </el-select>
                   </el-form-item>
                </el-col>
                <el-col :span="12">
-                  <el-form-item label="城市" prop="city">
-                     <el-input v-model="form.city" placeholder="请输入城市" />
+                  <el-form-item label="城市" prop="cityCode">
+                     <el-select
+                        v-model="form.cityCode"
+                        placeholder="请选择城市"
+                        style="width: 100%"
+                        :disabled="!form.provinceCode"
+                        @change="handleFormCityChange"
+                     >
+                        <el-option
+                           v-for="item in cityFormOptions"
+                           :key="item.code"
+                           :label="item.name"
+                           :value="item.code"
+                        />
+                     </el-select>
                   </el-form-item>
                </el-col>
             </el-row>
@@ -316,6 +355,7 @@
 
 <script setup name="Activity">
 import { listActivity, getActivity, addActivity, updateActivity, delActivity, changeActivityStatus } from "@/api/core/activity"
+import { getProvinces, getCitiesByProvince, getDistrictsByCity } from "@/api/common/region"
 import { getToken } from "@/utils/auth"
 
 const { proxy } = getCurrentInstance()
@@ -336,12 +376,26 @@ const total = ref(0)
 const title = ref("")
 const detailData = ref({})
 
+// 省市区级联相关数据
+const provinceOptions = ref([])
+const cityQueryOptions = ref([])
+const cityFormOptions = ref([])
+const provinceNameMap = ref({})
+const cityNameMap = ref({})
+
 const data = reactive({
-  form: {},
+  form: {
+    provinceCode: undefined,
+    cityCode: undefined,
+    province: undefined,
+    city: undefined
+  },
   queryParams: {
     pageNum: 1,
     pageSize: 10,
     activityName: undefined,
+    provinceCode: undefined,
+    cityCode: undefined,
     province: undefined,
     city: undefined,
     status: undefined
@@ -350,7 +404,9 @@ const data = reactive({
     activityName: [{ required: true, message: "活动名称不能为空", trigger: "blur" }],
     activityTime: [{ required: true, message: "活动时间不能为空", trigger: "change" }],
     totalCapacity: [{ required: true, message: "总人数不能为空", trigger: "blur" }],
-    registrationFee: [{ required: true, message: "报名费用不能为空", trigger: "blur" }]
+    registrationFee: [{ required: true, message: "报名费用不能为空", trigger: "blur" }],
+    provinceCode: [{ required: true, message: "请选择省份", trigger: "change" }],
+    cityCode: [{ required: true, message: "请选择城市", trigger: "change" }]
   }
 })
 
@@ -358,12 +414,12 @@ const { queryParams, form, rules } = toRefs(data)
 
 /** 查询活动列表 */
 function getList() {
-  loading.value = true
-  listActivity(queryParams.value).then(response => {
-    activityList.value = response.data
-    total.value = response.total
-    loading.value = false
-  })
+   loading.value = true
+   listActivity(queryParams.value).then(response => {
+     activityList.value = response.data
+     total.value = response.total
+     loading.value = false
+   })
 }
 
 /** 格式化地址 */
@@ -373,6 +429,53 @@ function formatAddress(row) {
   if (row.city) parts.push(row.city)
   if (row.address) parts.push(row.address)
   return parts.join(' ') || '-'
+}
+
+/** 加载省份列表 */
+function loadProvinces() {
+  getProvinces().then(response => {
+    provinceOptions.value = response.data || []
+    // 构建省份名称映射
+    provinceOptions.value.forEach(item => {
+      provinceNameMap.value[item.code] = item.name
+    })
+  })
+}
+
+/** 查询区域省份选择变化 */
+function handleQueryProvinceChange(provinceCode) {
+  queryParams.value.cityCode = undefined
+  queryParams.value.city = undefined
+  queryParams.value.province = provinceNameMap.value[provinceCode]
+  if (provinceCode) {
+    getCitiesByProvince(provinceCode).then(response => {
+      cityQueryOptions.value = response.data || []
+    })
+  } else {
+    cityQueryOptions.value = []
+  }
+}
+
+/** 表单区域省份选择变化 */
+function handleFormProvinceChange(provinceCode) {
+  form.value.cityCode = undefined
+  form.value.city = undefined
+  form.value.province = provinceNameMap.value[provinceCode]
+  cityFormOptions.value = []
+  if (provinceCode) {
+    getCitiesByProvince(provinceCode).then(response => {
+      cityFormOptions.value = response.data || []
+      // 构建城市名称映射
+      cityFormOptions.value.forEach(item => {
+        cityNameMap.value[item.code] = item.name
+      })
+    })
+  }
+}
+
+/** 表单区域城市选择变化 */
+function handleFormCityChange(cityCode) {
+  form.value.city = cityNameMap.value[cityCode]
 }
 
 /** 取消按钮 */
@@ -390,6 +493,8 @@ function reset() {
     organizerName: undefined,
     organizerAvatar: undefined,
     activityTime: undefined,
+    provinceCode: undefined,
+    cityCode: undefined,
     province: undefined,
     city: undefined,
     address: undefined,
@@ -400,6 +505,7 @@ function reset() {
     status: '0',
     remark: undefined
   }
+  cityFormOptions.value = []
   proxy.resetForm("activityRef")
 }
 
@@ -435,6 +541,24 @@ function handleUpdate(row) {
   const id = row.id || ids.value
   getActivity(id).then(response => {
     form.value = response.data
+    // 根据省份名称查找省份代码
+    const provinceItem = provinceOptions.value.find(item => item.name === form.value.province)
+    if (provinceItem) {
+      form.value.provinceCode = provinceItem.code
+      // 加载城市列表
+      getCitiesByProvince(provinceItem.code).then(cityRes => {
+        cityFormOptions.value = cityRes.data || []
+        // 构建城市名称映射
+        cityFormOptions.value.forEach(item => {
+          cityNameMap.value[item.code] = item.name
+        })
+        // 根据城市名称查找城市代码
+        const cityItem = cityFormOptions.value.find(item => item.name === form.value.city)
+        if (cityItem) {
+          form.value.cityCode = cityItem.code
+        }
+      })
+    }
     open.value = true
     title.value = "修改活动"
   })
@@ -561,6 +685,8 @@ function beforeAvatarUpload(file) {
   return true
 }
 
+// 初始化加载省份列表
+loadProvinces()
 getList()
 </script>
 

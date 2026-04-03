@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CoreChinaRegionMapper">
+
+	<resultMap type="CoreChinaRegion" id="CoreChinaRegionResult">
+		<id     property="id"                column="id"                  />
+		<result property="code"              column="code"                />
+		<result property="name"              column="name"                />
+		<result property="parentCode"        column="parent_code"         />
+		<result property="level"             column="level"               />
+		<result property="pinyin"            column="pinyin"              />
+		<result property="fullName"          column="full_name"           />
+		<result property="longitude"         column="longitude"           />
+		<result property="latitude"          column="latitude"            />
+		<result property="sortOrder"         column="sort_order"          />
+		<result property="status"            column="status"              />
+		<result property="createTime"        column="create_time"         />
+		<result property="updateTime"        column="update_time"         />
+	</resultMap>
+
+	<sql id="selectCoreChinaRegionVo">
+        select id, code, name, parent_code, level, pinyin, full_name,
+               longitude, latitude, sort_order, status, create_time, update_time
+		from core_china_region
+    </sql>
+
+	<select id="selectCoreChinaRegionList" parameterType="CoreChinaRegion" resultMap="CoreChinaRegionResult">
+		<include refid="selectCoreChinaRegionVo"/>
+		<where>
+			<if test="code != null and code != ''">
+				AND code = #{code}
+			</if>
+			<if test="name != null and name != ''">
+				AND name like concat('%', #{name}, '%')
+			</if>
+			<if test="parentCode != null and parentCode != ''">
+				AND parent_code = #{parentCode}
+			</if>
+			<if test="level != null">
+				AND level = #{level}
+			</if>
+			<if test="pinyin != null and pinyin != ''">
+				AND pinyin like concat('%', #{pinyin}, '%')
+			</if>
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+		</where>
+		order by sort_order asc, code asc
+	</select>
+
+	<select id="selectCoreChinaRegionByParentCode" parameterType="String" resultMap="CoreChinaRegionResult">
+		<include refid="selectCoreChinaRegionVo"/>
+		where parent_code = #{parentCode}
+		order by sort_order asc, code asc
+	</select>
+
+	<select id="selectCoreChinaRegionByLevel" parameterType="Integer" resultMap="CoreChinaRegionResult">
+		<include refid="selectCoreChinaRegionVo"/>
+		where level = #{level}
+		order by sort_order asc, code asc
+	</select>
+
+	<select id="selectCoreChinaRegionByCode" parameterType="String" resultMap="CoreChinaRegionResult">
+		<include refid="selectCoreChinaRegionVo"/>
+		where code = #{code}
+	</select>
+
+	<select id="selectAllProvinces" resultMap="CoreChinaRegionResult">
+		<include refid="selectCoreChinaRegionVo"/>
+		where level = 1
+		order by sort_order asc, code asc
+	</select>
+
+	<select id="selectCitiesByProvinceCode" parameterType="String" resultMap="CoreChinaRegionResult">
+		<include refid="selectCoreChinaRegionVo"/>
+		where parent_code = #{provinceCode} and level = 2
+		order by sort_order asc, code asc
+	</select>
+
+	<select id="selectDistrictsByCityCode" parameterType="String" resultMap="CoreChinaRegionResult">
+		<include refid="selectCoreChinaRegionVo"/>
+		where parent_code = #{cityCode} and level = 3
+		order by sort_order asc, code asc
+	</select>
+
+</mapper>
