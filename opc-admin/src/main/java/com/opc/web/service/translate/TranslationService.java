@@ -1,4 +1,4 @@
-package com.opc.common.utils.translate;
+package com.opc.web.service.translate;
 
 /**
  * 翻译服务接口
@@ -35,4 +35,12 @@ public interface TranslationService {
      * @return 翻译后的文本数组
      */
     String[] translate(String[] texts, String sourceLang, String targetLang);
+
+    /**
+     * 自动识别语言并翻译成中文
+     *
+     * @param text 待翻译文本
+     * @return 中文翻译结果
+     */
+    String translateToChinese(String text);
 }

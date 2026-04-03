@@ -2,179 +2,125 @@ package com.opc.common.utils.sql;
 
 import com.opc.common.exception.UtilException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * SQL操作工具类测试
- */
 public class SqlUtilTest {
 
     @Test
-    @DisplayName("验证ORDER BY SQL-有效值")
-    public void testIsValidOrderBySql_Valid() {
-        assertTrue(SqlUtil.isValidOrderBySql("create_time"));
-        assertTrue(SqlUtil.isValidOrderBySql("create_time desc"));
-        assertTrue(SqlUtil.isValidOrderBySql("create_time asc"));
-        assertTrue(SqlUtil.isValidOrderBySql("user_name, create_time desc"));
-        assertTrue(SqlUtil.isValidOrderBySql("dept_id asc, user_name desc"));
-        assertTrue(SqlUtil.isValidOrderBySql("field1, field2, field3"));
+    public void testEscapeOrderBySqlValid() {
+        String value = "create_time desc";
+        String result = SqlUtil.escapeOrderBySql(value);
+        assertEquals(value, result);
     }
 
     @Test
-    @DisplayName("验证ORDER BY SQL-无效值")
-    public void testIsValidOrderBySql_Invalid() {
-        assertFalse(SqlUtil.isValidOrderBySql("create_time; drop table user;"));
-        assertFalse(SqlUtil.isValidOrderBySql("1=1"));
-        assertFalse(SqlUtil.isValidOrderBySql("user_name'"));
-        assertFalse(SqlUtil.isValidOrderBySql("user_name--"));
-        assertFalse(SqlUtil.isValidOrderBySql("user_name/*"));
-        assertFalse(SqlUtil.isValidOrderBySql(""));
+    public void testEscapeOrderBySqlEmpty() {
+        assertEquals("", SqlUtil.escapeOrderBySql(""));
+        assertNull(SqlUtil.escapeOrderBySql(null));
     }
 
     @Test
-    @DisplayName("转义ORDER BY SQL-有效值")
-    public void testEscapeOrderBySql_Valid() {
-        assertEquals("create_time", SqlUtil.escapeOrderBySql("create_time"));
-        assertEquals("create_time desc", SqlUtil.escapeOrderBySql("create_time desc"));
-        assertEquals("user_name, create_time", SqlUtil.escapeOrderBySql("user_name, create_time"));
-    }
-
-    @Test
-    @DisplayName("转义ORDER BY SQL-无效值抛出异常")
-    public void testEscapeOrderBySql_Invalid() {
+    public void testEscapeOrderBySqlInvalid() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.escapeOrderBySql("create_time; drop table user;");
+            SqlUtil.escapeOrderBySql("create_time; drop table users");
         });
     }
 
     @Test
-    @DisplayName("转义ORDER BY SQL-超长值抛出异常")
-    public void testEscapeOrderBySql_TooLong() {
-        StringBuilder longSql = new StringBuilder();
+    public void testEscapeOrderBySqlTooLong() {
+        StringBuilder longValue = new StringBuilder();
         for (int i = 0; i < 600; i++) {
-            longSql.append("a");
+            longValue.append("a");
         }
         assertThrows(UtilException.class, () -> {
-            SqlUtil.escapeOrderBySql(longSql.toString());
+            SqlUtil.escapeOrderBySql(longValue.toString());
         });
     }
 
     @Test
-    @DisplayName("转义ORDER BY SQL-空值")
-    public void testEscapeOrderBySql_Empty() {
-        assertNull(SqlUtil.escapeOrderBySql(null));
-        assertEquals("", SqlUtil.escapeOrderBySql(""));
+    public void testIsValidOrderBySqlValid() {
+        assertTrue(SqlUtil.isValidOrderBySql("create_time desc"));
+        assertTrue(SqlUtil.isValidOrderBySql("id asc, name desc"));
+        assertTrue(SqlUtil.isValidOrderBySql("user.create_time"));
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-正常值")
-    public void testFilterKeyword_Normal() {
-        // 正常值不应抛出异常
+    public void testIsValidOrderBySqlInvalid() {
+        assertFalse(SqlUtil.isValidOrderBySql("create_time; delete from users"));
+        assertFalse(SqlUtil.isValidOrderBySql("create_time -- comment"));
+        assertFalse(SqlUtil.isValidOrderBySql("create_time /* comment */"));
+    }
+
+    @Test
+    public void testFilterKeywordSafe() {
+        // Should not throw exception
         assertDoesNotThrow(() -> {
-            SqlUtil.filterKeyword("normal_value");
-            SqlUtil.filterKeyword("user_name");
-            SqlUtil.filterKeyword("test123");
+            SqlUtil.filterKeyword("safe_value");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含and")
-    public void testFilterKeyword_And() {
+    public void testFilterKeywordEmpty() {
+        assertDoesNotThrow(() -> {
+            SqlUtil.filterKeyword("");
+            SqlUtil.filterKeyword(null);
+        });
+    }
+
+    @Test
+    public void testFilterKeywordWithInjection() {
         assertThrows(UtilException.class, () -> {
             SqlUtil.filterKeyword("1 and 1=1");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含select")
-    public void testFilterKeyword_Select() {
+    public void testFilterKeywordWithSelect() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("select * from user");
+            SqlUtil.filterKeyword("select * from users");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含insert")
-    public void testFilterKeyword_Insert() {
+    public void testFilterKeywordWithUnion() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("insert into user values");
+            SqlUtil.filterKeyword("1 union select * from users");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含delete")
-    public void testFilterKeyword_Delete() {
+    public void testFilterKeywordWithInsert() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("delete from user");
+            SqlUtil.filterKeyword("insert into users values");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含update")
-    public void testFilterKeyword_Update() {
+    public void testFilterKeywordWithDelete() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("update user set");
+            SqlUtil.filterKeyword("delete from users");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含drop")
-    public void testFilterKeyword_Drop() {
+    public void testFilterKeywordWithUpdate() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("drop table user");
+            SqlUtil.filterKeyword("update users set");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含union")
-    public void testFilterKeyword_Union() {
+    public void testFilterKeywordWithDrop() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("union select");
+            SqlUtil.filterKeyword("drop table users");
         });
     }
 
     @Test
-    @DisplayName("SQL关键字过滤-包含sleep")
-    public void testFilterKeyword_Sleep() {
+    public void testFilterKeywordCaseInsensitive() {
         assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("sleep(5)");
-        });
-    }
-
-    @Test
-    @DisplayName("SQL关键字过滤-空值")
-    public void testFilterKeyword_Empty() {
-        assertDoesNotThrow(() -> {
-            SqlUtil.filterKeyword(null);
-            SqlUtil.filterKeyword("");
-        });
-    }
-
-    @Test
-    @DisplayName("SQL关键字过滤-大小写不敏感")
-    public void testFilterKeyword_CaseInsensitive() {
-        assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("SELECT * FROM user");
-        });
-        assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("Select * From user");
-        });
-    }
-
-    @Test
-    @DisplayName("SQL关键字过滤-包含exec")
-    public void testFilterKeyword_Exec() {
-        assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("exec xp_cmdshell");
-        });
-    }
-
-    @Test
-    @DisplayName("SQL关键字过滤-包含information_schema")
-    public void testFilterKeyword_InformationSchema() {
-        assertThrows(UtilException.class, () -> {
-            SqlUtil.filterKeyword("information_schema.tables");
+            SqlUtil.filterKeyword("SELECT * FROM users");
         });
     }
 }

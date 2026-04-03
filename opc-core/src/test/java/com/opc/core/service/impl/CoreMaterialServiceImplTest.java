@@ -2,8 +2,11 @@ package com.opc.core.service.impl;
 
 import com.opc.core.domain.CoreMaterial;
 import com.opc.core.domain.CoreTag;
+import com.opc.core.domain.CoreTag2;
 import com.opc.core.mapper.CoreMaterialMapper;
+import com.opc.core.mapper.CoreMaterialTag2Mapper;
 import com.opc.core.mapper.CoreMaterialTagMapper;
+import com.opc.core.mapper.CoreTag2Mapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +28,12 @@ public class CoreMaterialServiceImplTest
 
     @Mock
     private CoreMaterialTagMapper materialTagMapper;
+
+    @Mock
+    private CoreMaterialTag2Mapper materialTag2Mapper;
+
+    @Mock
+    private CoreTag2Mapper tag2Mapper;
 
     @InjectMocks
     private CoreMaterialServiceImpl materialService;
@@ -57,6 +66,7 @@ public class CoreMaterialServiceImplTest
 
         when(materialMapper.selectMaterialById(1L)).thenReturn(material);
         when(materialTagMapper.selectTagsByMaterialId(1L)).thenReturn(Arrays.asList());
+        when(materialTag2Mapper.selectTags2ByMaterialId(1L)).thenReturn(Arrays.asList());
 
         CoreMaterial result = materialService.selectMaterialById(1L);
 
@@ -76,8 +86,13 @@ public class CoreMaterialServiceImplTest
         tag.setId(1L);
         tag.setTagName("Test Tag");
 
+        CoreTag2 tag2 = new CoreTag2();
+        tag2.setId(1L);
+        tag2.setTagName("Test Tag 2");
+
         when(materialMapper.selectMaterialById(1L)).thenReturn(material);
         when(materialTagMapper.selectTagsByMaterialId(1L)).thenReturn(Arrays.asList(tag));
+        when(materialTag2Mapper.selectTags2ByMaterialId(1L)).thenReturn(Arrays.asList(tag2));
 
         CoreMaterial result = materialService.selectMaterialById(1L);
 
@@ -113,6 +128,7 @@ public class CoreMaterialServiceImplTest
         when(materialMapper.insertMaterial(any(CoreMaterial.class))).thenReturn(1);
         when(materialTagMapper.deleteMaterialTagByMaterialId(1L)).thenReturn(1);
         when(materialMapper.insertMaterialTag(anyLong(), anyLong())).thenReturn(1);
+        when(tag2Mapper.selectAllActiveTags()).thenReturn(Arrays.asList());
 
         int result = materialService.insertMaterial(material);
 
@@ -129,6 +145,7 @@ public class CoreMaterialServiceImplTest
         material.setTitle("Updated Material");
 
         when(materialMapper.updateMaterial(any(CoreMaterial.class))).thenReturn(1);
+        when(tag2Mapper.selectAllActiveTags()).thenReturn(Arrays.asList());
 
         int result = materialService.updateMaterial(material);
 
@@ -146,6 +163,7 @@ public class CoreMaterialServiceImplTest
         when(materialMapper.updateMaterial(any(CoreMaterial.class))).thenReturn(1);
         when(materialTagMapper.deleteMaterialTagByMaterialId(1L)).thenReturn(1);
         when(materialMapper.insertMaterialTag(anyLong(), anyLong())).thenReturn(1);
+        when(tag2Mapper.selectAllActiveTags()).thenReturn(Arrays.asList());
 
         int result = materialService.updateMaterial(material);
 

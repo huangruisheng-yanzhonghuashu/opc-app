@@ -1,0 +1,23 @@
+# Ollama 翻译服务配置
+ollama:
+  translation:
+    # Ollama 服务地址
+    url: http://192.168.0.109:11434
+    # 使用的模型
+    model: translategemma:4b
+    # 请求超时时间（秒）- 大模型推理较慢，设置较长超时
+    request-timeout-seconds: 120
+    # 温度参数（0-1，越低越保守）
+    temperature: 0.3
+
+# DeepLX 翻译服务配置（保留作为备用）
+deeplx:
+  # DeepLX 服务地址（只需要基础地址，代码会自动追加 /translate 路径）
+  # 示例：http://localhost:1188 或 https://your-domain.com
+  url: https://vps-sg-aws-opc.43046721.xyz/translate
+  # 访问令牌（可选，如果 DeepLX 服务配置了访问控制）
+  token:
+  # 连接超时时间（毫秒）
+  connect-timeout: 5000
+  # 读取超时时间（毫秒）
+  read-timeout: 10000

@@ -120,6 +120,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Ollama4j 客户端 -->
+        <dependency>
+            <groupId>io.github.ollama4j</groupId>
+            <artifactId>ollama4j</artifactId>
+            <version>1.1.6</version>
+        </dependency>
+
     </dependencies>
 
 </project>

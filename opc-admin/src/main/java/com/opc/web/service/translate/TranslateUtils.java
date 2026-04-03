@@ -1,4 +1,4 @@
-package com.opc.common.utils.translate;
+package com.opc.web.service.translate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -80,5 +80,18 @@ public class TranslateUtils {
      */
     public static String toJapanese(String text) {
         return translate(text, LanguageCode.JAPANESE);
+    }
+
+    /**
+     * 自动识别语言并翻译成中文
+     *
+     * @param text 待翻译文本
+     * @return 中文翻译结果
+     */
+    public static String autoTranslateToChinese(String text) {
+        if (staticTranslationService == null) {
+            return text;
+        }
+        return staticTranslationService.translateToChinese(text);
     }
 }

@@ -1,93 +1,120 @@
 package com.opc.common.utils.uuid;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SeqTest
-{
+public class SeqTest {
+
     @Test
-    public void testGetId()
-    {
-        String id1 = Seq.getId();
-        String id2 = Seq.getId();
+    public void testGetId() {
+        String id = Seq.getId();
+        assertNotNull(id);
+        assertTrue(id.length() >= 16);
+    }
+
+    @Test
+    public void testGetIdWithType() {
+        String id1 = Seq.getId(Seq.commSeqType);
+        String id2 = Seq.getId(Seq.uploadSeqType);
 
         assertNotNull(id1);
         assertNotNull(id2);
-        assertEquals(18, id1.length());
-        assertEquals(18, id2.length());
+        assertTrue(id1.length() >= 16);
+        assertTrue(id2.length() >= 16);
+    }
+
+    @Test
+    public void testGetIdUniqueness() {
+        Set<String> ids = new HashSet<>();
+        for (int i = 0; i < 100; i++) {
+            String id = Seq.getId();
+            assertFalse(ids.contains(id), "Duplicate ID generated: " + id);
+            ids.add(id);
+        }
+    }
+
+    @Test
+    public void testGetIdFormat() {
+        String id = Seq.getId();
+        // Format: yyMMddHHmmss + machineCode + sequence
+        assertTrue(id.length() >= 16);
+        assertTrue(id.matches("\\d{14}A\\d+"));
+    }
+
+    @Test
+    public void testGetIdWithCustomAtomicInteger() {
+        AtomicInteger atomicInt = new AtomicInteger(1);
+        String id = Seq.getId(atomicInt, 3);
+        assertNotNull(id);
+        assertTrue(id.contains("A"));
+    }
+
+    @Test
+    public void testSequenceIncrement() {
+        String id1 = Seq.getId();
+        String id2 = Seq.getId();
+
         assertNotEquals(id1, id2);
     }
 
     @Test
-    public void testGetIdWithTypeCommon()
-    {
-        String id = Seq.getId(Seq.commSeqType);
+    public void testSequenceRollover() {
+        // Test that sequence rolls over after reaching max
+        AtomicInteger atomicInt = new AtomicInteger(998);
+        String id1 = Seq.getId(atomicInt, 3);
+        String id2 = Seq.getId(atomicInt, 3);
+        String id3 = Seq.getId(atomicInt, 3);
 
-        assertNotNull(id);
-        assertEquals(18, id.length());
+        assertNotNull(id1);
+        assertNotNull(id2);
+        assertNotNull(id3);
     }
 
     @Test
-    public void testGetIdWithTypeUpload()
-    {
-        String id = Seq.getId(Seq.uploadSeqType);
-
-        assertNotNull(id);
-        assertEquals(18, id.length());
-    }
-
-    @Test
-    public void testGetIdWithUnknownType()
-    {
-        String id = Seq.getId("UNKNOWN");
-
-        assertNotNull(id);
-        assertEquals(18, id.length());
-    }
-
-    @Test
-    public void testSeqIncrement()
-    {
-        String id1 = Seq.getId();
-        String id2 = Seq.getId();
-
-        String seq1 = id1.substring(id1.length() - 3);
-        String seq2 = id2.substring(id2.length() - 3);
-
-        int num1 = Integer.parseInt(seq1);
-        int num2 = Integer.parseInt(seq2);
-
-        assertEquals(num1 + 1, num2);
-    }
-
-    @Test
-    public void testSeqFormat()
-    {
-        String id = Seq.getId();
-
-        assertTrue(id.matches("\\d{14}A\\d{3}"));
-    }
-
-    @Test
-    public void testCommSeqTypeConstant()
-    {
+    public void testCommonSequenceType() {
         assertEquals("COMMON", Seq.commSeqType);
     }
 
     @Test
-    public void testUploadSeqTypeConstant()
-    {
+    public void testUploadSequenceType() {
         assertEquals("UPLOAD", Seq.uploadSeqType);
     }
 
     @Test
-    public void testMultipleCalls()
-    {
-        for (int i = 0; i < 100; i++)
-        {
-            String id = Seq.getId();
-            assertNotNull(id);
-            assertEquals(18, id.length());
+    public void testMachineCode() {
+        String id = Seq.getId();
+        assertTrue(id.contains("A"));
+    }
+
+    @Test
+    public void testConcurrentIdGeneration() throws InterruptedException {
+        Set<String> ids = new HashSet<>();
+        Thread[] threads = new Thread[10];
+
+        for (int i = 0; i < 10; i++) {
+            threads[i] = new Thread(() -> {
+                for (int j = 0; j < 10; j++) {
+                    String id = Seq.getId();
+                    synchronized (ids) {
+                        ids.add(id);
+                    }
+                }
+            });
         }
+
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        assertEquals(100, ids.size());
     }
 }

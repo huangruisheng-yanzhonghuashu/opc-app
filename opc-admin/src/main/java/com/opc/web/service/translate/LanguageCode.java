@@ -1,4 +1,4 @@
-package com.opc.common.utils.translate;
+package com.opc.web.service.translate;
 
 /**
  * 支持的语言代码常量

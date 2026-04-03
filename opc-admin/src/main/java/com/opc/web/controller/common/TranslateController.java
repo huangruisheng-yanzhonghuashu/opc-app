@@ -2,8 +2,8 @@ package com.opc.web.controller.common;
 
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
-import com.opc.common.utils.translate.LanguageCode;
-import com.opc.common.utils.translate.TranslationService;
+import com.opc.web.service.translate.LanguageCode;
+import com.opc.web.service.translate.TranslationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

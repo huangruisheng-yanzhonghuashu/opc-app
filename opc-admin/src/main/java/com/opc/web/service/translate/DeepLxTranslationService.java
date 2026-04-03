@@ -1,4 +1,4 @@
-package com.opc.common.utils.translate;
+package com.opc.web.service.translate;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
@@ -125,6 +125,17 @@ public class DeepLxTranslationService implements TranslationService {
             results[i] = translate(texts[i], sourceLang, targetLang);
         }
         return results;
+    }
+
+    /**
+     * 自动识别语言并翻译成中文
+     *
+     * @param text 待翻译文本
+     * @return 中文翻译结果
+     */
+    @Override
+    public String translateToChinese(String text) {
+        return translate(text, "auto", LanguageCode.CHINESE_SIMPLIFIED);
     }
 
     /**

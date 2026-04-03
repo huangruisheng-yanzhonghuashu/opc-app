@@ -1,4 +1,4 @@
-package com.opc.common.utils.translate;
+package com.opc.web.service.translate;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

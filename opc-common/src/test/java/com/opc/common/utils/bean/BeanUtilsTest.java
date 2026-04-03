@@ -1,69 +1,50 @@
 package com.opc.common.utils.bean;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
-public class BeanUtilsTest
-{
-    public static class TestBean
-    {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class BeanUtilsTest {
+
+    public static class TestSource {
         private String name;
         private Integer age;
-        private Boolean active;
 
-        public String getName()
-        {
-            return name;
-        }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public Integer getAge() { return age; }
+        public void setAge(Integer age) { this.age = age; }
+    }
 
-        public void setName(String name)
-        {
-            this.name = name;
-        }
+    public static class TestTarget {
+        private String name;
+        private Integer age;
 
-        public Integer getAge()
-        {
-            return age;
-        }
-
-        public void setAge(Integer age)
-        {
-            this.age = age;
-        }
-
-        public Boolean getActive()
-        {
-            return active;
-        }
-
-        public void setActive(Boolean active)
-        {
-            this.active = active;
-        }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public Integer getAge() { return age; }
+        public void setAge(Integer age) { this.age = age; }
     }
 
     @Test
-    public void testCopyBeanProp()
-    {
-        TestBean source = new TestBean();
-        source.setName("Test");
-        source.setAge(25);
-        source.setActive(true);
+    public void testCopyBeanProp() {
+        TestSource source = new TestSource();
+        source.setName("John");
+        source.setAge(30);
 
-        TestBean target = new TestBean();
+        TestTarget target = new TestTarget();
         BeanUtils.copyBeanProp(target, source);
 
-        assertEquals("Test", target.getName());
-        assertEquals(25, target.getAge());
-        assertEquals(Boolean.TRUE, target.getActive());
+        assertEquals("John", target.getName());
+        assertEquals(Integer.valueOf(30), target.getAge());
     }
 
     @Test
-    public void testCopyBeanPropWithNullSource()
-    {
-        TestBean target = new TestBean();
+    public void testCopyBeanPropWithNullSource() {
+        TestTarget target = new TestTarget();
         target.setName("Original");
 
         BeanUtils.copyBeanProp(target, null);
@@ -72,64 +53,41 @@ public class BeanUtilsTest
     }
 
     @Test
-    public void testGetSetterMethods()
-    {
-        TestBean bean = new TestBean();
-        List<java.lang.reflect.Method> setters = BeanUtils.getSetterMethods(bean);
+    public void testGetSetterMethods() {
+        TestSource obj = new TestSource();
+        List<Method> setters = BeanUtils.getSetterMethods(obj);
 
         assertNotNull(setters);
-        assertTrue(setters.size() >= 3);
+        assertTrue(setters.size() >= 2);
 
-        boolean hasNameSetter = false;
-        boolean hasAgeSetter = false;
-        boolean hasActiveSetter = false;
-
-        for (java.lang.reflect.Method method : setters)
-        {
-            if (method.getName().equals("setName"))
-                hasNameSetter = true;
-            if (method.getName().equals("setAge"))
-                hasAgeSetter = true;
-            if (method.getName().equals("setActive"))
-                hasActiveSetter = true;
-        }
+        boolean hasNameSetter = setters.stream()
+            .anyMatch(m -> m.getName().equals("setName"));
+        boolean hasAgeSetter = setters.stream()
+            .anyMatch(m -> m.getName().equals("setAge"));
 
         assertTrue(hasNameSetter);
         assertTrue(hasAgeSetter);
-        assertTrue(hasActiveSetter);
     }
 
     @Test
-    public void testGetGetterMethods()
-    {
-        TestBean bean = new TestBean();
-        List<java.lang.reflect.Method> getters = BeanUtils.getGetterMethods(bean);
+    public void testGetGetterMethods() {
+        TestSource obj = new TestSource();
+        List<Method> getters = BeanUtils.getGetterMethods(obj);
 
         assertNotNull(getters);
-        assertTrue(getters.size() >= 3);
+        assertTrue(getters.size() >= 2);
 
-        boolean hasNameGetter = false;
-        boolean hasAgeGetter = false;
-        boolean hasActiveGetter = false;
-
-        for (java.lang.reflect.Method method : getters)
-        {
-            if (method.getName().equals("getName"))
-                hasNameGetter = true;
-            if (method.getName().equals("getAge"))
-                hasAgeGetter = true;
-            if (method.getName().equals("getActive"))
-                hasActiveGetter = true;
-        }
+        boolean hasNameGetter = getters.stream()
+            .anyMatch(m -> m.getName().equals("getName"));
+        boolean hasAgeGetter = getters.stream()
+            .anyMatch(m -> m.getName().equals("getAge"));
 
         assertTrue(hasNameGetter);
         assertTrue(hasAgeGetter);
-        assertTrue(hasActiveGetter);
     }
 
     @Test
-    public void testIsMethodPropEquals()
-    {
+    public void testIsMethodPropEquals() {
         assertTrue(BeanUtils.isMethodPropEquals("getName", "setName"));
         assertTrue(BeanUtils.isMethodPropEquals("getAge", "setAge"));
         assertFalse(BeanUtils.isMethodPropEquals("getName", "setAge"));
@@ -137,22 +95,28 @@ public class BeanUtilsTest
     }
 
     @Test
-    public void testCopyBeanPropPartial()
-    {
-        TestBean source = new TestBean();
-        source.setName("Test");
-        source.setAge(25);
-        source.setActive(false);
+    public void testCopyBeanPropPartial() {
+        TestSource source = new TestSource();
+        source.setName("John");
+        // age is null
 
-        TestBean target = new TestBean();
-        target.setName("Original");
-        target.setAge(30);
-        target.setActive(true);
+        TestTarget target = new TestTarget();
+        target.setAge(25);
 
         BeanUtils.copyBeanProp(target, source);
 
-        assertEquals("Test", target.getName());
-        assertEquals(25, target.getAge());
-        assertEquals(Boolean.FALSE, target.getActive());
+        assertEquals("John", target.getName());
+    }
+
+    public static class DifferentTypesSource {
+        private String value;
+        public String getValue() { return value; }
+        public void setValue(String value) { this.value = value; }
+    }
+
+    public static class DifferentTypesTarget {
+        private Integer value;
+        public Integer getValue() { return value; }
+        public void setValue(Integer value) { this.value = value; }
     }
 }

@@ -58,7 +58,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: druid,ai,twitter,opencli
+    active: druid,ai,twitter,opencli,ollama
   # 文件上传
   servlet:
     multipart:
@@ -205,14 +205,4 @@ xss:
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
 
-# DeepLX 翻译服务配置
-deeplx:
-  # DeepLX 服务地址（只需要基础地址，代码会自动追加 /translate 路径）
-  # 示例：http://localhost:1188 或 https://your-domain.com
-  url: https://vps-sg-aws-opc.43046721.xyz/translate
-  # 访问令牌（可选，如果 DeepLX 服务配置了访问控制）
-  token:
-  # 连接超时时间（毫秒）
-  connect-timeout: 5000
-  # 读取超时时间（毫秒）
-  read-timeout: 10000
+
