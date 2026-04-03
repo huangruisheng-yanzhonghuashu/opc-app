@@ -1149,6 +1149,14 @@ function handleUpdate(row) {
   getTagOptions()
   getMaterial(id).then(response => {
     form.value = response.data
+    // 确保materialType有默认值（兼容旧数据）
+    if (!form.value.materialType) {
+      form.value.materialType = 'post'
+    }
+    // 确保issueNo有默认值
+    if (form.value.issueNo === undefined || form.value.issueNo === null) {
+      form.value.issueNo = 0
+    }
     // 将标签转换为id数组
     if (form.value.tags && form.value.tags.length > 0) {
       form.value.tagIds = form.value.tags.map(tag => tag.id)
