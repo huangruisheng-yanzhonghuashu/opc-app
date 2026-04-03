@@ -189,9 +189,9 @@ public class CoreCollectSourceController extends BaseController {
      */
     private AjaxResult handleYoutubeFetch(String sourceUrl, String keyword) {
         // 如果是 YouTube 视频链接，直接下载该视频
-        if (sourceUrl != null && (sourceUrl.contains("youtube.com") || sourceUrl.contains("youtu.be"))) {
-            return collectSourceFetchService.fetchYoutubeVideoByUrl(sourceUrl);
-        }
+        //if (sourceUrl != null && (sourceUrl.contains("youtube.com") || sourceUrl.contains("youtu.be"))) {
+            //return collectSourceFetchService.fetchYoutubeVideoByUrl(sourceUrl);
+        //}
         // 否则使用关键词搜索
         return collectSourceFetchService.fetchYoutubeData(keyword);
     }

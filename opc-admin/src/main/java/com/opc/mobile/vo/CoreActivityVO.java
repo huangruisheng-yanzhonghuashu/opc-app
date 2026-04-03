@@ -3,7 +3,7 @@ package com.opc.mobile.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.util.Date;
 
 /**
  * 活动 VO
@@ -23,22 +23,22 @@ public class CoreActivityVO
     @Schema(description = "活动名称")
     private String activityName;
 
-    /** 活动海报URL */
-    @Schema(description = "活动海报URL")
+    /** 活动海报 */
+    @Schema(description = "活动海报")
     private String posterUrl;
 
-    /** 活动组织者名称 */
-    @Schema(description = "活动组织者名称")
+    /** 组织者名称 */
+    @Schema(description = "组织者名称")
     private String organizerName;
 
-    /** 活动组织者头像URL */
-    @Schema(description = "活动组织者头像URL")
+    /** 组织者头像 */
+    @Schema(description = "组织者头像")
     private String organizerAvatar;
 
     /** 活动时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "活动时间")
-    private Instant activityTime;
+    private Date activityTime;
 
     /** 省份 */
     @Schema(description = "省份")
@@ -52,16 +52,16 @@ public class CoreActivityVO
     @Schema(description = "详细地址")
     private String address;
 
-    /** 活动总人数 */
-    @Schema(description = "活动总人数")
+    /** 总人数 */
+    @Schema(description = "总人数")
     private Integer totalCapacity;
 
     /** 已报名人数 */
     @Schema(description = "已报名人数")
     private Integer registeredCount;
 
-    /** 活动报名费用 */
-    @Schema(description = "活动报名费用")
+    /** 报名费用 */
+    @Schema(description = "报名费用")
     private BigDecimal registrationFee;
 
     /** 活动详情 */
@@ -75,7 +75,16 @@ public class CoreActivityVO
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "创建时间")
-    private Instant createTime;
+    private Date createTime;
+
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "更新时间")
+    private Date updateTime;
+
+    /** 备注 */
+    @Schema(description = "备注")
+    private String remark;
 
     public Long getId()
     {
@@ -127,12 +136,12 @@ public class CoreActivityVO
         this.organizerAvatar = organizerAvatar;
     }
 
-    public Instant getActivityTime()
+    public Date getActivityTime()
     {
         return activityTime;
     }
 
-    public void setActivityTime(Instant activityTime)
+    public void setActivityTime(Date activityTime)
     {
         this.activityTime = activityTime;
     }
@@ -217,13 +226,33 @@ public class CoreActivityVO
         this.status = status;
     }
 
-    public Instant getCreateTime()
+    public Date getCreateTime()
     {
         return createTime;
     }
 
-    public void setCreateTime(Instant createTime)
+    public void setCreateTime(Date createTime)
     {
         this.createTime = createTime;
+    }
+
+    public Date getUpdateTime()
+    {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime)
+    {
+        this.updateTime = updateTime;
+    }
+
+    public String getRemark()
+    {
+        return remark;
+    }
+
+    public void setRemark(String remark)
+    {
+        this.remark = remark;
     }
 }

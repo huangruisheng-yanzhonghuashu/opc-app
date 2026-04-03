@@ -5,6 +5,7 @@ ollama:
     url: http://192.168.0.109:11434
     # 使用的模型
     model: translategemma:4b
+    #model: gemma3:4b
     # 请求超时时间（秒）- 大模型推理较慢，设置较长超时
     request-timeout-seconds: 120
     # 温度参数（0-1，越低越保守）

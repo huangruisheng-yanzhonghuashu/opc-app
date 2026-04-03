@@ -86,12 +86,11 @@ public class CollectSourceFetchService {
     }
 
     /**
-     * 根据视频 URL 导入 YouTube 视频
-     *
-     * @param videoUrl YouTube 视频 URL
-     * @return 导入结果
+     * 根据视频 URL 导入单个 YouTube 视频
+     * @param keyword
+     * @return
      */
-    public AjaxResult fetchYoutubeVideoByUrl(String videoUrl) {
-        return youtubeFetchService.fetchYoutubeVideoByUrl(videoUrl);
+    public AjaxResult fetchYoutubeVideoByUrl(String keyword) {
+        return youtubeFetchService.fetchYoutubeData(keyword);
     }
 }
