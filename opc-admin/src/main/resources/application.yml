@@ -42,6 +42,9 @@ logging:
   level:
     com.opc: debug
     org.springframework: warn
+  pattern:
+    # 日志时间格式使用北京时间
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Shanghai
 
 # 用户配置
 user:
@@ -53,6 +56,10 @@ user:
 
 # Spring配置
 spring:
+  # 时区配置 - 统一使用北京时间
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
   # 资源信息
   messages:
     # 国际化资源文件路径
