@@ -124,7 +124,7 @@ public class CoreCollectSourceController extends BaseController {
         return AjaxResult.success(list);
     }
 
-    @Operation(summary = "获取数据", description = "根据来源类型调用对应接口获取数据")
+    @Operation(summary = "获取数据", description = "根据来源类型调用对应接口获取数据（异步执行）")
     @Parameter(name = "id", description = "配置ID", required = true)
     @PreAuthorize("@ss.hasPermi('core:collect:query')")
     @Log(title = "采集信息源获取数据", businessType = BusinessType.OTHER)
@@ -149,16 +149,14 @@ public class CoreCollectSourceController extends BaseController {
             return AjaxResult.error("该来源类型暂且不支持：" + sourceType);
         }
 
-        switch (type) {
-            case TWITTER:
-                return handleTwitterFetch(sourceUrl, keyword);
-            case REDDIT:
-                return collectSourceFetchService.fetchRedditData(keyword);
-            case YOUTUBE:
-                return handleYoutubeFetch(sourceUrl, keyword);
-            default:
-                return AjaxResult.error("该来源类型暂且不支持：" + sourceType);
-        }
+        // 异步执行数据获取任务
+        collectSourceFetchService.fetchDataAsync(sourceType, sourceUrl, keyword);
+
+        // 立即返回提示信息
+        AjaxResult result = AjaxResult.success("数据正在后台同步中，稍后查看");
+        result.put("sourceType", sourceType);
+        result.put("keyword", keyword);
+        return result;
     }
 
     /**

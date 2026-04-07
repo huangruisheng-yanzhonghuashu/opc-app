@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.net.InetAddress;
@@ -16,6 +17,7 @@ import java.net.UnknownHostException;
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class }, scanBasePackages = { "com.opc" })
 @EnableScheduling
+@EnableAsync
 public class OpcApplication
 {
     // 颜色常量

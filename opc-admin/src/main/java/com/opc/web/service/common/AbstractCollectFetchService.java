@@ -71,9 +71,9 @@ public abstract class AbstractCollectFetchService {
                 builder.isWindows() ? "Windows" : "Unix",
                 proxyDebug);
 
-        // 调试：打印完整的命令列表
+        // 调试：打印完整的命令
         if (log.isDebugEnabled()) {
-            log.debug("ProcessBuilder 命令: {}", processBuilder.command());
+            log.debug("ProcessBuilder 命令: {}", String.join(" ", processBuilder.command()));
         }
 
         Process process = processBuilder.start();

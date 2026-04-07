@@ -215,7 +215,41 @@ public class OpenCliCommandBuilder {
      * @return 命令字符串
      */
     public String toCommandString() {
-        return String.join(" ", command);
+        StringBuilder cmdBuilder = new StringBuilder();
+        for (int i = 0; i < command.size(); i++) {
+            String arg = command.get(i);
+            if (i > 0) {
+                cmdBuilder.append(" ");
+            }
+            // 非 Windows 系统：路径、URL、包含空格或特殊字符的参数需要引号
+            if (!isWindows && shouldQuoteArg(arg)) {
+                cmdBuilder.append("\"").append(arg).append("\"");
+            } else {
+                cmdBuilder.append(arg);
+            }
+        }
+        return cmdBuilder.toString();
+    }
+
+    /**
+     * 判断参数是否需要引号包裹
+     * 适用于非 Windows 系统的命令行显示
+     */
+    private boolean shouldQuoteArg(String arg) {
+        // 路径（包含 / 或 \）
+        if (arg.contains("/") || arg.contains("\\")) {
+            return true;
+        }
+        // URL（包含 ://）
+        if (arg.contains("://")) {
+            return true;
+        }
+        // 包含空格或特殊字符
+        if (arg.contains(" ") || arg.contains("&") || arg.contains("|") ||
+            arg.contains("<") || arg.contains(">") || arg.contains("(") || arg.contains(")")) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -549,19 +583,109 @@ public class OpenCliCommandBuilder {
     // ==================== yt-dlp 方法 ====================
 
     /**
+     * 获取有效的 yt-dlp 可执行路径
+     * <p>
+     * Windows 系统返回 null（使用默认命令名 yt-dlp，依赖 PATH）
+     * Mac/Linux 返回配置的 yt-dlp 绝对路径
+     * </p>
+     *
+     * @param properties OpenCLI 配置属性
+     * @return Windows 返回 null，其他系统返回配置的路径
+     */
+    private static String getEffectiveYtDlpPath(OpenCliProperties properties) {
+        if (properties == null) {
+            return null;
+        }
+        String osName = System.getProperty("os.name").toLowerCase();
+        boolean isWindows = osName.contains("win");
+        // Windows 不需要使用 ytDlpPath，直接返回 null（使用 PATH 中的 yt-dlp）
+        if (isWindows) {
+            return null;
+        }
+        return properties.getYtDlpPath();
+    }
+
+    /**
      * 构建 yt-dlp 下载命令
+     * <p>
+     * Windows 系统：直接使用 yt-dlp
+     * 其他系统（Mac/Linux）：使用 cookies-from-browser chrome 选项
+     * </p>
      *
      * @param videoUrl 视频 URL
      * @return 命令构建器
      */
     public static OpenCliCommandBuilder buildYtDlpDownload(String videoUrl) {
-        return new OpenCliCommandBuilder(false)
-                .withModule(CMD_YT_DLP)
-                .withArg(videoUrl);
+        return buildYtDlpDownload(videoUrl, null, null);
+    }
+
+    /**
+     * 构建 yt-dlp 下载命令（使用配置）
+     *
+     * @param videoUrl 视频 URL
+     * @param properties OpenCLI 配置属性
+     * @return 命令构建器
+     */
+    public static OpenCliCommandBuilder buildYtDlpDownload(String videoUrl, OpenCliProperties properties) {
+        return buildYtDlpDownload(videoUrl, null, properties);
+    }
+
+    /**
+     * 构建 yt-dlp 下载命令（带输出目录和配置）
+     * <p>
+     * Windows 系统：直接使用 yt-dlp（从 PATH 查找）
+     * 其他系统（Mac/Linux）：使用配置的 yt-dlp 绝对路径
+     * </p>
+     * <p>
+     * 强制下载为 MP4 格式，避免 webm 格式不被文件服务器支持
+     * </p>
+     *
+     * @param videoUrl 视频 URL
+     * @param outputPath 输出目录
+     * @param properties OpenCLI 配置属性，用于获取 yt-dlp 路径
+     * @return 命令构建器
+     */
+    public static OpenCliCommandBuilder buildYtDlpDownload(String videoUrl, String outputPath, OpenCliProperties properties) {
+        String ytDlpCommand = getEffectiveYtDlpPath(properties);
+        // 如果未配置路径（Windows 或未配置），使用默认命令名
+        if (ytDlpCommand == null || ytDlpCommand.isEmpty()) {
+            ytDlpCommand = CMD_YT_DLP;
+        }
+        OpenCliCommandBuilder builder = new OpenCliCommandBuilder(false)
+                .withModule(ytDlpCommand);
+
+        // 非 Windows 系统使用 cookies-from-browser chrome 选项
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (!osName.contains("win")) {
+            builder.withOption("--cookies-from-browser", "chrome");
+        }
+
+        // 强制指定格式为 MP4，避免 webm 格式不被文件服务器支持
+        builder.withOption("--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best");
+        builder.withOption("--merge-output-format", "mp4");
+        builder.withOption("--remux-video", "mp4");
+
+        // yt-dlp 使用 -o 指定输出模板，使用 youtube_时间戳.mp4 格式
+        if (outputPath != null && !outputPath.isEmpty()) {
+            // 确保路径以 / 或 \ 结尾
+            String path = outputPath.endsWith("/") || outputPath.endsWith("\\")
+                    ? outputPath
+                    : outputPath + "/";
+            // 生成时间戳格式的文件名：youtube_年月日_时分秒_毫秒.mp4
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new java.util.Date());
+            builder.withOption("-o", path + "youtube_" + timestamp + ".%(ext)s");
+        }
+
+        builder.withArg(videoUrl);
+        return builder;
     }
 
     /**
      * 构建 yt-dlp 下载命令（带输出目录）
+     * <p>
+     * Windows 系统：直接使用 yt-dlp
+     * 其他系统（Mac/Linux）：使用 cookies-from-browser chrome 选项
+     * </p>
      * <p>
      * 强制下载为 MP4 格式，避免 webm 格式不被文件服务器支持
      * </p>
@@ -569,27 +693,11 @@ public class OpenCliCommandBuilder {
      * @param videoUrl 视频 URL
      * @param outputPath 输出目录
      * @return 命令构建器
+     * @deprecated 请使用 {@link #buildYtDlpDownload(String, String, OpenCliProperties)}
      */
+    @Deprecated
     public static OpenCliCommandBuilder buildYtDlpDownload(String videoUrl, String outputPath) {
-        OpenCliCommandBuilder builder = new OpenCliCommandBuilder(false)
-                .withModule(CMD_YT_DLP);
-
-        // 强制指定格式为 MP4，避免下载 webm
-        builder.withOption("--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best");
-        builder.withOption("--merge-output-format", "mp4");
-        builder.withOption("--remux-video", "mp4");
-
-        // yt-dlp 使用 -o 指定输出模板，这里使用目录+默认文件名
-        if (outputPath != null && !outputPath.isEmpty()) {
-            // 确保路径以 / 或 \ 结尾
-            String path = outputPath.endsWith("/") || outputPath.endsWith("\\")
-                    ? outputPath
-                    : outputPath + "/";
-            builder.withOption("-o", path + "%(title)s.mp4");
-        }
-
-        builder.withArg(videoUrl);
-        return builder;
+        return buildYtDlpDownload(videoUrl, outputPath, null);
     }
 
     /**
@@ -601,7 +709,20 @@ public class OpenCliCommandBuilder {
      * @return 命令构建器
      */
     public static OpenCliCommandBuilder buildYtDlpDownloadWithProxy(String videoUrl, String outputPath, String proxyUrl) {
-        OpenCliCommandBuilder builder = buildYtDlpDownload(videoUrl, outputPath);
+        return buildYtDlpDownloadWithProxy(videoUrl, outputPath, proxyUrl, null);
+    }
+
+    /**
+     * 构建 yt-dlp 下载命令（带代理、输出目录和配置）
+     *
+     * @param videoUrl 视频 URL
+     * @param outputPath 输出目录
+     * @param proxyUrl 代理地址
+     * @param properties OpenCLI 配置属性
+     * @return 命令构建器
+     */
+    public static OpenCliCommandBuilder buildYtDlpDownloadWithProxy(String videoUrl, String outputPath, String proxyUrl, OpenCliProperties properties) {
+        OpenCliCommandBuilder builder = buildYtDlpDownload(videoUrl, outputPath, properties);
         if (proxyUrl != null && !proxyUrl.isEmpty()) {
             builder.withProxy(proxyUrl);  // 使用环境变量方式设置代理
         }
@@ -617,7 +738,7 @@ public class OpenCliCommandBuilder {
      * @return 命令构建器
      */
     public static OpenCliCommandBuilder buildYtDlpDownloadWithConfigProxy(String videoUrl, String outputPath, OpenCliProperties properties) {
-        OpenCliCommandBuilder builder = buildYtDlpDownload(videoUrl, outputPath);
+        OpenCliCommandBuilder builder = buildYtDlpDownload(videoUrl, outputPath, properties);
         builder.applyProxyFromConfig(properties);
         return builder;
     }

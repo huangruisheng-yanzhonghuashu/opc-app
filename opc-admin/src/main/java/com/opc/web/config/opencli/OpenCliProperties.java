@@ -25,6 +25,13 @@ public class OpenCliProperties {
     private String executablePath;
 
     /**
+     * yt-dlp 可执行文件的绝对路径
+     * 例如: /usr/local/bin/yt-dlp (Mac/Linux) 或 C:\Tools\yt-dlp.exe (Windows)
+     * 如果未设置，则使用 PATH 环境变量查找
+     */
+    private String ytDlpPath;
+
+    /**
      * 代理配置
      */
     private ProxyConfig proxy = new ProxyConfig();
@@ -35,6 +42,14 @@ public class OpenCliProperties {
 
     public void setExecutablePath(String executablePath) {
         this.executablePath = executablePath;
+    }
+
+    public String getYtDlpPath() {
+        return ytDlpPath;
+    }
+
+    public void setYtDlpPath(String ytDlpPath) {
+        this.ytDlpPath = ytDlpPath;
     }
 
     public ProxyConfig getProxy() {

@@ -4,7 +4,12 @@ opencli:
   # 通过 `which opencli` 命令获取实际路径
   # 例如: /Users/sevilinma/.nvm/versions/node/v22.22.0/bin/opencli
   executablePath: /Users/sevilinma/.nvm/versions/node/v22.22.0/bin/opencli
-  
+
+  # yt-dlp 可执行文件的绝对路径
+  # Windows: 不需要配置，自动使用 PATH 中的 yt-dlp
+  # Mac/Linux: 配置绝对路径，如 /opt/homebrew/bin/yt-dlp
+  ytDlpPath: /opt/homebrew/bin/yt-dlp
+
   # 代理配置
   proxy:
     # 是否启用代理
