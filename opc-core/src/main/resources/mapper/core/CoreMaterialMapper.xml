@@ -7,9 +7,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<resultMap type="CoreMaterial" id="CoreMaterialResult">
 		<id     property="id"                column="id"                  />
 		<result property="title"              column="title"               />
+		<result property="originalTitle"      column="original_title"      />
 		<result property="author"             column="author"              />
 		<result property="summary"            column="summary"             />
 		<result property="content"           column="content"             />
+		<result property="originalContent"   column="original_content"    />
 		<result property="originalUrl"       column="original_url"        />
 		<result property="originalId"        column="original_id"         />
 		<result property="replyCount"        column="reply_count"         />
@@ -55,7 +57,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="selectMaterialVo">
-        select m.id, m.title, m.author, m.summary, m.content, m.original_url, m.original_id, m.reply_count,
+        select m.id, m.title, m.original_title, m.author, m.summary, m.content, m.original_content, m.original_url, m.original_id, m.reply_count,
                m.like_count, m.dislike_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
                m.content_type, m.package_type, m.category_id, m.status, m.is_top, m.source, m.material_type, m.issue_no, m.cover_image, m.video_url,
                m.online_time, m.offline_time, m.top_time, m.untop_time,
@@ -130,9 +132,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		update core_material
  		<set>
  			<if test="title != null and title != ''">title = #{title},</if>
+ 			<if test="originalTitle != null">original_title = #{originalTitle},</if>
  			<if test="author != null">author = #{author},</if>
  			<if test="summary != null">summary = #{summary},</if>
  			<if test="content != null">content = #{content},</if>
+ 			<if test="originalContent != null">original_content = #{originalContent},</if>
  			<if test="originalUrl != null">original_url = #{originalUrl},</if>
  			<if test="originalId != null">original_id = #{originalId},</if>
  			<if test="replyCount != null">reply_count = #{replyCount},</if>
@@ -167,9 +171,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		insert into core_material(
  			<if test="id != null and id != 0">id,</if>
  			<if test="title != null and title != ''">title,</if>
+ 			<if test="originalTitle != null">original_title,</if>
  			<if test="author != null">author,</if>
  			<if test="summary != null">summary,</if>
  			<if test="content != null">content,</if>
+ 			<if test="originalContent != null">original_content,</if>
  			<if test="originalUrl != null">original_url,</if>
  			<if test="originalId != null">original_id,</if>
  			<if test="replyCount != null">reply_count,</if>
@@ -199,9 +205,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		)values(
  			<if test="id != null and id != 0">#{id},</if>
  			<if test="title != null and title != ''">#{title},</if>
+ 			<if test="originalTitle != null">#{originalTitle},</if>
  			<if test="author != null">#{author},</if>
  			<if test="summary != null">#{summary},</if>
  			<if test="content != null">#{content},</if>
+ 			<if test="originalContent != null">#{originalContent},</if>
  			<if test="originalUrl != null">#{originalUrl},</if>
  			<if test="originalId != null">#{originalId},</if>
  			<if test="replyCount != null">#{replyCount},</if>
@@ -266,7 +274,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</insert>
 
 	<select id="selectMaterialListByTagId" resultMap="CoreMaterialResult">
-		select m.id, m.title, m.author, m.summary, m.content, m.original_url, m.original_id, m.reply_count,
+		select m.id, m.title, m.original_title, m.author, m.summary, m.content, m.original_content, m.original_url, m.original_id, m.reply_count,
 		       m.like_count, m.dislike_count, m.view_count, m.share_count, m.comment_count, m.publish_time,
 		       m.content_type, m.package_type, m.status, m.is_top, m.source, m.cover_image, m.video_url,
 		       m.online_time, m.offline_time, m.top_time, m.untop_time,

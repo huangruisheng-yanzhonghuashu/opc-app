@@ -102,8 +102,8 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
             String translatedTitle = TranslateUtils.autoTranslateToChinese(originalTitle);
             material.setTitle(translatedTitle);
             material.setAuthor("Unknown");
+            // 使用URL作为originalContent，翻译后保存到content
             //material.setOriginalContent(videoUrl);
-            // 翻译为中文后保存到 content（YouTube URL 通常不需要翻译，但为了统一处理）
             //String translatedContent = TranslateUtils.autoTranslateToChinese(videoUrl);
             //material.setContent(translatedContent);
             material.setPackageType(PACKAGE_TYPE_NORMAL);
@@ -351,11 +351,11 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
         String videoId = extractVideoId(url);
         material.setOriginalId(videoId != null ? videoId : url);
 
-        // 设置内容描述
-        //String originalContent = buildContentDescription(node);
-        //material.setOriginalContent(originalContent);
-        //String translatedContent = TranslateUtils.autoTranslateToChinese(originalContent);
-        //material.setContent(translatedContent);
+        // 设置内容描述（originalContent存储原始描述，content存储翻译后的内容）
+/*        String originalContent = buildContentDescription(node);
+        material.setOriginalContent(originalContent);
+        String translatedContent = TranslateUtils.autoTranslateToChinese(originalContent);
+        material.setContent(translatedContent);*/
 
         // 设置观看数（移除 "次观看" 等字符，只保留数字）
        /* String viewsStr = getTextValue(node, "views");
@@ -377,6 +377,45 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
         material.setSource(sourceType != null ? sourceType : SOURCE_YOUTUBE);
 
         return material;
+    }
+
+    /**
+     * 构建内容描述
+     */
+    private String buildContentDescription(JsonNode node) {
+        StringBuilder content = new StringBuilder();
+
+        // 添加标题
+        String title = getTextValue(node, "title");
+        if (title != null && !title.isEmpty()) {
+            content.append("标题: ").append(title).append("\n");
+        }
+
+        // 添加频道
+        String channel = getTextValue(node, "channel");
+        if (channel != null && !channel.isEmpty()) {
+            content.append("频道: ").append(channel).append("\n");
+        }
+
+        // 添加描述
+        String description = getTextValue(node, "description");
+        if (description != null && !description.isEmpty()) {
+            content.append("描述: ").append(description).append("\n");
+        }
+
+        // 添加观看数
+        String views = getTextValue(node, "views");
+        if (views != null && !views.isEmpty()) {
+            content.append("观看数: ").append(views).append("\n");
+        }
+
+        // 添加时长
+        String duration = getTextValue(node, "duration");
+        if (duration != null && !duration.isEmpty()) {
+            content.append("时长: ").append(duration).append("\n");
+        }
+
+        return content.toString().trim();
     }
 
     /**
