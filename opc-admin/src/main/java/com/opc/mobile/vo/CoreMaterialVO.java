@@ -154,6 +154,10 @@ public class CoreMaterialVO
     @Schema(description = "标签2列表")
     private List<CoreTag2VO> tags2;
 
+    /** 媒体文件列表 */
+    @Schema(description = "媒体文件列表")
+    private List<CoreMaterialMediaVO> medias;
+
     public Long getId()
     {
         return id;
@@ -482,5 +486,15 @@ public class CoreMaterialVO
     public void setTags2(List<CoreTag2VO> tags2)
     {
         this.tags2 = tags2;
+    }
+
+    public List<CoreMaterialMediaVO> getMedias()
+    {
+        return medias;
+    }
+
+    public void setMedias(List<CoreMaterialMediaVO> medias)
+    {
+        this.medias = medias;
     }
 }

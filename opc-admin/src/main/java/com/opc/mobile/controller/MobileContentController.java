@@ -1,6 +1,7 @@
 package com.opc.mobile.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.opc.common.annotation.MemberLogin;
@@ -8,13 +9,16 @@ import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.utils.HtmlWrapperUtils;
 import com.opc.core.domain.CoreMaterial;
+import com.opc.core.domain.CoreMaterialMedia;
 import com.opc.core.domain.CoreMember;
 import com.opc.core.domain.vo.MemberLoginVO;
+import com.opc.core.service.ICoreMaterialMediaService;
 import com.opc.core.service.ICoreMaterialService;
 import com.opc.core.service.ICoreMemberService;
 import com.opc.core.service.MemberTokenService;
 import com.opc.mobile.dto.MaterialActionDTO;
 import com.opc.mobile.dto.MaterialIdDTO;
+import com.opc.mobile.vo.CoreMaterialMediaVO;
 import com.opc.mobile.vo.CoreMaterialVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,6 +45,9 @@ public class MobileContentController extends BaseController
 {
     @Autowired
     private ICoreMaterialService materialService;
+
+    @Autowired
+    private ICoreMaterialMediaService materialMediaService;
 
     @Autowired
     private ICoreMemberService memberService;
@@ -104,10 +111,16 @@ public class MobileContentController extends BaseController
         CoreMaterialVO vo = new CoreMaterialVO();
         BeanUtils.copyProperties(material, vo);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("material", vo);
+        // 查询素材媒体文件列表并转换为VO
+        List<CoreMaterialMedia> mediaList = materialMediaService.selectMaterialMediaByMaterialId(id);
+        List<CoreMaterialMediaVO> mediaVOList = mediaList.stream().map(media -> {
+            CoreMaterialMediaVO mediaVO = new CoreMaterialMediaVO();
+            BeanUtils.copyProperties(media, mediaVO);
+            return mediaVO;
+        }).toList();
+        vo.setMedias(mediaVOList);
 
-        return AjaxResult.success(result);
+        return AjaxResult.success(vo);
     }
 
     /**
