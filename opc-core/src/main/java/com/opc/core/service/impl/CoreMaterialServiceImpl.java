@@ -9,15 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.opc.core.domain.CoreMaterial;
-import com.opc.core.domain.CoreMaterialTag2;
+import com.opc.core.domain.CoreMaterialTag;
 import com.opc.core.domain.CoreMaterialUserAction;
 import com.opc.core.domain.CoreTag;
-import com.opc.core.domain.CoreTag2;
 import com.opc.core.mapper.CoreMaterialMapper;
-import com.opc.core.mapper.CoreMaterialTag2Mapper;
 import com.opc.core.mapper.CoreMaterialTagMapper;
 import com.opc.core.mapper.CoreMaterialUserActionMapper;
-import com.opc.core.mapper.CoreTag2Mapper;
+import com.opc.core.mapper.CoreTagMapper;
 import com.opc.core.service.ICoreMaterialService;
 
 @Service
@@ -30,13 +28,10 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
     private CoreMaterialTagMapper materialTagMapper;
 
     @Autowired
-    private CoreMaterialTag2Mapper materialTag2Mapper;
-
-    @Autowired
     private CoreMaterialUserActionMapper userActionMapper;
 
     @Autowired
-    private CoreTag2Mapper tag2Mapper;
+    private CoreTagMapper tagMapper;
 
     @Autowired
     private CoreMaterialAsyncService asyncService;
@@ -55,8 +50,6 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         {
             List<CoreTag> tags = materialTagMapper.selectTagsByMaterialId(id);
             material.setTags(tags);
-            List<CoreTag2> tags2 = materialTag2Mapper.selectTags2ByMaterialId(id);
-            material.setTags2(tags2);
         }
         return material;
     }
@@ -335,6 +328,7 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
 
     /**
      * 自动匹配内容中的标签并建立关联
+     * 从 core_tag 表获取标签，匹配素材标题、正文、总结中的标签名称
      * 
      * @param material 素材对象
      */
@@ -346,13 +340,13 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         }
 
         // 获取所有启用的标签
-        List<CoreTag2> allTags = tag2Mapper.selectAllActiveTags();
+        List<CoreTag> allTags = tagMapper.selectAllActiveTags();
         if (allTags == null || allTags.isEmpty())
         {
             return;
         }
 
-        // 构建需要匹配的内容文本（标题 + 正文 + 总结）
+        // 构建需要匹配的内容文本（标题 + 正文 + 总结 + 原标题 + 原始内容）
         StringBuilder contentBuilder = new StringBuilder();
         if (material.getTitle() != null)
         {
@@ -364,7 +358,15 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         }
         if (material.getSummary() != null)
         {
-            contentBuilder.append(material.getSummary());
+            contentBuilder.append(material.getSummary()).append(" ");
+        }
+        if (material.getOriginalTitle() != null)
+        {
+            contentBuilder.append(material.getOriginalTitle()).append(" ");
+        }
+        if (material.getOriginalContent() != null)
+        {
+            contentBuilder.append(material.getOriginalContent());
         }
         String contentText = contentBuilder.toString();
 
@@ -375,7 +377,7 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
 
         // 查找匹配的标签
         Set<Long> matchedTagIds = new HashSet<>();
-        for (CoreTag2 tag : allTags)
+        for (CoreTag tag : allTags)
         {
             if (tag.getTagName() != null && !tag.getTagName().trim().isEmpty())
             {
@@ -390,13 +392,13 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         // 保存匹配的标签关联
         if (!matchedTagIds.isEmpty())
         {
-            List<CoreMaterialTag2> tagList = new ArrayList<>();
+            List<CoreMaterialTag> tagList = new ArrayList<>();
             for (Long tagId : matchedTagIds)
             {
                 // 检查是否已存在关联，避免重复
-                if (!materialTag2Mapper.checkMaterialTag2Exists(material.getId(), tagId))
+                if (!materialTagMapper.checkMaterialTagExists(material.getId(), tagId))
                 {
-                    CoreMaterialTag2 materialTag = new CoreMaterialTag2();
+                    CoreMaterialTag materialTag = new CoreMaterialTag();
                     materialTag.setMaterialId(material.getId());
                     materialTag.setTagId(tagId);
                     materialTag.setCreateBy(material.getCreateBy());
@@ -406,7 +408,7 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
 
             if (!tagList.isEmpty())
             {
-                materialTag2Mapper.batchInsertMaterialTag2(tagList);
+                materialTagMapper.batchInsertMaterialTag(tagList);
             }
         }
     }

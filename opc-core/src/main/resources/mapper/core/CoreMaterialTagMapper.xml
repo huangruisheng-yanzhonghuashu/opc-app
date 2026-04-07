@@ -88,4 +88,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</foreach>
 	</delete>
 
+	<select id="checkMaterialTagExists" resultType="boolean">
+		select count(*) > 0 from core_material_tag
+		where material_id = #{materialId} and tag_id = #{tagId}
+	</select>
+
 </mapper>

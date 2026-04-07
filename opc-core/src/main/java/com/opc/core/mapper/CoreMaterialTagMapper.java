@@ -21,4 +21,6 @@ public interface CoreMaterialTagMapper
     public int deleteMaterialTags(Long[] ids);
 
     public int batchInsertMaterialTag(List<CoreMaterialTag> materialTagList);
+
+    public boolean checkMaterialTagExists(Long materialId, Long tagId);
 }
