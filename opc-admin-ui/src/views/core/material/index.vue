@@ -69,6 +69,19 @@
                </el-option>
             </el-select>
          </el-form-item>
+         <el-form-item label="素材类型" prop="materialType">
+            <el-select v-model="queryParams.materialType" placeholder="全部" clearable style="width: 200px">
+               <el-option label="帖子" value="post" />
+               <el-option label="文章" value="article" />
+            </el-select>
+         </el-form-item>
+         <el-form-item label="内容类型" prop="contentType">
+            <el-select v-model="queryParams.contentType" placeholder="全部" clearable style="width: 200px">
+               <el-option label="纯文本" value="text" />
+               <el-option label="图文" value="image" />
+               <el-option label="视频" value="video" />
+            </el-select>
+         </el-form-item>
          <el-form-item>
             <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>

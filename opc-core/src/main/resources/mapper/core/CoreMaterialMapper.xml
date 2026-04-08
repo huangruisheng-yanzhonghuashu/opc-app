@@ -86,9 +86,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="params.maxPackageType != null">
 				AND package_type &lt;= #{params.maxPackageType}
 			</if>
-			<if test="source != null and source != ''">
-				AND source = #{source}
-			</if>
+		<if test="source != null and source != ''">
+			AND source = #{source}
+		</if>
+		<if test="materialType != null and materialType != ''">
+			AND material_type = #{materialType}
+		</if>
+		<if test="contentType != null and contentType != ''">
+			AND content_type = #{contentType}
+		</if>
 		<if test="tagIds != null and tagIds.size > 0">
 			AND exists (
 				select 1 from core_material_tag mt
