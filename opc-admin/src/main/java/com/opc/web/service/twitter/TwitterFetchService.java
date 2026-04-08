@@ -195,8 +195,6 @@ public class TwitterFetchService extends AbstractCollectFetchService {
                         log.info("素材 {} 上传了 {} 个文件到文件服务器", material.getOriginalId(), uploadedUrls.size());
                         contentType = determineContentType(uploadedUrls);
                     }
-                } else if (isArticle) {
-                    contentType = "article";
                 }
 
                 // 设置内容类型并保存素材
