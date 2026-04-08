@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
@@ -157,18 +158,9 @@ public class LogAspect
      */
     private boolean isMemberAnonymousMethod(JoinPoint joinPoint)
     {
-        if (joinPoint.getTarget() instanceof org.springframework.web.servlet.mvc.Controller)
-        {
-            Method[] methods = joinPoint.getTarget().getClass().getMethods();
-            for (Method method : methods)
-            {
-                if (method.getName().equals(joinPoint.getSignature().getName()))
-                {
-                    return method.getAnnotation(MemberAnonymous.class) != null;
-                }
-            }
-        }
-        return false;
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        return method.getAnnotation(MemberAnonymous.class) != null;
     }
 
     /**
