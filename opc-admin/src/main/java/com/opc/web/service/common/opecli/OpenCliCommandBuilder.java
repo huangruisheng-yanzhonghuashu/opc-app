@@ -666,8 +666,8 @@ public class OpenCliCommandBuilder {
             builder.withOption("--merge-output-format", "mp4");
             builder.withOption("--remux-video", "mp4");
         } else {
-            // 非 Windows 系统（Mac/Linux）：使用 cookies 和 -S 格式选择器
-            builder.withOption("--cookies-from-browser", "chrome");
+            // 非 Windows 系统（Mac/Linux）：使用 cookies 文件和 -S 格式选择器
+            builder.withOption("--cookies", "/Users/sevilinma/opc/youtube_cookies.txt");
             builder.withOption("-S", "ext:mp4:m4a");
             builder.withOption("--merge-output-format", "mp4");
         }
