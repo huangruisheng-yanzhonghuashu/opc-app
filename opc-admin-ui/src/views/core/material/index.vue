@@ -294,25 +294,6 @@
                   </el-select>
                </el-form-item>
             </div>
-            <!-- 正文编辑器 -->
-            <!-- 帖子类型：正文使用textarea -->
-            <template v-if="form.materialType === 'post'">
-               <el-form-item label="正文" prop="content">
-                  <el-input v-model="form.content" type="textarea" placeholder="请输入正文" :rows="6" />
-               </el-form-item>
-            </template>
-            <!-- 文章类型：正文使用富文本框 -->
-            <template v-else-if="form.materialType === 'article'">
-               <el-form-item label="正文" prop="content">
-                  <Editor v-model="form.content" :min-height="300" />
-               </el-form-item>
-            </template>
-            <!-- 其他情况：使用富文本框 -->
-            <template v-else>
-               <el-form-item label="正文" prop="content">
-                  <Editor v-model="form.content" :min-height="300" />
-               </el-form-item>
-            </template>
             <!-- 内容编辑 -->
             <div class="form-section">
                <div class="section-title"><el-icon><EditPen /></el-icon><span>内容编辑</span></div>
