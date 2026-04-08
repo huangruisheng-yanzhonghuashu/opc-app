@@ -244,9 +244,10 @@ public class OpenCliCommandBuilder {
         if (arg.contains("://")) {
             return true;
         }
-        // 包含空格或特殊字符
+        // 包含空格或特殊字符（包括冒号:，用于 -S 参数如 ext:mp4:m4a）
         if (arg.contains(" ") || arg.contains("&") || arg.contains("|") ||
-            arg.contains("<") || arg.contains(">") || arg.contains("(") || arg.contains(")")) {
+            arg.contains("<") || arg.contains(">") || arg.contains("(") || arg.contains(")") ||
+            arg.contains(":")) {
             return true;
         }
         return false;
@@ -654,23 +655,28 @@ public class OpenCliCommandBuilder {
         OpenCliCommandBuilder builder = new OpenCliCommandBuilder(false)
                 .withModule(ytDlpCommand);
 
-        // 非 Windows 系统使用 cookies-from-browser chrome 选项
+        // 检测操作系统
         String osName = System.getProperty("os.name").toLowerCase();
-        if (!osName.contains("win")) {
+        boolean isWindows = osName.contains("win");
+
+        if (isWindows) {
+            // Windows 系统：使用长格式参数
+            builder.withOption("--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best");
+            builder.withOption("--merge-output-format", "mp4");
+            builder.withOption("--remux-video", "mp4");
+        } else {
+            // 非 Windows 系统（Mac/Linux）：使用 cookies 和 -S 格式选择器
             builder.withOption("--cookies-from-browser", "chrome");
+            builder.withOption("-S", "ext:mp4:m4a");
+            builder.withOption("--merge-output-format", "mp4");
         }
 
-        // 强制指定格式为 MP4，避免 webm 格式不被文件服务器支持
-        builder.withOption("--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best");
-        builder.withOption("--merge-output-format", "mp4");
-        builder.withOption("--remux-video", "mp4");
-
-        // yt-dlp 使用 -o 指定输出模板，使用 youtube_时间戳.mp4 格式
+        // yt-dlp 使用 -o 指定输出模板
         if (outputPath != null && !outputPath.isEmpty()) {
             // 确保路径以 / 或 \ 结尾
             String path = outputPath.endsWith("/") || outputPath.endsWith("\\")
                     ? outputPath
-                    : outputPath + "/";
+                    : outputPath + (isWindows ? "\\" : "/");
             // 生成时间戳格式的文件名：youtube_年月日_时分秒_毫秒.mp4
             String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new java.util.Date());
             builder.withOption("-o", path + "youtube_" + timestamp + ".%(ext)s");
