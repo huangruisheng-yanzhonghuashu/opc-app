@@ -6,6 +6,7 @@ import com.opc.core.domain.CoreMaterial;
 import com.opc.core.domain.CoreMaterialMedia;
 import com.opc.core.service.ICoreMaterialMediaService;
 import com.opc.core.service.ICoreMaterialService;
+import com.opc.web.config.opencli.OpenCliProperties;
 import com.opc.web.config.twitter.v2.TwitterApiV2Properties;
 import com.opc.web.dto.twitter.v2.TweetDTO;
 import com.opc.web.dto.twitter.v2.TwitterSearchRequestDTO;
@@ -58,6 +59,9 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
     private TwitterApiV2Properties twitterApiV2Properties;
 
     @Autowired
+    private OpenCliProperties openCliProperties;
+
+    @Autowired
     private ICoreMaterialService materialService;
 
     @Autowired
@@ -73,13 +77,22 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
                 .socketTimeout(twitterApiV2Properties.getTimeout())
                 .concurrency(100, 20);
 
-        // 设置代理
-        if (twitterApiV2Properties.isProxyEnabled()) {
-            Proxy proxy = new Proxy(twitterApiV2Properties.getProxyHost(), twitterApiV2Properties.getProxyPort());
-            config.proxy(proxy);
-            log.info("Unirest 代理已启用: {}:{}",
-                    twitterApiV2Properties.getProxyHost(),
-                    twitterApiV2Properties.getProxyPort());
+        // 设置代理（使用 opencli.proxy 配置）
+        if (openCliProperties != null && openCliProperties.getProxy() != null
+                && openCliProperties.getProxy().isEnabled()) {
+            String proxyUrl = openCliProperties.getProxyUrl();
+            if (proxyUrl != null && !proxyUrl.isEmpty()) {
+                try {
+                    java.net.URL url = new java.net.URL(proxyUrl);
+                    String host = url.getHost();
+                    int port = url.getPort() > 0 ? url.getPort() : 7890;
+                    Proxy proxy = new Proxy(host, port);
+                    config.proxy(proxy);
+                    log.info("Unirest 代理已启用: {}:{}", host, port);
+                } catch (Exception e) {
+                    log.warn("解析代理地址失败: {}", proxyUrl, e);
+                }
+            }
         }
 
         log.info("Unirest 初始化完成");
@@ -129,9 +142,20 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             }
 
             // 如果配置了代理，在请求级别也设置代理（确保使用代理）
-            if (twitterApiV2Properties.isProxyEnabled()) {
-                getRequest.proxy(twitterApiV2Properties.getProxyHost(), twitterApiV2Properties.getProxyPort());
-                log.debug("请求已设置代理: {}:{}", twitterApiV2Properties.getProxyHost(), twitterApiV2Properties.getProxyPort());
+            if (openCliProperties != null && openCliProperties.getProxy() != null
+                    && openCliProperties.getProxy().isEnabled()) {
+                String proxyUrl = openCliProperties.getProxyUrl();
+                if (proxyUrl != null && !proxyUrl.isEmpty()) {
+                    try {
+                        java.net.URL proxyAddress = new java.net.URL(proxyUrl);
+                        String host = proxyAddress.getHost();
+                        int port = proxyAddress.getPort() > 0 ? proxyAddress.getPort() : 7890;
+                        getRequest.proxy(host, port);
+                        log.debug("请求已设置代理: {}:{}", host, port);
+                    } catch (Exception e) {
+                        log.warn("解析代理地址失败: {}", proxyUrl, e);
+                    }
+                }
             }
 
             HttpResponse<String> response = getRequest.asString();
@@ -561,13 +585,27 @@ public class TwitterApiV2ServiceImpl implements TwitterApiV2Service {
             // 下载文件（使用代理）
             URL url = new URL(mediaUrl);
             InputStream in;
-            if (twitterApiV2Properties.isProxyEnabled()) {
+            if (openCliProperties != null && openCliProperties.getProxy() != null
+                    && openCliProperties.getProxy().isEnabled()) {
                 // 使用代理
-                java.net.Proxy proxy = new java.net.Proxy(
-                        java.net.Proxy.Type.HTTP,
-                        new InetSocketAddress(twitterApiV2Properties.getProxyHost(),
-                                twitterApiV2Properties.getProxyPort()));
-                in = url.openConnection(proxy).getInputStream();
+                String proxyUrl = openCliProperties.getProxyUrl();
+                if (proxyUrl != null && !proxyUrl.isEmpty()) {
+                    try {
+                        java.net.URL proxyAddress = new java.net.URL(proxyUrl);
+                        String host = proxyAddress.getHost();
+                        int port = proxyAddress.getPort() > 0 ? proxyAddress.getPort() : 7890;
+                        java.net.Proxy proxy = new java.net.Proxy(
+                                java.net.Proxy.Type.HTTP,
+                                new InetSocketAddress(host, port));
+                        in = url.openConnection(proxy).getInputStream();
+                        log.debug("使用代理下载媒体文件: {}:{}", host, port);
+                    } catch (Exception e) {
+                        log.warn("解析代理地址失败，直接连接: {}", proxyUrl, e);
+                        in = url.openStream();
+                    }
+                } else {
+                    in = url.openStream();
+                }
             } else {
                 // 直接连接
                 in = url.openStream();

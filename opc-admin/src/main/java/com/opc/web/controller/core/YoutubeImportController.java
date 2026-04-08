@@ -36,24 +36,4 @@ public class YoutubeImportController {
         }
         return youtubeFetchService.fetchYoutubeData(keyword.trim());
     }
-
-    /**
-     * 根据视频 URL 导入单个 YouTube 视频
-     *
-     * @param videoUrl YouTube 视频 URL
-     * @return 导入结果
-     */
-    @PreAuthorize("@ss.hasPermi('core:material:add')")
-    @PostMapping("/importByUrl")
-    public AjaxResult importYoutubeVideoByUrl(@RequestParam("videoUrl") String videoUrl) {
-        if (videoUrl == null || videoUrl.trim().isEmpty()) {
-            return AjaxResult.error("视频 URL 不能为空");
-        }
-        // 简单的 URL 格式验证
-        String url = videoUrl.trim();
-        if (!url.contains("youtube.com") && !url.contains("youtu.be")) {
-            return AjaxResult.error("无效的 YouTube URL");
-        }
-        return youtubeFetchService.fetchYoutubeVideoByUrl(url);
-    }
 }

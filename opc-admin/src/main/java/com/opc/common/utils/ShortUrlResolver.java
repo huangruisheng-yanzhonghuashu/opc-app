@@ -1,6 +1,6 @@
 package com.opc.common.utils;
 
-import com.opc.web.config.twitter.v2.TwitterApiV2Properties;
+import com.opc.web.config.opencli.OpenCliProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.net.HttpURLConnection;
@@ -11,11 +11,11 @@ import java.net.URL;
 @Component
 public class ShortUrlResolver {
 
-    private static TwitterApiV2Properties twitterApiV2Properties;
+    private static OpenCliProperties openCliProperties;
 
     @Autowired
-    public void setTwitterApiV2Properties(TwitterApiV2Properties properties) {
-        ShortUrlResolver.twitterApiV2Properties = properties;
+    public void setOpenCliProperties(OpenCliProperties properties) {
+        ShortUrlResolver.openCliProperties = properties;
     }
 
     public static String expandShortUrl(String shortUrl) throws Exception {
@@ -23,17 +23,14 @@ public class ShortUrlResolver {
         int redirectCount = 0;
         String currentUrl = shortUrl;
 
-        boolean proxyEnabled = twitterApiV2Properties != null && twitterApiV2Properties.isProxyEnabled();
-        String proxyHost = twitterApiV2Properties != null ? twitterApiV2Properties.getProxyHost() : "localhost";
-        int proxyPort = twitterApiV2Properties != null ? twitterApiV2Properties.getProxyPort() : 7899;
-
         while (redirectCount < maxRedirects) {
             HttpURLConnection connection = null;
             try {
                 URL url = new URL(currentUrl);
                 
-                if (proxyEnabled) {
-                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+                // 使用 opencli.proxy 配置
+                Proxy proxy = getHttpProxy();
+                if (proxy != null) {
                     connection = (HttpURLConnection) url.openConnection(proxy);
                 } else {
                     connection = (HttpURLConnection) url.openConnection();
@@ -62,6 +59,30 @@ public class ShortUrlResolver {
             }
         }
         throw new RuntimeException("重定向次数超过限制：" + maxRedirects);
+    }
+
+    /**
+     * 获取 HTTP 代理配置
+     */
+    private static Proxy getHttpProxy() {
+        if (openCliProperties == null || openCliProperties.getProxy() == null
+                || !openCliProperties.getProxy().isEnabled()) {
+            return null;
+        }
+
+        String proxyUrl = openCliProperties.getProxyUrl();
+        if (proxyUrl == null || proxyUrl.isEmpty()) {
+            return null;
+        }
+
+        try {
+            URL url = new URL(proxyUrl);
+            String host = url.getHost();
+            int port = url.getPort() > 0 ? url.getPort() : 7890;
+            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static void main(String[] args) throws Exception {

@@ -4,7 +4,4 @@ twitter:
     bearer-token: AAAAAAAAAAAAAAAAAAAAAPqP8gEAAAAA9kijiLWK2xqUVSFZibEFfna2gGs%3DWilvmCsBgPNAnVtDGB1Oi1scjnvIu7W3AcNYqzdn6NJVVrajC2
     base-url: https://api.x.com/2
     timeout: 30000
-    # 代理配置
-    proxy-enabled: true
-    proxy-host: localhost
-    proxy-port: 7899
+    # 代理配置已合并到 opencli.proxy，请统一在 application-opencli.yml 中配置

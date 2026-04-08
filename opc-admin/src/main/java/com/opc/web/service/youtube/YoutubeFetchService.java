@@ -12,8 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.opc.web.service.common.opecli.OpenCliConstants.*;
 
@@ -68,74 +75,100 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
     }
 
     /**
-     * 根据视频 URL 下载并导入单个视频
-     *
-     * @param videoUrl YouTube 视频 URL
-     * @return 导入结果
+     * 下载封面图并上传到文件服务器（支持代理）
      */
-    public AjaxResult fetchYoutubeVideoByUrl(String videoUrl) {
+    private String downloadAndUploadThumbnail(String thumbnailUrl, String videoId) {
+        HttpURLConnection connection = null;
         try {
-            String sourceType = SOURCE_YOUTUBE;
+            // 构建下载目录
+            String downloadPath = buildDownloadPath(videoId);
+            String thumbnailFileName = videoId + "_thumbnail.jpg";
+            File thumbnailFile = new File(downloadPath, thumbnailFileName);
 
-            // 从 URL 提取视频 ID
-            String videoId = extractVideoId(videoUrl);
-            if (videoId == null || videoId.isEmpty()) {
-                return AjaxResult.error("无法从 URL 提取视频 ID");
+            // 下载封面图
+            log.info("下载封面图: {} -> {}", thumbnailUrl, thumbnailFile.getAbsolutePath());
+
+            URL url = new URL(thumbnailUrl);
+
+            // 获取代理配置
+            Proxy proxy = getHttpProxy();
+            if (proxy != null) {
+                log.info("使用代理下载封面图: {}", proxy);
+                connection = (HttpURLConnection) url.openConnection(proxy);
+            } else {
+                connection = (HttpURLConnection) url.openConnection();
             }
 
-            // 检查素材是否已存在
-            CoreMaterial existingMaterial = materialService.selectMaterialByOriginalId(videoId);
-            if (existingMaterial != null) {
-                AjaxResult ajaxResult = AjaxResult.success("素材已存在");
-                ajaxResult.put("videoId", videoId);
-                ajaxResult.put("materialId", existingMaterial.getId());
-                return ajaxResult;
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(30000);
+            connection.setReadTimeout(30000);
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                log.error("封面图下载失败，HTTP状态码: {}", responseCode);
+                return null;
             }
 
-            // 创建素材对象
-            CoreMaterial material = new CoreMaterial();
-            material.setOriginalId(videoId);
-            material.setOriginalUrl(videoUrl);
-            // 设置原标题和翻译后的标题
-            String originalTitle = "YouTube Video " + videoId;
-            material.setOriginalTitle(originalTitle);
-            String translatedTitle = TranslateUtils.autoTranslateToChinese(originalTitle);
-            material.setTitle(translatedTitle);
-            material.setAuthor("Unknown");
-            // 使用URL作为originalContent，翻译后保存到content
-            //material.setOriginalContent(videoUrl);
-            //String translatedContent = TranslateUtils.autoTranslateToChinese(videoUrl);
-            //material.setContent(translatedContent);
-            material.setPackageType(PACKAGE_TYPE_NORMAL);
-            material.setStatus(STATUS_OFFLINE);
-            material.setSource(sourceType);
-            material.setContentType(CONTENT_TYPE_VIDEO);
-
-            // 下载视频并上传
-            List<String> uploadedUrls = downloadAndUploadVideo(videoUrl, videoId);
-            if (!uploadedUrls.isEmpty()) {
-                material.setVideoUrl(uploadedUrls.get(0));
+            // 读取图片数据
+            byte[] imageData;
+            try (InputStream in = connection.getInputStream()) {
+                imageData = in.readAllBytes();
             }
 
-            // 保存素材
-            materialService.insertMaterial(material);
-            Long materialId = material.getId();
-
-            // 保存素材媒体文件信息
-            if (!uploadedUrls.isEmpty()) {
-                saveMaterialMediaFiles(materialId, uploadedUrls);
+            if (imageData == null || imageData.length == 0) {
+                log.error("封面图下载失败，数据为空: {}", thumbnailUrl);
+                return null;
             }
 
-            AjaxResult ajaxResult = AjaxResult.success("导入完成");
-            ajaxResult.put("videoId", videoId);
-            ajaxResult.put("sourceType", sourceType);
-            ajaxResult.put("materialId", materialId);
-            ajaxResult.put("uploadedFiles", uploadedUrls.size());
-            return ajaxResult;
+            // 保存到本地
+            java.nio.file.Files.write(thumbnailFile.toPath(), imageData);
+            log.info("封面图下载成功: {}, 大小: {} 字节", thumbnailFile.getAbsolutePath(), imageData.length);
 
+            // 上传到文件服务器
+            String uploadedUrl = HttpUtils.uploadToFileServer(thumbnailFile, thumbnailFileName);
+            if (uploadedUrl != null) {
+                log.info("封面上传成功: {}", uploadedUrl);
+                return uploadedUrl;
+            } else {
+                log.error("封面上传失败: {}", thumbnailFileName);
+            }
         } catch (Exception e) {
-            log.error("YouTube 视频导入失败, URL: {}", videoUrl, e);
-            return AjaxResult.error("导入失败: " + e.getMessage());
+            log.error("下载或上传封面图失败: {}", thumbnailUrl, e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取 HTTP 代理配置
+     */
+    private Proxy getHttpProxy() {
+        if (openCliProperties == null || openCliProperties.getProxy() == null
+                || !openCliProperties.getProxy().isEnabled()) {
+            return null;
+        }
+
+        String proxyUrl = openCliProperties.getProxyUrl();
+        if (proxyUrl == null || proxyUrl.isEmpty()) {
+            return null;
+        }
+
+        try {
+            // 解析代理地址，格式如 http://127.0.0.1:7890
+            URL url = new URL(proxyUrl);
+            String host = url.getHost();
+            int port = url.getPort() > 0 ? url.getPort() : 7890;
+
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+            log.debug("使用代理: {}:{}", host, port);
+            return proxy;
+        } catch (Exception e) {
+            log.warn("解析代理地址失败: {}", proxyUrl, e);
+            return null;
         }
     }
 
@@ -174,8 +207,36 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
                     }
                 }
 
-                // 下载视频并上传
+                // 使用 youtube video 命令获取视频详情（包括高清封面）
                 String originalUrl = material.getOriginalUrl();
+                if (originalUrl != null && !originalUrl.isEmpty()) {
+                    CoreMaterial videoDetail = fetchVideoDetailByUrl(originalUrl, originalId, material.getSource());
+                    if (videoDetail != null) {
+                        // 更新素材信息（标题、作者、封面等）
+                        if (videoDetail.getOriginalTitle() != null) {
+                            material.setOriginalTitle(videoDetail.getOriginalTitle());
+                            material.setTitle(videoDetail.getTitle());
+                        }
+                        if (videoDetail.getAuthor() != null) {
+                            material.setAuthor(videoDetail.getAuthor());
+                        }
+                        if (videoDetail.getCoverImage() != null) {
+                            material.setCoverImage(videoDetail.getCoverImage());
+                        }
+                    }
+                }
+
+                // 下载并上传封面图（优先处理）
+                String thumbnailUrl = material.getCoverImage();
+                if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+                    String uploadedCoverUrl = downloadAndUploadThumbnail(thumbnailUrl, originalId);
+                    if (uploadedCoverUrl != null) {
+                        material.setCoverImage(uploadedCoverUrl);
+                        log.info("素材 {} 封面上传成功: {}", originalId, uploadedCoverUrl);
+                    }
+                }
+
+                // 下载视频并上传
                 List<String> uploadedUrls = new ArrayList<>();
                 if (originalUrl != null && !originalUrl.isEmpty()) {
                     uploadedUrls = downloadAndUploadVideo(originalUrl, originalId);
@@ -204,6 +265,39 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
 
         log.info("导入完成: 总计={}, 成功={}, 跳过={}, 失败={}", materials.size(), successCount, skipCount, failCount);
         return new ImportResult(materials.size(), successCount, failCount, skipCount);
+    }
+
+    /**
+     * 使用 opencli youtube video 命令获取视频详情
+     */
+    private CoreMaterial fetchVideoDetailByUrl(String videoUrl, String videoId, String sourceType) {
+        try {
+            // 执行 opencli youtube video 命令获取视频详情
+            OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
+                    .withModule(MODULE_YOUTUBE)
+                    .withSubCommand("video")
+                    .withArg(videoUrl)
+                    .withOption(OPTION_FORMAT_JSON, VALUE_JSON);
+
+            String jsonResult = executeCommand(builder);
+            log.info("获取到视频详情: {}", jsonResult);
+
+            // 解析返回的 field-value 格式数据
+            JsonNode rootNode = objectMapper.readTree(jsonResult);
+            if (rootNode.isArray() && isFieldValueFormat(rootNode)) {
+                JsonNode convertedNode = convertFieldValueToObject(rootNode);
+                CoreMaterial material = convertYoutubeToMaterial(convertedNode, sourceType);
+                if (material != null) {
+                    // 确保 videoId 和 originalUrl 设置正确
+                    material.setOriginalId(videoId);
+                    material.setOriginalUrl(videoUrl);
+                    return material;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("获取视频详情失败: {}", videoUrl, e);
+        }
+        return null;
     }
 
     /**
@@ -302,16 +396,30 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
 
     /**
      * 解析 YouTube JSON 数据
+     * 支持两种格式：
+     * 1. search 命令返回的普通对象数组：[{"title": "...", "thumbnail": "..."}]
+     * 2. video 命令返回的 field-value 数组：[{"field": "thumbnail", "value": "..."}]
      */
     private List<CoreMaterial> parseYoutubeJson(String youtubeJson, String sourceType) throws Exception {
         List<CoreMaterial> materials = new ArrayList<>();
         JsonNode rootNode = objectMapper.readTree(youtubeJson);
 
         if (rootNode.isArray()) {
-            for (JsonNode node : rootNode) {
-                CoreMaterial material = convertYoutubeToMaterial(node, sourceType);
+            // 判断是否是 video 命令返回的 field-value 格式
+            if (isFieldValueFormat(rootNode)) {
+                // 转换为普通对象格式
+                JsonNode convertedNode = convertFieldValueToObject(rootNode);
+                CoreMaterial material = convertYoutubeToMaterial(convertedNode, sourceType);
                 if (material != null) {
                     materials.add(material);
+                }
+            } else {
+                // search 命令返回的普通对象数组
+                for (JsonNode node : rootNode) {
+                    CoreMaterial material = convertYoutubeToMaterial(node, sourceType);
+                    if (material != null) {
+                        materials.add(material);
+                    }
                 }
             }
         } else {
@@ -322,6 +430,33 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
         }
 
         return materials;
+    }
+
+    /**
+     * 判断是否是 video 命令返回的 field-value 格式
+     */
+    private boolean isFieldValueFormat(JsonNode arrayNode) {
+        if (arrayNode.size() == 0) {
+            return false;
+        }
+        JsonNode firstNode = arrayNode.get(0);
+        return firstNode.has("field") && firstNode.has("value");
+    }
+
+    /**
+     * 将 field-value 数组转换为普通对象
+     * [{"field": "thumbnail", "value": "..."}] -> {"thumbnail": "..."}
+     */
+    private JsonNode convertFieldValueToObject(JsonNode fieldValueArray) {
+        Map<String, String> map = new HashMap<>();
+        for (JsonNode node : fieldValueArray) {
+            String field = getTextValue(node, "field");
+            String value = getTextValue(node, "value");
+            if (field != null && value != null) {
+                map.put(field, value);
+            }
+        }
+        return objectMapper.valueToTree(map);
     }
 
     /**
@@ -350,6 +485,12 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
         // 从 URL 提取视频 ID 作为 originalId
         String videoId = extractVideoId(url);
         material.setOriginalId(videoId != null ? videoId : url);
+
+        // 设置封面图片
+        String thumbnail = getTextValue(node, "thumbnail");
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            material.setCoverImage(thumbnail);
+        }
 
         // 设置内容描述（originalContent存储原始描述，content存储翻译后的内容）
 /*        String originalContent = buildContentDescription(node);

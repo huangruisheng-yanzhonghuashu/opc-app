@@ -21,4 +21,4 @@ opencli:
     # 代理协议 (http, https, socks5)
     protocol: http
     # 代理完整地址（如果配置此项，则优先使用，忽略 host/port/protocol）
-    url: https://localhost:7899
+    url: https://localhost:1082
