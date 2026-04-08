@@ -71,9 +71,9 @@ public abstract class AbstractCollectFetchService {
                 builder.isWindows() ? "Windows" : "Unix",
                 proxyDebug);
 
-        // 调试：打印完整的命令
+        // 调试：打印完整的命令（带引号格式，便于在 shell 中直接复制执行）
         if (log.isDebugEnabled()) {
-            log.debug("ProcessBuilder 命令: {}", String.join(" ", processBuilder.command()));
+            log.debug("ProcessBuilder 命令: {}", builder.toCommandString());
         }
 
         Process process = processBuilder.start();
@@ -91,8 +91,11 @@ public abstract class AbstractCollectFetchService {
         // 等待命令执行完成
         int exitCode = process.waitFor();
         if (exitCode != 0) {
+            String errorOutput = output.toString().trim();
             log.error("命令执行失败，退出码: {}", exitCode);
-            throw new RuntimeException("opencli 命令执行失败，退出码: " + exitCode);
+            log.error("命令: {}", builder.toCommandString());
+            log.error("错误输出: {}", errorOutput.isEmpty() ? "无输出" : errorOutput);
+            throw new RuntimeException("opencli 命令执行失败，退出码: " + exitCode + "，错误: " + errorOutput);
         }
 
         String result = output.toString().trim();

@@ -429,8 +429,9 @@ public class OpenCliCommandBuilder {
      * 添加命令参数，处理包含空格或特殊字符的情况
      */
     private void appendCommandArgument(StringBuilder cmdBuilder, String arg) {
-        // 如果参数包含空格或特殊字符，需要用引号括起来
-        if (arg.contains(" ") || arg.contains("&") || arg.contains("|") || arg.contains("<") || arg.contains(">") || arg.contains("(") || arg.contains(")")) {
+        // 如果参数包含空格或特殊字符（包括冒号:），需要用引号括起来
+        if (arg.contains(" ") || arg.contains("&") || arg.contains("|") || arg.contains("<") ||
+            arg.contains(">") || arg.contains("(") || arg.contains(")") || arg.contains(":")) {
             cmdBuilder.append(" \"").append(arg).append("\"");
         } else {
             cmdBuilder.append(" ").append(arg);
