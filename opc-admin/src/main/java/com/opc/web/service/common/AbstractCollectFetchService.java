@@ -52,9 +52,8 @@ public abstract class AbstractCollectFetchService {
         // 获取实际应用的代理设置（builder 中的优先级高于配置）
         String effectiveProxy = builder.getProxyUrl();
         if (effectiveProxy == null || effectiveProxy.isEmpty()) {
-            if (openCliProperties != null && openCliProperties.getProxy() != null && openCliProperties.getProxy().isEnabled()) {
-                effectiveProxy = openCliProperties.getProxyUrl();
-            }
+            // 使用命令行代理配置
+            effectiveProxy = openCliProperties != null ? openCliProperties.getCommandProxyUrl() : null;
         }
 
         // 打印实际设置的环境变量（用于调试）

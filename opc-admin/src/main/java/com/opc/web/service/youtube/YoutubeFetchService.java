@@ -147,12 +147,11 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
      * 获取 HTTP 代理配置
      */
     private Proxy getHttpProxy() {
-        if (openCliProperties == null || openCliProperties.getProxy() == null
-                || !openCliProperties.getProxy().isEnabled()) {
+        if (openCliProperties == null) {
             return null;
         }
 
-        String proxyUrl = openCliProperties.getProxyUrl();
+        String proxyUrl = openCliProperties.getHttpProxyUrl();
         if (proxyUrl == null || proxyUrl.isEmpty()) {
             return null;
         }
@@ -164,10 +163,10 @@ public class YoutubeFetchService extends AbstractCollectFetchService {
             int port = url.getPort() > 0 ? url.getPort() : 7890;
 
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
-            log.debug("使用代理: {}:{}", host, port);
+            log.debug("使用 HTTP 代理: {}:{}", host, port);
             return proxy;
         } catch (Exception e) {
-            log.warn("解析代理地址失败: {}", proxyUrl, e);
+            log.warn("解析 HTTP 代理地址失败: {}", proxyUrl, e);
             return null;
         }
     }

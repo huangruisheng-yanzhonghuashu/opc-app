@@ -28,7 +28,7 @@ public class ShortUrlResolver {
             try {
                 URL url = new URL(currentUrl);
                 
-                // 使用 opencli.proxy 配置
+                // 使用 opencli.httpProxy 配置
                 Proxy proxy = getHttpProxy();
                 if (proxy != null) {
                     connection = (HttpURLConnection) url.openConnection(proxy);
@@ -65,12 +65,11 @@ public class ShortUrlResolver {
      * 获取 HTTP 代理配置
      */
     private static Proxy getHttpProxy() {
-        if (openCliProperties == null || openCliProperties.getProxy() == null
-                || !openCliProperties.getProxy().isEnabled()) {
+        if (openCliProperties == null) {
             return null;
         }
 
-        String proxyUrl = openCliProperties.getProxyUrl();
+        String proxyUrl = openCliProperties.getHttpProxyUrl();
         if (proxyUrl == null || proxyUrl.isEmpty()) {
             return null;
         }

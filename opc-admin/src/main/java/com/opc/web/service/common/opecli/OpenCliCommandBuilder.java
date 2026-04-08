@@ -553,14 +553,14 @@ public class OpenCliCommandBuilder {
     }
 
     /**
-     * 根据配置自动应用代理设置
+     * 根据配置自动应用代理设置（使用命令行代理）
      *
      * @param properties OpenCLI 配置属性
      * @return 当前构建器
      */
     public OpenCliCommandBuilder applyProxyFromConfig(OpenCliProperties properties) {
-        if (properties != null && properties.getProxy() != null && properties.getProxy().isEnabled()) {
-            String proxyUrl = properties.getProxyUrl();
+        if (properties != null) {
+            String proxyUrl = properties.getCommandProxyUrl();
             if (proxyUrl != null && !proxyUrl.isEmpty()) {
                 this.proxyUrl = proxyUrl;
             }

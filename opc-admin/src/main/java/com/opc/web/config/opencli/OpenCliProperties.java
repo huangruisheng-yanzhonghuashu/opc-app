@@ -32,9 +32,14 @@ public class OpenCliProperties {
     private String ytDlpPath;
 
     /**
-     * 代理配置
+     * 命令行代理配置（用于 opencli、yt-dlp 等命令行工具）
      */
-    private ProxyConfig proxy = new ProxyConfig();
+    private ProxyConfig commandProxy = new ProxyConfig();
+
+    /**
+     * HTTP 代理配置（用于 HTTP 下载、API 请求等）
+     */
+    private ProxyConfig httpProxy = new ProxyConfig();
 
     public String getExecutablePath() {
         return executablePath;
@@ -52,34 +57,58 @@ public class OpenCliProperties {
         this.ytDlpPath = ytDlpPath;
     }
 
-    public ProxyConfig getProxy() {
-        return proxy;
+    public ProxyConfig getCommandProxy() {
+        return commandProxy;
     }
 
-    public void setProxy(ProxyConfig proxy) {
-        this.proxy = proxy;
+    public void setCommandProxy(ProxyConfig commandProxy) {
+        this.commandProxy = commandProxy;
+    }
+
+    public ProxyConfig getHttpProxy() {
+        return httpProxy;
+    }
+
+    public void setHttpProxy(ProxyConfig httpProxy) {
+        this.httpProxy = httpProxy;
     }
 
     /**
-     * 获取完整的代理 URL
+     * 获取命令行代理 URL
      *
      * @return 代理地址，如 http://127.0.0.1:7890，如果未启用则返回 null
      */
-    public String getProxyUrl() {
-        if (proxy == null || !proxy.isEnabled()) {
+    public String getCommandProxyUrl() {
+        return getProxyUrlFromConfig(commandProxy);
+    }
+
+    /**
+     * 获取 HTTP 代理 URL
+     *
+     * @return 代理地址，如 http://127.0.0.1:7890，如果未启用则返回 null
+     */
+    public String getHttpProxyUrl() {
+        return getProxyUrlFromConfig(httpProxy);
+    }
+
+    /**
+     * 从配置中获取代理 URL
+     */
+    private String getProxyUrlFromConfig(ProxyConfig config) {
+        if (config == null || !config.isEnabled()) {
             return null;
         }
         // 如果配置了完整的 url，优先使用
-        if (proxy.getUrl() != null && !proxy.getUrl().isEmpty()) {
-            return proxy.getUrl();
+        if (config.getUrl() != null && !config.getUrl().isEmpty()) {
+            return config.getUrl();
         }
         // 否则根据 host/port/protocol 构建
-        if (proxy.getHost() == null || proxy.getHost().isEmpty()) {
+        if (config.getHost() == null || config.getHost().isEmpty()) {
             return null;
         }
-        String protocol = proxy.getProtocol() != null ? proxy.getProtocol() : "http";
-        int port = proxy.getPort() > 0 ? proxy.getPort() : 7890;
-        return String.format("%s://%s:%d", protocol, proxy.getHost(), port);
+        String protocol = config.getProtocol() != null ? config.getProtocol() : "http";
+        int port = config.getPort() > 0 ? config.getPort() : 7890;
+        return String.format("%s://%s:%d", protocol, config.getHost(), port);
     }
 
     /**
