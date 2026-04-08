@@ -302,7 +302,7 @@
             <el-row>
                <el-col :span="12">
                   <el-form-item label="素材类型" prop="materialType">
-                     <el-select v-model="form.materialType" placeholder="请选择素材类型" style="width: 100%">
+                     <el-select v-model="form.materialType" placeholder="请选择素材类型" style="width: 100%" @change="handleMaterialTypeChange">
                         <el-option label="帖子" value="post" />
                         <el-option label="文章" value="article" />
                      </el-select>
@@ -901,6 +901,22 @@ function getCategoryList() {
   })
 }
 
+
+
+function handleMaterialTypeChange(value) {
+  // 切换素材类型时，内容保持不变，不进行任何转换
+  // 仅UI会根据materialType自动切换编辑器（textarea或富文本编辑器）
+}
+
+function normalizeContentByMaterialType() {
+  if (!form.value.content) return
+  if (form.value.materialType === 'post') {
+    // 帖子类型：去除HTML标签，保留纯文本
+    form.value.content = form.value.content.replace(/<[^>]*>/g, '')
+  }
+  // 文章类型：保持HTML不变
+}
+
 // 二级分类搜索
 function handleCategoryQuery() {
   categoryQueryParams.value.pageNum = 1
@@ -958,6 +974,8 @@ function handleCategoryUpdate(row) {
   })
 }
 
+
+
 // 删除二级分类
 function handleCategoryDelete(row) {
   const ids = row.id ? [row.id] : categoryIds.value
@@ -994,6 +1012,8 @@ function submitCategoryForm() {
   })
 }
 
+
+
 function getList() {
   loading.value = true
   listMaterial(queryParams.value).then(response => {
@@ -1003,11 +1023,15 @@ function getList() {
   })
 }
 
+
+
 function getTagOptions() {
   getAllActiveTags().then(response => {
     tagOptions.value = response.data || []
   })
 }
+
+
 
 function cancel() {
   open.value = false
@@ -1163,6 +1187,8 @@ function handleView(row) {
   })
 }
 
+
+
 function handleUpdate(row) {
   const id = row.id || ids.value
   getTagOptions()
@@ -1171,7 +1197,12 @@ function handleUpdate(row) {
     const data = response.data
     // 确保materialType有默认值（兼容旧数据）
     if (data.materialType === undefined || data.materialType === null || data.materialType === '') {
-      data.materialType = 'post'
+      // 根据内容智能猜测素材类型：包含HTML标签的为文章，否则为帖子
+      if (data.content && /<[^>]*>/.test(data.content)) {
+        data.materialType = 'article'
+      } else {
+        data.materialType = 'post'
+      }
     }
     // 确保issueNo有默认值
     if (data.issueNo === undefined || data.issueNo === null) {
@@ -1220,10 +1251,8 @@ function handleUpdate(row) {
         remark: undefined,
         ...data // 展开 data，覆盖默认值
       }
-      // 再次确保 materialType 正确（防止 data 中有空值覆盖）
-      if (!form.value.materialType) {
-        form.value.materialType = 'post'
-      }
+      // 根据素材类型规范化内容
+      normalizeContentByMaterialType()
       // 加载媒体列表（只要是帖子类型就加载）
       if (form.value.materialType === 'post') {
         getMaterialMedia(id).then(mediaResponse => {
@@ -1238,6 +1267,8 @@ function handleUpdate(row) {
     })
   })
 }
+
+
 
 function handleDelete() {
   const materialIds = ids.value
@@ -1303,6 +1334,8 @@ function submitForm() {
     }
   })
 }
+
+
 
 getTagOptions()
 queryParams.value.packageType = 0

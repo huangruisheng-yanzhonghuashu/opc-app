@@ -1,5 +1,6 @@
 package com.opc.framework.aspectj;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson2.JSON;
 import com.opc.common.annotation.Log;
+import com.opc.common.annotation.MemberAnonymous;
 import com.opc.common.core.domain.entity.SysUser;
 import com.opc.common.core.domain.model.LoginUser;
 import com.opc.common.core.text.Convert;
@@ -89,8 +91,15 @@ public class LogAspect
     {
         try
         {
+            // 检查是否为会员匿名访问接口，如果是则跳过获取用户信息
+            boolean isMemberAnonymous = isMemberAnonymousMethod(joinPoint);
+            
             // 获取当前的用户
-            LoginUser loginUser = SecurityUtils.getLoginUser();
+            LoginUser loginUser = null;
+            if (!isMemberAnonymous)
+            {
+                loginUser = SecurityUtils.getLoginUser();
+            }
 
             // *========数据库日志=========*//
             SysOperLog operLog = new SysOperLog();
@@ -107,6 +116,10 @@ public class LogAspect
                 {
                     operLog.setDeptName(currentUser.getDept().getDeptName());
                 }
+            }
+            else if (isMemberAnonymous)
+            {
+                operLog.setOperName("会员");
             }
 
             if (e != null)
@@ -137,6 +150,25 @@ public class LogAspect
         {
             TIME_THREADLOCAL.remove();
         }
+    }
+
+    /**
+     * 判断是否为会员匿名访问方法
+     */
+    private boolean isMemberAnonymousMethod(JoinPoint joinPoint)
+    {
+        if (joinPoint.getTarget() instanceof org.springframework.web.servlet.mvc.Controller)
+        {
+            Method[] methods = joinPoint.getTarget().getClass().getMethods();
+            for (Method method : methods)
+            {
+                if (method.getName().equals(joinPoint.getSignature().getName()))
+                {
+                    return method.getAnnotation(MemberAnonymous.class) != null;
+                }
+            }
+        }
+        return false;
     }
 
     /**

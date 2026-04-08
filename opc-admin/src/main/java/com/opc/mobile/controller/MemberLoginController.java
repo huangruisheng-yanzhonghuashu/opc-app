@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.opc.common.annotation.Log;
+import com.opc.common.annotation.MemberAnonymous;
 import com.opc.common.constant.Constants;
 import com.opc.common.core.domain.AjaxResult;
 import com.opc.common.enums.BusinessType;
@@ -32,6 +33,7 @@ public class MemberLoginController
     private MemberTokenService memberTokenService;
 
     @Operation(summary = "会员登录", description = "会员使用邮箱和密码登录，成功返回JWT令牌")
+    @MemberAnonymous
     @Log(title = "会员登录", businessType = BusinessType.OTHER)
     @PostMapping("/login")
     public AjaxResult login(@Validated @RequestBody MemberLoginDTO loginDTO, HttpServletResponse response)
@@ -45,6 +47,7 @@ public class MemberLoginController
     }
 
     @Operation(summary = "会员登出", description = "退出当前会员登录")
+    @MemberAnonymous
     @Log(title = "会员登出", businessType = BusinessType.OTHER)
     @PostMapping("/logout")
     public AjaxResult logout()
