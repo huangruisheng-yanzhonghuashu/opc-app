@@ -60,6 +60,9 @@ public final class OpenCliConstants {
     /** 读取详情子命令 */
     public static final String SUBCOMMAND_READ = "read";
 
+    /** 文章子命令 */
+    public static final String SUBCOMMAND_ARTICLE = "article";
+
     // ==================== 参数选项 ====================
 
     /** JSON 格式输出选项 */

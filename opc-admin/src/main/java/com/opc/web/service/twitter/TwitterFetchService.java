@@ -12,6 +12,8 @@ import com.opc.web.service.common.AbstractCollectFetchService;
 import com.opc.web.service.twitter.v2.TwitterApiV2Service;
 import com.opc.web.service.translate.TranslateUtils;
 import com.opc.common.utils.ShortUrlResolver;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -159,23 +161,42 @@ public class TwitterFetchService extends AbstractCollectFetchService {
                     }
                 }
 
-                // 解析短链接
+                // 解析短链接，检测是否是文章URL
+                String originalUrl = material.getOriginalUrl();
+                boolean isArticle = false;
                 List<String> mediaUrls = extractUrls(material.getContent());
-                for (String mediaUrl : mediaUrls) {
+                //没法解析文章或图和视频的短链接
+                /*for (String mediaUrl : mediaUrls) {
                     String resolvedUrl = resolveShortUrl(mediaUrl);
                     log.debug("解析短链接: {} -> {}", mediaUrl, resolvedUrl);
-                }
+                    String newResolvedUrl = resolveShortUrl(resolvedUrl);
+                    log.debug("解析短链接: {} -> {}", newResolvedUrl, resolvedUrl);
+
+                    // 检测是否是 Twitter/X 文章 URL
+                    if (isTwitterArticleUrl(newResolvedUrl)) {
+                        log.info("检测到 Twitter 文章 URL: {}", newResolvedUrl);
+                        // 获取文章并转换为 HTML
+                        String articleHtml = fetchTwitterArticleAsHtml(newResolvedUrl);
+                        if (articleHtml != null && !articleHtml.isEmpty()) {
+                            material.setContent(articleHtml);
+                            material.setOriginalContent(articleHtml);
+                            material.setMaterialType("article");
+                            isArticle = true;
+                        }
+                    }
+                }*/
 
                 // 执行带代理的下载命令并上传文件，获取内容类型
                 String contentType = CONTENT_TYPE_TEXT;
                 List<String> uploadedUrls = new ArrayList<>();
-                String originalUrl = material.getOriginalUrl();
-                if (originalUrl != null && !originalUrl.isEmpty()) {
+                if (!isArticle && originalUrl != null && !originalUrl.isEmpty() && !mediaUrls.isEmpty()) {
                     uploadedUrls = downloadWithProxyAndUpload(originalUrl, material.getOriginalId());
                     if (!uploadedUrls.isEmpty()) {
                         log.info("素材 {} 上传了 {} 个文件到文件服务器", material.getOriginalId(), uploadedUrls.size());
                         contentType = determineContentType(uploadedUrls);
                     }
+                } else if (isArticle) {
+                    contentType = "article";
                 }
 
                 // 设置内容类型并保存素材
@@ -197,6 +218,87 @@ public class TwitterFetchService extends AbstractCollectFetchService {
 
         log.info("导入完成: 总计={}, 成功={}, 跳过={}, 失败={}", materials.size(), successCount, skipCount, failCount);
         return new ImportResult(materials.size(), successCount, failCount, skipCount);
+    }
+
+    /**
+     * 判断是否是 Twitter/X 文章 URL
+     * 例如: https://x.com/thedankoe/article/2010042119121957316
+     */
+    private boolean isTwitterArticleUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return false;
+        }
+        return url.matches("https?://(x\\.com|twitter\\.com)/[^/]+/article/\\d+");
+    }
+
+    /**
+     * 获取 Twitter 文章内容并转换为 HTML
+     * 执行命令: opencli twitter article <articleId> -f md
+     *
+     * @param articleUrl 文章URL
+     * @return HTML 格式的内容
+     */
+    private String fetchTwitterArticleAsHtml(String articleUrl) {
+        try {
+            // 从 URL 中提取文章 ID
+            String articleId = extractArticleId(articleUrl);
+            if (articleId == null || articleId.isEmpty()) {
+                log.error("无法从 URL 中提取文章 ID: {}", articleUrl);
+                return null;
+            }
+
+            // 构建命令: opencli twitter article <articleId> -f md
+            OpenCliCommandBuilder builder = new OpenCliCommandBuilder(openCliProperties)
+                    .withModule(MODULE_TWITTER)
+                    .withSubCommand(SUBCOMMAND_ARTICLE)
+                    .withArg(articleId)
+                    .withOption(OPTION_FORMAT_JSON, "md");
+
+            builder.applyProxyFromConfig(openCliProperties);
+
+            String markdownContent = executeCommand(builder);
+            if (markdownContent == null || markdownContent.isEmpty()) {
+                log.error("获取 Twitter 文章失败: {}", articleUrl);
+                return null;
+            }
+
+            // 将 Markdown 转换为 HTML
+            String htmlContent = markdownToHtml(markdownContent);
+            log.info("成功获取并转换 Twitter 文章: {}, 内容长度: {}", articleUrl, htmlContent.length());
+            return htmlContent;
+
+        } catch (Exception e) {
+            log.error("获取 Twitter 文章失败, URL: {}", articleUrl, e);
+            return null;
+        }
+    }
+
+    /**
+     * 从文章 URL 中提取文章 ID
+     * 例如: https://x.com/thedankoe/article/2010042119121957316 -> 2010042119121957316
+     */
+    private String extractArticleId(String articleUrl) {
+        if (articleUrl == null || articleUrl.isEmpty()) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile("/article/(\\d+)");
+        Matcher matcher = pattern.matcher(articleUrl);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    /**
+     * 将 Markdown 转换为 HTML
+     */
+    private String markdownToHtml(String markdown) {
+        if (markdown == null || markdown.isEmpty()) {
+            return "";
+        }
+        Parser parser = Parser.builder().build();
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        return renderer.render(parser.parse(markdown));
     }
 
     /**

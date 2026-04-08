@@ -111,6 +111,13 @@
             <version>3.14.5</version>
         </dependency>
 
+        <!-- CommonMark for Markdown to HTML conversion -->
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>0.21.0</version>
+        </dependency>
+
         <!-- 测试依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
