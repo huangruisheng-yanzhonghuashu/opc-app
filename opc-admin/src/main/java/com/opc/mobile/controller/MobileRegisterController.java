@@ -225,7 +225,7 @@ public class MobileRegisterController extends MobileBaseController {
      */
     private String buildEmailContent(String code) {
         return "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>" +
-                "<h2 style='color: #333; text-align: center;'>用户注册</h2>" +
+                "<h2 style='color: #333; text-align: center;'>nexa用户注册</h2>" +
                 "<p style='color: #666; font-size: 14px;'>尊敬的用户，您好！</p>" +
                 "<p style='color: #666; font-size: 14px;'>您正在进行账号注册，验证码为：</p>" +
                 "<div style='background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0; border-radius: 3px;'>" +
