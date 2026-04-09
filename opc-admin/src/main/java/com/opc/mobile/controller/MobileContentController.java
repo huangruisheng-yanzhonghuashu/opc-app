@@ -111,13 +111,16 @@ public class MobileContentController extends BaseController
         CoreMaterialVO vo = new CoreMaterialVO();
         BeanUtils.copyProperties(material, vo);
 
-        // 查询素材媒体文件列表并转换为VO
+        // 查询素材媒体文件列表并转换为VO（根据contentType过滤）
         List<CoreMaterialMedia> mediaList = materialMediaService.selectMaterialMediaByMaterialId(id);
-        List<CoreMaterialMediaVO> mediaVOList = mediaList.stream().map(media -> {
-            CoreMaterialMediaVO mediaVO = new CoreMaterialMediaVO();
-            BeanUtils.copyProperties(media, mediaVO);
-            return mediaVO;
-        }).toList();
+        String contentType = material.getContentType();
+        List<CoreMaterialMediaVO> mediaVOList = mediaList.stream()
+            .filter(media -> media.getMediaType() != null && media.getMediaType().equals(contentType))
+            .map(media -> {
+                CoreMaterialMediaVO mediaVO = new CoreMaterialMediaVO();
+                BeanUtils.copyProperties(media, mediaVO);
+                return mediaVO;
+            }).toList();
         vo.setMedias(mediaVOList);
 
         return AjaxResult.success(vo);
