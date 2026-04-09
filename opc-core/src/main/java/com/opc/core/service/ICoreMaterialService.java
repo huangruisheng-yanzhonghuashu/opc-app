@@ -93,4 +93,12 @@ public interface ICoreMaterialService
      * @return 素材列表（排除最新期数）
      */
     List<CoreMaterial> selectMaterialListByCategoryIdExcludeLatest(Long categoryId, String status);
+
+    /**
+     * 批量上架素材
+     *
+     * @param ids 素材ID数组
+     * @return 影响行数
+     */
+    int batchOnlineMaterial(Long[] ids);
 }

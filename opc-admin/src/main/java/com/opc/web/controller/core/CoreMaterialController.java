@@ -143,4 +143,13 @@ public class CoreMaterialController extends BaseController
     {
         return toAjax(materialMediaService.deleteMaterialMediaById(mediaId));
     }
+
+    @Operation(summary = "批量上架素材", description = "批量将素材状态改为上架")
+    @PreAuthorize("@ss.hasPermi('core:material:changeStatus')")
+    @Log(title = "素材管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/batchOnline/{ids}")
+    public AjaxResult batchOnline(@PathVariable Long[] ids)
+    {
+        return toAjax(materialService.batchOnlineMaterial(ids));
+    }
 }

@@ -108,6 +108,16 @@
                v-hasPermi="['core:material:remove']"
             >删除</el-button>
          </el-col>
+         <el-col :span="1.5">
+            <el-button
+               type="success"
+               plain
+               icon="CircleCheck"
+               :disabled="multiple"
+               @click="handleBatchOnline"
+               v-hasPermi="['core:material:changeStatus']"
+            >批量上架</el-button>
+         </el-col>
          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
 
@@ -595,7 +605,7 @@
 </template>
 
 <script setup name="Material">
-import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia, saveMaterialMedia, deleteMaterialMedia } from "@/api/core/material"
+import { listMaterial, addMaterial, getMaterial, updateMaterial, delMaterial, changeMaterialStatus, changeMaterialTop, getMaterialMedia, saveMaterialMedia, deleteMaterialMedia, batchOnlineMaterial } from "@/api/core/material"
 import { getAllActiveTags } from "@/api/core/tag"
 import { listCategoryByPackageType, listMaterialCategory, addMaterialCategory, getMaterialCategory, updateMaterialCategory, delMaterialCategory } from "@/api/core/materialCategory"
 import { User, Star, Medal, Sunrise, Document, Collection, EditPen, Picture, Setting, Timer } from '@element-plus/icons-vue'
@@ -1153,6 +1163,16 @@ function handleChangeTop(row) {
   }).then(() => {
     getList()
     proxy.$modal.msgSuccess(text + "成功")
+  }).catch(() => {})
+}
+
+function handleBatchOnline() {
+  const materialIds = ids.value
+  proxy.$modal.confirm('是否确认批量上架素材编号为"' + materialIds + '"的数据项？').then(function() {
+    return batchOnlineMaterial(materialIds)
+  }).then(() => {
+    getList()
+    proxy.$modal.msgSuccess("批量上架成功")
   }).catch(() => {})
 }
 

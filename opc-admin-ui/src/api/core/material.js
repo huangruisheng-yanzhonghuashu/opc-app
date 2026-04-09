@@ -75,3 +75,10 @@ export function deleteMaterialMedia(mediaId) {
     method: 'delete'
   })
 }
+
+export function batchOnlineMaterial(ids) {
+  return request({
+    url: '/core/material/batchOnline/' + ids,
+    method: 'put'
+  })
+}
