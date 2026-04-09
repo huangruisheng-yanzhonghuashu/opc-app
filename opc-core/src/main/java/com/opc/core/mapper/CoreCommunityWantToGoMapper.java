@@ -101,4 +101,13 @@ public interface CoreCommunityWantToGoMapper
      * @return 结果
      */
     public int updateCommunityWantToGoCount(Long communityId);
+
+    /**
+     * 根据会员ID和社区ID列表查询想去记录
+     *
+     * @param memberId 会员ID
+     * @param communityIds 社区ID列表
+     * @return 列表
+     */
+    public List<CoreCommunityWantToGo> selectByMemberAndCommunityIds(Long memberId, List<Long> communityIds);
 }

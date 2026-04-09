@@ -164,4 +164,14 @@ public class CoreCommunityVisitedServiceImpl implements ICoreCommunityVisitedSer
         }
         return cancel(existing.getId());
     }
+
+    @Override
+    public List<CoreCommunityVisited> selectByMemberAndCommunityIds(Long memberId, List<Long> communityIds)
+    {
+        if (memberId == null || communityIds == null || communityIds.isEmpty())
+        {
+            return List.of();
+        }
+        return mapper.selectByMemberAndCommunityIds(memberId, communityIds);
+    }
 }

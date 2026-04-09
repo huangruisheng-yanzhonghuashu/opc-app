@@ -77,4 +77,13 @@ public interface CoreCommunityReviewMapper
      * @return 结果
      */
     public int updateCommunityReviewStats(Long communityId);
+
+    /**
+     * 根据会员ID和社区ID列表查询评价记录
+     *
+     * @param memberId 会员ID
+     * @param communityIds 社区ID列表
+     * @return 列表
+     */
+    public List<CoreCommunityReview> selectByMemberAndCommunityIds(Long memberId, List<Long> communityIds);
 }

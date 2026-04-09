@@ -193,4 +193,21 @@ public class CoreCommunityReviewServiceImpl implements ICoreCommunityReviewServi
         }
         return result;
     }
+
+    /**
+     * 根据会员ID和社区ID列表查询评价记录
+     *
+     * @param memberId 会员ID
+     * @param communityIds 社区ID列表
+     * @return 列表
+     */
+    @Override
+    public List<CoreCommunityReview> selectByMemberAndCommunityIds(Long memberId, List<Long> communityIds)
+    {
+        if (memberId == null || communityIds == null || communityIds.isEmpty())
+        {
+            return List.of();
+        }
+        return reviewMapper.selectByMemberAndCommunityIds(memberId, communityIds);
+    }
 }

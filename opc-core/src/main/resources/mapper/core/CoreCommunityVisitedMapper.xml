@@ -130,4 +130,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		WHERE c.id = #{communityId}
 	</update>
 
+	<select id="selectByMemberAndCommunityIds" resultMap="CoreCommunityVisitedResult">
+		<include refid="selectVo"/>
+		WHERE member_id = #{memberId}
+		  AND community_id IN
+		<foreach collection="communityIds" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		AND status = '0'
+	</select>
+
 </mapper>

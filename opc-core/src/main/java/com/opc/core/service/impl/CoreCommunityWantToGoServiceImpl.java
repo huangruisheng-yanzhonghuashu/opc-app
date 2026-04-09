@@ -161,4 +161,14 @@ public class CoreCommunityWantToGoServiceImpl implements ICoreCommunityWantToGoS
         }
         return cancel(existing.getId());
     }
+
+    @Override
+    public List<CoreCommunityWantToGo> selectByMemberAndCommunityIds(Long memberId, List<Long> communityIds)
+    {
+        if (memberId == null || communityIds == null || communityIds.isEmpty())
+        {
+            return List.of();
+        }
+        return mapper.selectByMemberAndCommunityIds(memberId, communityIds);
+    }
 }

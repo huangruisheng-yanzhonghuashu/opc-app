@@ -25,6 +25,7 @@ import com.opc.core.service.ICoreCommunityReviewService;
 import com.opc.core.service.ICoreCommunityWantToGoService;
 import com.opc.core.service.ICoreCommunityVisitedService;
 import com.opc.core.service.MemberTokenService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opc.mobile.dto.CommunityIdDTO;
 import com.opc.mobile.dto.CommunityMemberDTO;
 import com.opc.mobile.dto.CommunityQueryDTO;
@@ -57,17 +58,39 @@ public class MemberCommunityController extends BaseController
     @Autowired
     private MemberTokenService memberTokenService;
 
-    @Operation(summary = "社区列表", description = "查询全部社区列表，按省份分组")
+    @Operation(summary = "社区列表", description = "查询全部社区列表，按省份分组，需要会员登录")
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreCommunityVO.class)))
+    @MemberLogin
     @PostMapping("/list")
-    public AjaxResult list(@RequestBody CommunityQueryDTO dto)
+    public AjaxResult list(HttpServletRequest request)
     {
         CoreCommunity community = new CoreCommunity();
-        if (dto != null) {
-            BeanUtils.copyProperties(dto, community);
-        }
         community.setStatus("0");
         List<CoreCommunity> list = communityService.selectCommunityList(community);
+
+        // 获取当前登录会员
+        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
+        Long memberId = loginUser.getMemberId();
+
+        // 批量查询会员的关联状态（性能优化）
+        List<Long> communityIds = list.stream()
+                .map(CoreCommunity::getId)
+                .collect(Collectors.toList());
+
+        // 查询想去记录
+        List<CoreCommunityWantToGo> wantToGoList = wantToGoService.selectByMemberAndCommunityIds(memberId, communityIds);
+        Map<Long, CoreCommunityWantToGo> wantToGoMap = wantToGoList.stream()
+                .collect(Collectors.toMap(CoreCommunityWantToGo::getCommunityId, w -> w, (w1, w2) -> w1));
+
+        // 查询去过记录
+        List<CoreCommunityVisited> visitedList = visitedService.selectByMemberAndCommunityIds(memberId, communityIds);
+        Map<Long, CoreCommunityVisited> visitedMap = visitedList.stream()
+                .collect(Collectors.toMap(CoreCommunityVisited::getCommunityId, v -> v, (v1, v2) -> v1));
+
+        // 查询评价记录
+        List<CoreCommunityReview> reviewList = reviewService.selectByMemberAndCommunityIds(memberId, communityIds);
+        Map<Long, CoreCommunityReview> reviewMap = reviewList.stream()
+                .collect(Collectors.toMap(CoreCommunityReview::getCommunityId, r -> r, (r1, r2) -> r1));
 
         // 按省份分组并转换为VO
         Map<String, List<CoreCommunityVO>> groupedByProvince = list.stream()
@@ -76,6 +99,21 @@ public class MemberCommunityController extends BaseController
                         Collectors.mapping(c -> {
                             CoreCommunityVO vo = new CoreCommunityVO();
                             BeanUtils.copyProperties(c, vo);
+                            Long communityId = c.getId();
+
+                            // 设置会员关联状态
+                            vo.setWantToGo(wantToGoMap.containsKey(communityId));
+                            vo.setVisited(visitedMap.containsKey(communityId));
+
+                            CoreCommunityReview review = reviewMap.get(communityId);
+                            if (review != null) {
+                                vo.setReviewed(true);
+                                vo.setMyRating(review.getRating());
+                            } else {
+                                vo.setReviewed(false);
+                                vo.setMyRating(null);
+                            }
+
                             return vo;
                         }, Collectors.toList())
                 ));
