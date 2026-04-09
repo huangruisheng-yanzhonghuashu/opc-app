@@ -3,6 +3,7 @@ package com.opc.mobile.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -18,9 +19,11 @@ public class MobileRegisterDTO {
     @Size(min = 2, max = 20, message = "用户名长度必须在2到20个字符之间")
     private String username;
 
-    @Schema(description = "用户密码", required = true, example = "password123")
+    @Schema(description = "用户密码", required = true, example = "Password123!")
     @NotBlank(message = "密码不能为空")
-    @Size(min = 5, max = 20, message = "密码长度必须在5到20个字符之间")
+    @Size(min = 8, max = 20, message = "密码长度必须在8到20个字符之间")
+    @Pattern(regexp = "^(?:(?=.*[a-z])(?=.*[A-Z])|(?=.*[a-z])(?=.*\\d)|(?=.*[a-z])(?=.*[^a-zA-Z0-9])|(?=.*[A-Z])(?=.*\\d)|(?=.*[A-Z])(?=.*[^a-zA-Z0-9])|(?=.*\\d)(?=.*[^a-zA-Z0-9])).{8,20}$",
+             message = "密码必须包含小写字母、大写字母、数字、特殊字符中的至少两种")
     private String password;
 
     @Schema(description = "邮箱地址", required = true, example = "zhangsan@example.com")
