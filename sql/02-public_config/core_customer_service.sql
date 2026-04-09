@@ -26,7 +26,7 @@ create table core_customer_service (
 -- ----------------------------
 
 -- 菜单：客服配置（上级：公共配置 menu_id=30000，排序4）
-insert into sys_menu values('30004', '客服配置', '30000', '4', 'customerService', 'core/customerService/index', '', '', 1, 0, 'C', '0', '0', 'core:customerService:list', 'customer-service', 'admin', sysdate(), '', null, '客服配置菜单');
+insert into sys_menu values('30004', '客服配置', '30000', '4', 'customerService', 'core/customerService/index', '', '', 1, 0, 'C', '0', '0', 'core:customerService:list', 'service', 'admin', sysdate(), '', null, '客服配置菜单');
 
 -- ----------------------------
 -- 客服配置权限按钮
