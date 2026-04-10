@@ -142,7 +142,8 @@ public class CoreActivationCodeServiceImpl implements ICoreActivationCodeService
                 throw new RuntimeException("只有未使用的激活码才能发送，ID：" + id);
             }
         }
-        return coreActivationCodeMapper.batchUpdateStatus(ids, "1"); // 1-已发送-未使用
+        // 批量更新状态和发送时间
+        return coreActivationCodeMapper.batchUpdateStatusAndSendTime(ids, "1", DateUtils.getNowDate()); // 1-已发送-未使用
     }
 
     /**

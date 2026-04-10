@@ -27,8 +27,8 @@ public class CoreActivationCode extends BaseEntity {
     private Integer validDays;
 
     /** 过期时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Excel(name = "过期时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Excel(name = "过期时间", width = 20, dateFormat = "yyyy-MM-dd")
     private Date expireTime;
 
     /** 渠道标签 */

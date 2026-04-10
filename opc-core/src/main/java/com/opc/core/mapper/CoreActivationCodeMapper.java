@@ -1,5 +1,6 @@
 package com.opc.core.mapper;
 
+import java.util.Date;
 import java.util.List;
 import com.opc.core.domain.CoreActivationCode;
 import org.apache.ibatis.annotations.Param;
@@ -83,4 +84,14 @@ public interface CoreActivationCodeMapper {
      * @return 结果
      */
     public int batchUpdateStatus(@Param("ids") Long[] ids, @Param("status") String status);
+
+    /**
+     * 批量修改状态和发送时间
+     *
+     * @param ids 主键数组
+     * @param status 状态
+     * @param sendTime 发送时间
+     * @return 结果
+     */
+    public int batchUpdateStatusAndSendTime(@Param("ids") Long[] ids, @Param("status") String status, @Param("sendTime") Date sendTime);
 }

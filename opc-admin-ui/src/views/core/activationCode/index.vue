@@ -99,9 +99,9 @@
       <el-table-column label="渠道标签" align="center" prop="channelTag" />
       <el-table-column label="批次号" align="center" prop="batchNo" width="180" />
       <el-table-column label="有效天数" align="center" prop="validDays" width="80" />
-      <el-table-column label="过期时间" align="center" prop="expireTime" width="180">
+      <el-table-column label="过期时间" align="center" prop="expireTime" width="120">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.expireTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.expireTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="120">
@@ -342,6 +342,10 @@ function handleUpdate(row) {
     return;
   }
   form.value.ids = updateIds;
+  // 单条修改时，回显当前渠道标签
+  if (row.id) {
+    form.value.channelTag = row.channelTag;
+  }
   open.value = true;
 }
 

@@ -124,6 +124,17 @@
         </foreach>
     </update>
 
+    <update id="batchUpdateStatusAndSendTime">
+        update core_activation_code
+        set status = #{status},
+            send_time = #{sendTime},
+            update_time = sysdate()
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
     <delete id="deleteCoreActivationCodeById" parameterType="Long">
         delete from core_activation_code where id = #{id}
     </delete>
