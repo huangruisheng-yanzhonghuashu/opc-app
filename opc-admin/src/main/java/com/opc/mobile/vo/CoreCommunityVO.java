@@ -3,6 +3,7 @@ package com.opc.mobile.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -101,6 +102,11 @@ public class CoreCommunityVO
     /** 我的评分 */
     @Schema(description = "当前会员的评分")
     private BigDecimal myRating;
+
+    /** 去过时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "去过时间")
+    private LocalDateTime visitTime;
 
     public Long getId()
     {
@@ -310,5 +316,15 @@ public class CoreCommunityVO
     public void setMyRating(BigDecimal myRating)
     {
         this.myRating = myRating;
+    }
+
+    public LocalDateTime getVisitTime()
+    {
+        return visitTime;
+    }
+
+    public void setVisitTime(LocalDateTime visitTime)
+    {
+        this.visitTime = visitTime;
     }
 }

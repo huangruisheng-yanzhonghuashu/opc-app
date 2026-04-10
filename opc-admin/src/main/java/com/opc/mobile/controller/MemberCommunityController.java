@@ -114,6 +114,12 @@ public class MemberCommunityController extends BaseController
                                 vo.setMyRating(null);
                             }
 
+                            // 设置去过时间
+                            CoreCommunityVisited visitedRecord = visitedMap.get(communityId);
+                            if (visitedRecord != null) {
+                                vo.setVisitTime(visitedRecord.getVisitTime());
+                            }
+
                             return vo;
                         }, Collectors.toList())
                 ));
@@ -166,6 +172,11 @@ public class MemberCommunityController extends BaseController
         } else {
             vo.setReviewed(false);
             vo.setMyRating(null);
+        }
+
+        // 设置去过时间
+        if (visitedRecord != null) {
+            vo.setVisitTime(visitedRecord.getVisitTime());
         }
 
         return AjaxResult.success(vo);
