@@ -82,3 +82,10 @@ export function batchOnlineMaterial(ids) {
     method: 'put'
   })
 }
+
+export function batchOfflineMaterial(ids) {
+  return request({
+    url: '/core/material/batchOffline/' + ids,
+    method: 'put'
+  })
+}

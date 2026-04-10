@@ -152,4 +152,13 @@ public class CoreMaterialController extends BaseController
     {
         return toAjax(materialService.batchOnlineMaterial(ids));
     }
+
+    @Operation(summary = "批量下架素材", description = "批量将素材状态改为下架")
+    @PreAuthorize("@ss.hasPermi('core:material:changeStatus')")
+    @Log(title = "素材管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/batchOffline/{ids}")
+    public AjaxResult batchOffline(@PathVariable Long[] ids)
+    {
+        return toAjax(materialService.batchOfflineMaterial(ids));
+    }
 }

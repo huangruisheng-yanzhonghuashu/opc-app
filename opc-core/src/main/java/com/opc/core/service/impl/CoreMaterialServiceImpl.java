@@ -338,6 +338,18 @@ public class CoreMaterialServiceImpl implements ICoreMaterialService
         return count;
     }
 
+    @Override
+    @Transactional
+    public int batchOfflineMaterial(Long[] ids)
+    {
+        int count = 0;
+        for (Long id : ids)
+        {
+            count += changeStatus(id, "1");
+        }
+        return count;
+    }
+
     /**
      * 自动匹配内容中的标签并建立关联
      * 从 core_tag 表获取标签，匹配素材标题、正文、总结中的标签名称

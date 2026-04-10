@@ -101,4 +101,12 @@ public interface ICoreMaterialService
      * @return 影响行数
      */
     int batchOnlineMaterial(Long[] ids);
+
+    /**
+     * 批量下架素材
+     *
+     * @param ids 素材ID数组
+     * @return 影响行数
+     */
+    int batchOfflineMaterial(Long[] ids);
 }
