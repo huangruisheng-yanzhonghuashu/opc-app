@@ -8,6 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<id     property="id"                column="id"                  />
 		<result property="title"              column="title"               />
 		<result property="imageUrl"           column="image_url"          />
+		<result property="linkTargetType"     column="link_target_type"   />
 		<result property="linkType"           column="link_type"          />
 		<result property="linkValue"          column="link_value"         />
 		<result property="sortOrder"          column="sort_order"         />
@@ -20,7 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="selectBannerVo">
-        select id, title, image_url, link_type, link_value, sort_order, status,
+        select id, title, image_url, link_target_type, link_type, link_value, sort_order, status,
                create_by, create_time, update_by, update_time, remark
 		from core_banner
     </sql>
@@ -48,6 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		<set>
  			<if test="title != null and title != ''">title = #{title},</if>
  			<if test="imageUrl != null and imageUrl != ''">image_url = #{imageUrl},</if>
+ 			<if test="linkTargetType != null and linkTargetType != ''">link_target_type = #{linkTargetType},</if>
  			<if test="linkType != null and linkType != ''">link_type = #{linkType},</if>
  			<if test="linkValue != null">link_value = #{linkValue},</if>
  			<if test="sortOrder != null">sort_order = #{sortOrder},</if>
@@ -64,6 +66,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="id != null and id != 0">id,</if>
  			<if test="title != null and title != ''">title,</if>
  			<if test="imageUrl != null and imageUrl != ''">image_url,</if>
+ 			<if test="linkTargetType != null and linkTargetType != ''">link_target_type,</if>
  			<if test="linkType != null and linkType != ''">link_type,</if>
  			<if test="linkValue != null">link_value,</if>
  			<if test="sortOrder != null">sort_order,</if>
@@ -75,6 +78,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="id != null and id != 0">#{id},</if>
  			<if test="title != null and title != ''">#{title},</if>
  			<if test="imageUrl != null and imageUrl != ''">#{imageUrl},</if>
+ 			<if test="linkTargetType != null and linkTargetType != ''">#{linkTargetType},</if>
  			<if test="linkType != null and linkType != ''">#{linkType},</if>
  			<if test="linkValue != null">#{linkValue},</if>
  			<if test="sortOrder != null">#{sortOrder},</if>

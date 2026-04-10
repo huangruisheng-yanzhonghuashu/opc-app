@@ -80,10 +80,17 @@
                <span v-else>-</span>
             </template>
          </el-table-column>
+         <el-table-column label="链接目标" align="center" prop="linkTargetType" width="80">
+            <template #default="scope">
+               <el-tag :type="scope.row.linkTargetType === '1' ? 'warning' : 'info'">
+                  {{ scope.row.linkTargetType === '1' ? '帖子' : '文章' }}
+               </el-tag>
+            </template>
+         </el-table-column>
          <el-table-column label="链接类型" align="center" prop="linkType" width="100">
             <template #default="scope">
                <el-tag :type="scope.row.linkType === '1' ? 'primary' : 'success'">
-                  {{ scope.row.linkType === '1' ? '文章ID' : '外部链接' }}
+                  {{ scope.row.linkType === '1' ? '内部ID' : '外部链接' }}
                </el-tag>
             </template>
          </el-table-column>
@@ -142,14 +149,21 @@
                   <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                </el-upload>
             </el-form-item>
+            <el-form-item label="链接目标" prop="linkTargetType">
+               <el-radio-group v-model="form.linkTargetType" @change="handleLinkTargetTypeChange">
+                  <el-radio label="1">帖子</el-radio>
+                  <el-radio label="2">文章</el-radio>
+               </el-radio-group>
+               <div class="form-tip">帖子只能填写ID，文章可以填写ID或链接</div>
+            </el-form-item>
             <el-form-item label="链接类型" prop="linkType">
-               <el-radio-group v-model="form.linkType">
-                  <el-radio label="1">文章ID</el-radio>
+               <el-radio-group v-model="form.linkType" :disabled="form.linkTargetType === '1'">
+                  <el-radio label="1">内部ID</el-radio>
                   <el-radio label="2">外部链接</el-radio>
                </el-radio-group>
             </el-form-item>
             <el-form-item label="链接值" prop="linkValue">
-               <el-input v-model="form.linkValue" placeholder="请输入链接值" />
+               <el-input v-model="form.linkValue" :placeholder="linkValuePlaceholder" />
             </el-form-item>
             <el-form-item label="排序" prop="sortOrder">
                <el-input-number v-model="form.sortOrder" :min="0" placeholder="请输入排序数字" />
@@ -187,12 +201,17 @@
                />
                <span v-else>-</span>
             </el-descriptions-item>
-            <el-descriptions-item label="链接类型" :span="1">
-               <el-tag :type="detailData.linkType === '1' ? 'primary' : 'success'">
-                  {{ detailData.linkType === '1' ? '文章ID' : '外部链接' }}
+            <el-descriptions-item label="链接目标" :span="1">
+               <el-tag :type="detailData.linkTargetType === '1' ? 'warning' : 'info'">
+                  {{ detailData.linkTargetType === '1' ? '帖子' : '文章' }}
                </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="链接值" :span="1">{{ detailData.linkValue || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="链接类型" :span="1">
+               <el-tag :type="detailData.linkType === '1' ? 'primary' : 'success'">
+                  {{ detailData.linkType === '1' ? '内部ID' : '外部链接' }}
+               </el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="链接值" :span="2">{{ detailData.linkValue || '-' }}</el-descriptions-item>
             <el-descriptions-item label="排序" :span="1">{{ detailData.sortOrder }}</el-descriptions-item>
             <el-descriptions-item label="状态" :span="1">
                <el-tag :type="detailData.status === '0' ? 'success' : 'danger'">
@@ -245,12 +264,57 @@ const data = reactive({
   rules: {
     title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
     imageUrl: [{ required: true, message: "图片URL不能为空", trigger: "blur" }],
+    linkTargetType: [{ required: true, message: "链接目标不能为空", trigger: "change" }],
     linkType: [{ required: true, message: "链接类型不能为空", trigger: "change" }],
-    linkValue: [{ required: true, message: "链接值不能为空", trigger: "blur" }]
+    linkValue: [{ required: true, message: "链接值不能为空", trigger: "blur" },
+               { validator: validateLinkValue, trigger: "blur" }]
   }
 })
 
 const { queryParams, form, rules } = toRefs(data)
+
+// 链接值输入提示
+const linkValuePlaceholder = computed(() => {
+  if (form.value.linkTargetType === '1') {
+    return '请输入帖子ID（仅限数字ID）'
+  } else if (form.value.linkType === '1') {
+    return '请输入文章ID'
+  } else {
+    return '请输入文章链接URL'
+  }
+})
+
+// 验证链接值
+function validateLinkValue(rule, value, callback) {
+  if (!value) {
+    callback()
+    return
+  }
+  // 帖子只能填写数字ID
+  if (form.value.linkTargetType === '1') {
+    if (!/^\d+$/.test(value)) {
+      callback(new Error("帖子只能填写数字ID"))
+      return
+    }
+  }
+  // 文章+外部链接需要验证URL格式
+  if (form.value.linkTargetType === '2' && form.value.linkType === '2') {
+    const urlPattern = /^(https?:\/\/)/
+    if (!urlPattern.test(value)) {
+      callback(new Error("外部链接需要以http://或https://开头"))
+      return
+    }
+  }
+  callback()
+}
+
+// 链接目标类型改变时处理
+function handleLinkTargetTypeChange(val) {
+  if (val === '1') {
+    // 帖子只能使用内部ID
+    form.value.linkType = '1'
+  }
+}
 
 /** 查询Banner列表 */
 function getList() {
@@ -274,6 +338,7 @@ function reset() {
     id: undefined,
     title: undefined,
     imageUrl: undefined,
+    linkTargetType: '1',
     linkType: '1',
     linkValue: undefined,
     sortOrder: 0,
@@ -441,9 +506,14 @@ function beforeUpload(file) {
   justify-content: center;
 }
 .avatar {
-  width: 200px;
-  height: 120px;
-  display: block;
-  object-fit: cover;
+   width: 200px;
+   height: 120px;
+   display: block;
+   object-fit: cover;
+}
+.form-tip {
+   font-size: 12px;
+   color: #909399;
+   margin-top: 4px;
 }
 </style>

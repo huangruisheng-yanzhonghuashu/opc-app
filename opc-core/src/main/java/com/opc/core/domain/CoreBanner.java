@@ -19,7 +19,10 @@ public class CoreBanner extends BaseEntity
     @Excel(name = "图片URL")
     private String imageUrl;
 
-    @Excel(name = "链接类型", readConverterExp = "1=文章ID,2=外部链接")
+    @Excel(name = "链接目标类型", readConverterExp = "1=帖子,2=文章")
+    private String linkTargetType;
+
+    @Excel(name = "链接类型", readConverterExp = "1=内部ID,2=外部链接")
     private String linkType;
 
     @Excel(name = "链接值")
@@ -59,6 +62,16 @@ public class CoreBanner extends BaseEntity
     public void setImageUrl(String imageUrl)
     {
         this.imageUrl = imageUrl;
+    }
+
+    public String getLinkTargetType()
+    {
+        return linkTargetType;
+    }
+
+    public void setLinkTargetType(String linkTargetType)
+    {
+        this.linkTargetType = linkTargetType;
     }
 
     public String getLinkType()
@@ -107,6 +120,7 @@ public class CoreBanner extends BaseEntity
             .append("id", getId())
             .append("title", getTitle())
             .append("imageUrl", getImageUrl())
+            .append("linkTargetType", getLinkTargetType())
             .append("linkType", getLinkType())
             .append("linkValue", getLinkValue())
             .append("sortOrder", getSortOrder())
