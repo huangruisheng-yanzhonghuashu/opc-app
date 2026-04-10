@@ -14,6 +14,10 @@ insert into sys_menu values('60002', '套餐配置', '60000', '2', 'package', 'c
 -- 菜单：套餐订单（上级：套餐管理）
 insert into sys_menu values('60003', '套餐订单', '60000', '3', 'packageOrder', 'core/packageOrder/index', '', '', 1, 0, 'C', '0', '0', 'core:packageOrder:list', 'order', 'admin', sysdate(), '', null, '套餐订单菜单');
 
+-- 菜单：激活码管理（上级：套餐管理 menu_id=60000，排序4，在套餐订单后面）
+insert into sys_menu values('60004', '激活码管理', '60000', '4', 'activationCode', 'core/activationCode/index', '', '', 1, 0, 'C', '0', '0', 'core:activationCode:list', 'code', 'admin', sysdate(), '', null, '激活码管理菜单');
+
+
 -- ----------------------------
 -- 会员页面配置权限按钮
 -- ----------------------------
@@ -35,3 +39,15 @@ insert into sys_menu values('60030', '订单查询', '60003', '1', '', '', '', '
 insert into sys_menu values('60031', '订单新增', '60003', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:add', '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('60032', '订单修改', '60003', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:edit', '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('60033', '订单删除', '60003', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:packageOrder:remove', '#', 'admin', sysdate(), '', null, '');
+
+
+-- ----------------------------
+-- 激活码管理权限按钮
+-- ----------------------------
+insert into sys_menu values('60040', '激活码查询', '60004', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:activationCode:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('60041', '激活码生成', '60004', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:activationCode:add', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('60042', '激活码修改', '60004', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:activationCode:edit', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('60043', '激活码删除', '60004', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:activationCode:remove', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('60044', '激活码导出', '60004', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:activationCode:export', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('60045', '激活码发送', '60004', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'core:activationCode:send', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('60046', '激活码注销', '60004', '7', '', '', '', '', 1, 0, 'F', '0', '0', 'core:activationCode:cancel', '#', 'admin', sysdate(), '', null, '');
