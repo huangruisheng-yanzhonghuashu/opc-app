@@ -92,8 +92,8 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="activationCodeList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
+    <el-table v-loading="loading" :data="activationCodeList" @selection-change="handleSelectionChange" style="width: 100%">
+      <el-table-column type="selection" width="55" align="center" fixed="left" />
       <el-table-column label="ID" align="center" prop="id" width="80" />
       <el-table-column label="激活码" align="center" prop="code" width="200" show-overflow-tooltip />
       <el-table-column label="渠道标签" align="center" prop="channelTag" />
@@ -126,6 +126,12 @@
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="修改时间" align="center" prop="updateTime" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="使用者ID" align="center" prop="useUserId" width="100" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200" fixed="right">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['core:activationCode:edit']">修改渠道</el-button>
