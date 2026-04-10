@@ -216,14 +216,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		UNION ALL
 
 		SELECT
-			#{endDate} as date,
+			DATE(create_time) as date,
 			0 as newUserCount,
 			0 as activeUserCount,
-			COUNT(CASE WHEN package_type IS NULL THEN 1 END) as normalUserCount,
+			COUNT(CASE WHEN package_type IS NULL OR package_type = 0 THEN 1 END) as normalUserCount,
 			COUNT(CASE WHEN package_type = 1 THEN 1 END) as vipUserCount,
 			COUNT(CASE WHEN package_type >= 2 THEN 1 END) as svipUserCount
 		FROM core_member
 		WHERE status = '0'
+		  AND create_time >= #{startDate}
+		  AND create_time &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+		GROUP BY DATE(create_time)
 	</select>
 
 </mapper>

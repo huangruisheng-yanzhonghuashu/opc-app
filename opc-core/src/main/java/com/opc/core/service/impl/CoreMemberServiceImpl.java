@@ -36,6 +36,10 @@ public class CoreMemberServiceImpl implements ICoreMemberService
         if (member.getPassword() == null || member.getPassword().isEmpty()) {
             member.setPassword("123456@654321");
         }
+        // 设置注册时间为当前时间
+        if (member.getRegisterTime() == null) {
+            member.setRegisterTime(java.time.Instant.now());
+        }
         convertPackageToType(member);
         return memberMapper.insertMember(member);
     }
@@ -156,48 +160,58 @@ public class CoreMemberServiceImpl implements ICoreMemberService
             {
                 mergedData.put(date, new HashMap<>());
                 mergedData.get(date).put("date", date);
-                mergedData.get(date).put("newUserCount", 0);
-                mergedData.get(date).put("activeUserCount", 0);
+                mergedData.get(date).put("newUserCount", 0L);
+                mergedData.get(date).put("activeUserCount", 0L);
+                mergedData.get(date).put("normalUserCount", 0L);
+                mergedData.get(date).put("vipUserCount", 0L);
+                mergedData.get(date).put("svipUserCount", 0L);
             }
 
-            Long newUserCount = toLong(row.get("newUserCount"));
-            Long activeUserCount = toLong(row.get("activeUserCount"));
-            Long normalUserCount = toLong(row.get("normalUserCount"));
-            Long vipUserCount = toLong(row.get("vipUserCount"));
+            long newUserCount = toLongValue(row.get("newUserCount"));
+            long activeUserCount = toLongValue(row.get("activeUserCount"));
+            long normalUserCount = toLongValue(row.get("normalUserCount"));
+            long vipUserCount = toLongValue(row.get("vipUserCount"));
+            long svipUserCount = toLongValue(row.get("svipUserCount"));
 
-            if (newUserCount != null && newUserCount > 0)
+            if (newUserCount > 0)
             {
                 mergedData.get(date).put("newUserCount", newUserCount);
             }
-            if (activeUserCount != null && activeUserCount > 0)
+            if (activeUserCount > 0)
             {
                 mergedData.get(date).put("activeUserCount", activeUserCount);
             }
-            if (normalUserCount != null && normalUserCount > 0)
+            if (normalUserCount > 0)
             {
                 mergedData.get(date).put("normalUserCount", normalUserCount);
             }
-            if (vipUserCount != null && vipUserCount > 0)
+            if (vipUserCount > 0)
             {
                 mergedData.get(date).put("vipUserCount", vipUserCount);
+            }
+            if (svipUserCount > 0)
+            {
+                mergedData.get(date).put("svipUserCount", svipUserCount);
             }
         }
 
         return new ArrayList<>(mergedData.values());
     }
 
-    private Long toLong(Object obj)
+    private long toLongValue(Object obj)
     {
-        if (obj == null) return null;
+        if (obj == null) return 0L;
         if (obj instanceof Long) return (Long) obj;
         if (obj instanceof Integer) return ((Integer) obj).longValue();
+        if (obj instanceof java.math.BigInteger) return ((java.math.BigInteger) obj).longValue();
+        if (obj instanceof java.math.BigDecimal) return ((java.math.BigDecimal) obj).longValue();
         try
         {
             return Long.parseLong(String.valueOf(obj));
         }
         catch (NumberFormatException e)
         {
-            return null;
+            return 0L;
         }
     }
 }
