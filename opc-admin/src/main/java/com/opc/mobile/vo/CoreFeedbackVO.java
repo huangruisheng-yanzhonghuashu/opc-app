@@ -53,7 +53,7 @@ public class CoreFeedbackVO
     /** 回复时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "回复时间")
-    private Date replyTime;
+    private java.time.Instant replyTime;
 
     /** 回复人 */
     @Schema(description = "回复人")
@@ -163,12 +163,12 @@ public class CoreFeedbackVO
         this.reply = reply;
     }
 
-    public Date getReplyTime()
+    public java.time.Instant getReplyTime()
     {
         return replyTime;
     }
 
-    public void setReplyTime(Date replyTime)
+    public void setReplyTime(java.time.Instant replyTime)
     {
         this.replyTime = replyTime;
     }

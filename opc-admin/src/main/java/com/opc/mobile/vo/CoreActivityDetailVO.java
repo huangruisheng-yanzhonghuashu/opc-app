@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Date;
 
 /**
  * 活动详情包装VO
@@ -38,7 +39,7 @@ public class CoreActivityDetailVO
     /** 活动时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "活动时间")
-    private Instant activityTime;
+    private Date activityTime;
 
     /** 省份 */
     @Schema(description = "省份")
@@ -157,12 +158,12 @@ public class CoreActivityDetailVO
         this.organizerAvatar = organizerAvatar;
     }
 
-    public Instant getActivityTime()
+    public Date getActivityTime()
     {
         return activityTime;
     }
 
-    public void setActivityTime(Instant activityTime)
+    public void setActivityTime(Date activityTime)
     {
         this.activityTime = activityTime;
     }
