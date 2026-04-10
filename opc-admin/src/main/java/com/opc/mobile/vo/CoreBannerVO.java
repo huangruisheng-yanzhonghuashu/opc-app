@@ -26,8 +26,12 @@ public class CoreBannerVO
     @Schema(description = "图片URL")
     private String imageUrl;
 
-    /** 链接类型（1文章ID 2外部链接） */
-    @Schema(description = "链接类型（1文章ID 2外部链接）")
+    /** 链接目标类型（1帖子 2文章） */
+    @Schema(description = "链接目标类型（1帖子 2文章）")
+    private String linkTargetType;
+
+    /** 链接类型（1内部ID 2外部链接） */
+    @Schema(description = "链接类型（1内部ID 2外部链接）")
     private String linkType;
 
     /** 链接值 */
@@ -84,6 +88,16 @@ public class CoreBannerVO
     public void setImageUrl(String imageUrl)
     {
         this.imageUrl = imageUrl;
+    }
+
+    public String getLinkTargetType()
+    {
+        return linkTargetType;
+    }
+
+    public void setLinkTargetType(String linkTargetType)
+    {
+        this.linkTargetType = linkTargetType;
     }
 
     public String getLinkType()
