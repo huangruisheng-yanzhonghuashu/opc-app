@@ -75,4 +75,13 @@ public interface ICoreActivationCodeService {
      * @return 结果
      */
     public CoreActivationCode selectCoreActivationCodeByCode(String code);
+
+    /**
+     * 使用激活码
+     *
+     * @param code 激活码
+     * @param useUserId 使用用户ID
+     * @return 结果
+     */
+    public int useActivationCode(String code, Long useUserId);
 }

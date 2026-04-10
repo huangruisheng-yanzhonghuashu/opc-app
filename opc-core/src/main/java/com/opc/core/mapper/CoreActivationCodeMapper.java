@@ -94,4 +94,15 @@ public interface CoreActivationCodeMapper {
      * @return 结果
      */
     public int batchUpdateStatusAndSendTime(@Param("ids") Long[] ids, @Param("status") String status, @Param("sendTime") Date sendTime);
+
+    /**
+     * 更新激活码使用状态
+     *
+     * @param code 激活码
+     * @param status 状态
+     * @param useTime 使用时间
+     * @param useUserId 使用用户ID
+     * @return 结果
+     */
+    public int updateActivationCodeUsed(@Param("code") String code, @Param("status") String status, @Param("useTime") Date useTime, @Param("useUserId") Long useUserId);
 }

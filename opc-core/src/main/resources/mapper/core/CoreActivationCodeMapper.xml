@@ -151,4 +151,13 @@
         where code = #{code}
     </select>
 
+    <update id="updateActivationCodeUsed">
+        update core_activation_code
+        set status = #{status},
+            use_time = #{useTime},
+            use_user_id = #{useUserId},
+            update_time = sysdate()
+        where code = #{code}
+    </update>
+
 </mapper>

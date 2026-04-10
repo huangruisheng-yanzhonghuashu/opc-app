@@ -9,7 +9,9 @@ import com.opc.common.utils.DateUtils;
 import com.opc.common.utils.MessageUtils;
 import com.opc.common.utils.SecurityUtils;
 import com.opc.common.utils.StringUtils;
+import com.opc.core.domain.CoreActivationCode;
 import com.opc.core.domain.CoreMember;
+import com.opc.core.service.ICoreActivationCodeService;
 import com.opc.core.service.ICoreMemberService;
 import com.opc.framework.manager.AsyncManager;
 import com.opc.framework.manager.factory.AsyncFactory;
@@ -55,6 +57,9 @@ public class MobileRegisterController extends MobileBaseController {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ICoreActivationCodeService activationCodeService;
 
     @Value("${spring.mail.username:}")
     private String mailFrom;
@@ -115,13 +120,14 @@ public class MobileRegisterController extends MobileBaseController {
         }
     }
 
-    @Operation(summary = "邮箱验证码注册", description = "使用邮箱验证码完成用户注册")
+    @Operation(summary = "邮箱验证码注册", description = "使用邮箱验证码和激活码完成用户注册")
     @PostMapping("/registerByEmail")
     public AjaxResult registerByEmail(@Validated @RequestBody MobileRegisterDTO registerDTO) {
         String username = registerDTO.getUsername();
         String password = registerDTO.getPassword();
         String email = registerDTO.getEmail();
         String code = registerDTO.getCode();
+        String inviteCode = registerDTO.getInviteCode();
 
         // 参数校验
         if (StringUtils.isEmpty(username)) {
@@ -135,6 +141,10 @@ public class MobileRegisterController extends MobileBaseController {
         }
         if (StringUtils.isEmpty(code)) {
             return AjaxResult.error("验证码不能为空");
+        }
+        // 激活码（邀请码）必填校验
+        if (StringUtils.isEmpty(inviteCode)) {
+            return AjaxResult.error("激活码（邀请码）不能为空");
         }
 
         // 校验用户名长度
@@ -169,9 +179,9 @@ public class MobileRegisterController extends MobileBaseController {
         // 检查用户名是否已存在（从会员表判断）
         CoreMember member = new CoreMember();
         member.setUsername(username);
-     /*   if (!memberService.checkMemberNameUnique(member)) {
+        if (!memberService.checkMemberNameUnique(member)) {
             return AjaxResult.error("用户名已存在");
-        }*/
+        }
 
         // 检查邮箱是否已存在（从会员表判断）
         member.setEmail(email);
@@ -179,20 +189,44 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("邮箱已被注册");
         }
 
+        // 验证激活码（邀请码）
+        CoreActivationCode activationCode = activationCodeService.selectCoreActivationCodeByCode(inviteCode);
+        if (activationCode == null) {
+            return AjaxResult.error("激活码不存在");
+        }
+        // 检查激活码状态：0-未使用, 1-已发送-未使用 可以使用；2-已使用, 3-已注销, 4-已过期 不可用
+        String status = activationCode.getStatus();
+        if ("2".equals(status)) {
+            return AjaxResult.error("激活码已被使用");
+        }
+        if ("3".equals(status)) {
+            return AjaxResult.error("激活码已注销");
+        }
+        if ("4".equals(status)) {
+            return AjaxResult.error("激活码已过期");
+        }
+        // 检查激活码是否过期
+        if (activationCode.getExpireTime() != null &&
+                activationCode.getExpireTime().before(DateUtils.getNowDate())) {
+            return AjaxResult.error("激活码已过期");
+        }
+
         // 创建会员
         member.setNickname(username);
         member.setPassword(SecurityUtils.encryptPassword(password));
         member.setEmail(email);
         member.setSource("email");
-        // 设置邀请码（如有）
-        if (StringUtils.isNotEmpty(registerDTO.getInviteCode())) {
-            member.setInviteCode(registerDTO.getInviteCode());
-        }
+        // 设置邀请码
+        member.setInviteCode(inviteCode);
 
         boolean regFlag = memberService.insertMember(member) > 0;
         if (!regFlag) {
             return AjaxResult.error("注册失败，请联系系统管理人员");
         }
+
+        // 更新激活码使用状态
+        Long memberId = member.getId();
+        activationCodeService.useActivationCode(inviteCode, memberId);
 
         // 删除已使用的验证码（仅在非跳过模式下）
         if (!skipEmailCode) {
@@ -204,7 +238,7 @@ public class MobileRegisterController extends MobileBaseController {
         AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER,
                     MessageUtils.message("user.register.success")));
 
-        log.info("用户注册成功：username={}, email={}", username, email);
+        log.info("用户注册成功：username={}, email={}, inviteCode={}", username, email, inviteCode);
         return AjaxResult.success("注册成功");
     }
 
