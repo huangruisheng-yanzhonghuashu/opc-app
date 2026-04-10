@@ -62,6 +62,10 @@ public class CoreMemberServiceImpl implements ICoreMemberService
                 member.setPackageType(3);
             }
         }
+        // 如果packageType为空，默认为1（普通会员）
+        if (member.getPackageType() == null) {
+            member.setPackageType(1);
+        }
     }
 
     @Override
