@@ -200,13 +200,15 @@ function initChart() {
   
   chartInstance = echarts.init(chartRef.value)
   
-  // 过滤掉汇总数据（没有日期或日期为结束日期的汇总行）
+  // 过滤掉没有日期的数据
   const dailyData = overviewList.value.filter(item => {
-    return item.date && item.date !== queryParams.endDate && item.date !== defaultEndDate.value
+    return item.date
   })
   
-  // 如果没有每日数据，使用所有数据
-  const chartData = dailyData.length > 0 ? dailyData : overviewList.value
+  // 按日期排序
+  dailyData.sort((a, b) => a.date.localeCompare(b.date))
+  
+  const chartData = dailyData
   
   const dates = chartData.map(item => item.date)
   const newUserCounts = chartData.map(item => item.newUserCount || 0)

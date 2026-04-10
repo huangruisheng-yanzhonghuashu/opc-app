@@ -114,13 +114,16 @@ function loadData() {
   getMemberOverview(params).then(response => {
     const data = response.data || []
     
-    // 提取汇总数据（日期为结束日期的那一行）
-    const summary = data.find(item => item.date === params.endDate) || {}
+    // 获取今天的日期
+    const today = formatDate(new Date())
+    
+    // 提取今天的数据作为汇总
+    const summary = data.find(item => item.date === today) || {}
     summaryData.value = summary
     
-    // 提取每日数据用于图表
+    // 提取每日数据用于图表（包括今天）
     const dailyData = data.filter(item => {
-      return item.date && item.date !== params.endDate
+      return item.date
     }).sort((a, b) => a.date.localeCompare(b.date))
     
     initChart(dailyData)
