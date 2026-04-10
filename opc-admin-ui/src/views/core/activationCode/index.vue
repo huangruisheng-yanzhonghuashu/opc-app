@@ -55,10 +55,20 @@
           type="success"
           plain
           icon="Edit"
-          :disabled="single"
+          :disabled="multiple"
           @click="handleUpdate"
           v-hasPermi="['core:activationCode:edit']"
-        >修改渠道</el-button>
+        >批量修改渠道</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="info"
+          plain
+          icon="Position"
+          :disabled="multiple"
+          @click="handleBatchSend"
+          v-hasPermi="['core:activationCode:send']"
+        >批量发送</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -168,11 +178,11 @@
       </template>
     </el-dialog>
 
-    <!-- 修改渠道标签对话框 -->
-    <el-dialog title="修改渠道标签" v-model="open" width="500px" append-to-body>
+    <!-- 批量修改渠道标签对话框 -->
+    <el-dialog title="批量修改渠道标签" v-model="open" width="500px" append-to-body>
       <el-form ref="activationCodeRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="激活码" prop="code">
-          <el-input v-model="form.code" disabled />
+        <el-form-item label="选中数量" prop="ids">
+          <el-input :value="form.ids ? form.ids.length + ' 条' : '0 条'" disabled />
         </el-form-item>
         <el-form-item label="渠道标签" prop="channelTag">
           <el-input v-model="form.channelTag" placeholder="请输入渠道标签" />
@@ -248,7 +258,7 @@ const { queryParams, form, generateForm, rules, generateRules } = toRefs(data);
 function getList() {
   loading.value = true;
   listActivationCode(queryParams.value).then(response => {
-    activationCodeList.value = response.rows;
+    activationCodeList.value = response.data;
     total.value = response.total;
     loading.value = false;
   });
@@ -269,8 +279,7 @@ function cancelGenerate() {
 /** 表单重置 */
 function reset() {
   form.value = {
-    id: null,
-    code: null,
+    ids: [],
     channelTag: null
   };
   proxy.resetForm("activationCodeRef");
@@ -324,27 +333,50 @@ function submitGenerate() {
   });
 }
 
-/** 修改按钮操作 */
+/** 批量修改按钮操作 */
 function handleUpdate(row) {
   reset();
-  const id = row.id || ids.value;
-  getActivationCode(id).then(response => {
-    form.value = response.data;
-    open.value = true;
-  });
+  const updateIds = row.id ? [row.id] : ids.value;
+  if (!updateIds || updateIds.length === 0) {
+    proxy.$modal.msgWarning("请选择要修改的数据");
+    return;
+  }
+  form.value.ids = updateIds;
+  open.value = true;
 }
 
-/** 提交按钮 */
+/** 提交按钮（批量修改渠道） */
 function submitForm() {
   proxy.$refs["activationCodeRef"].validate(valid => {
     if (valid) {
-      updateActivationCode(form.value).then(response => {
-        proxy.$modal.msgSuccess("修改成功");
+      // 批量修改，循环调用接口
+      const promises = form.value.ids.map(id => {
+        return updateActivationCode({ id: id, channelTag: form.value.channelTag });
+      });
+      Promise.all(promises).then(() => {
+        proxy.$modal.msgSuccess("批量修改成功");
         open.value = false;
         getList();
+      }).catch(() => {
+        proxy.$modal.msgError("批量修改失败");
       });
     }
   });
+}
+
+/** 批量发送按钮操作 */
+function handleBatchSend() {
+  const sendIds = ids.value;
+  if (!sendIds || sendIds.length === 0) {
+    proxy.$modal.msgWarning("请选择要发送的激活码");
+    return;
+  }
+  proxy.$modal.confirm('确认批量发送选中的激活码吗？').then(function() {
+    return sendActivationCode(sendIds);
+  }).then(() => {
+    getList();
+    proxy.$modal.msgSuccess("批量发送成功");
+  }).catch(() => {});
 }
 
 /** 发送按钮操作 */
