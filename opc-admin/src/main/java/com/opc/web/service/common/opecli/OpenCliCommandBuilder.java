@@ -662,7 +662,9 @@ public class OpenCliCommandBuilder {
 
         if (isWindows) {
             // Windows 系统：使用长格式参数
-            builder.withOption("--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best");
+            // 强制选择 H.264 (AVC) 编码的视频，确保 iPhone 兼容性
+            // vcodec^=avc1 表示视频编码以 avc1 开头（即 H.264/AVC）
+            builder.withOption("--format", "bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/bestvideo[vcodec^=avc1]+bestaudio/best[ext=mp4]/best");
             builder.withOption("--merge-output-format", "mp4");
             builder.withOption("--remux-video", "mp4");
         } else {
