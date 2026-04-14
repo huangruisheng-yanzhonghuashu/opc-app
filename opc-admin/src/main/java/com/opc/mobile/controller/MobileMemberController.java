@@ -510,6 +510,7 @@ public class MobileMemberController {
      */
     @Operation(summary = "发送重置密码验证码", description = "向指定邮箱发送重置密码验证码，验证码有效期5分钟")
     @PostMapping("/sendResetPasswordCode")
+    @MemberAnonymous
     public AjaxResult sendResetPasswordCode(@RequestBody EmailCodeRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
 
@@ -558,6 +559,7 @@ public class MobileMemberController {
     @Operation(summary = "通过邮箱验证码重置密码", description = "使用邮箱验证码重置会员密码，无需登录")
     @Log(title = "重置密码", businessType = BusinessType.UPDATE)
     @PostMapping("/resetPasswordByEmail")
+    @MemberAnonymous
     public AjaxResult resetPasswordByEmail(@Valid @RequestBody MemberResetPasswordByEmailDTO resetDTO) {
         String email = resetDTO.getEmail();
         String code = resetDTO.getCode();
