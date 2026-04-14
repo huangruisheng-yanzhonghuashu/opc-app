@@ -43,3 +43,36 @@ insert into sys_menu values('30032', '搜索热词修改', '30003', '3', '', '',
 insert into sys_menu values('30033', '搜索热词删除', '30003', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:searchHotword:remove', '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('30034', '搜索热词导出', '30003', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:searchHotword:export', '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('30035', '搜索热词状态修改', '30003', '6', '', '', '', '', 1, 0, 'F', '0', '0', 'core:searchHotword:changeStatus', '#', 'admin', sysdate(), '', null, '');
+
+
+
+-- ----------------------------
+-- 客服配置 菜单及权限
+-- ----------------------------
+
+-- 菜单：客服配置（上级：公共配置 menu_id=30000，排序4）
+insert into sys_menu values('30004', '客服配置', '30000', '4', 'customerService', 'core/customerService/index', '', '', 1, 0, 'C', '0', '0', 'core:customerService:list', 'customer-service', 'admin', sysdate(), '', null, '客服配置菜单');
+
+-- ----------------------------
+-- 客服配置权限按钮
+-- ----------------------------
+insert into sys_menu values('30040', '客服查询', '30004', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('30041', '客服新增', '30004', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:add', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('30042', '客服修改', '30004', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:edit', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('30043', '客服删除', '30004', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:remove', '#', 'admin', sysdate(), '', null, '');
+
+
+
+-- ----------------------------
+-- 发布配置菜单
+-- ----------------------------
+insert into sys_menu values('30005', '发布配置', '30000', '5', 'publishConfig', 'core/publishConfig/index', '', '', 1, 0, 'C', '0', '0', 'core:publishConfig:list', 'upload', 'admin', sysdate(), '', null, '发布配置菜单');
+
+-- ----------------------------
+-- 发布配置权限按钮
+-- ----------------------------
+insert into sys_menu values('30050', '发布配置查询', '30005', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:publishConfig:query', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('30051', '发布配置新增', '30005', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:publishConfig:save', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('30052', '发布配置修改', '30005', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:publishConfig:save', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('30053', '发布配置删除', '30005', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:publishConfig:delete', '#', 'admin', sysdate(), '', null, '');
+insert into sys_menu values('30054', '发布配置导出', '30005', '5', '', '', '', '', 1, 0, 'F', '0', '0', 'core:publishConfig:export', '#', 'admin', sysdate(), '', null, '');

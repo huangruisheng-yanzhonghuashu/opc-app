@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CorePublishConfigMapper">
+
+    <resultMap type="com.opc.core.domain.CorePublishConfig" id="CorePublishConfigResult">
+        <id property="id" column="id"/>
+        <result property="platformType" column="platform_type"/>
+        <result property="version" column="version"/>
+        <result property="publishStatus" column="publish_status"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectCorePublishConfigVo">
+        select id, platform_type, version, publish_status, publish_time, remark, create_by, create_time, update_by, update_time
+        from core_publish_config
+    </sql>
+
+    <select id="selectCorePublishConfigById" parameterType="Long" resultMap="CorePublishConfigResult">
+        <include refid="selectCorePublishConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectCorePublishConfigList" parameterType="com.opc.core.domain.CorePublishConfig"
+            resultMap="CorePublishConfigResult">
+        <include refid="selectCorePublishConfigVo"/>
+        <where>
+            <if test="platformType != null and platformType != ''">
+                AND platform_type = #{platformType}
+            </if>
+            <if test="version != null and version != ''">
+                AND version like concat('%', #{version}, '%')
+            </if>
+            <if test="publishStatus != null and publishStatus != ''">
+                AND publish_status = #{publishStatus}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <insert id="insertCorePublishConfig" parameterType="com.opc.core.domain.CorePublishConfig"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into core_publish_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="platformType != null and platformType != ''">platform_type,</if>
+            <if test="version != null and version != ''">version,</if>
+            <if test="publishStatus != null and publishStatus != ''">publish_status,</if>
+            <if test="publishTime != null">publish_time,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="platformType != null and platformType != ''">#{platformType},</if>
+            <if test="version != null and version != ''">#{version},</if>
+            <if test="publishStatus != null and publishStatus != ''">#{publishStatus},</if>
+            <if test="publishTime != null">#{publishTime},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateCorePublishConfig" parameterType="com.opc.core.domain.CorePublishConfig">
+        update core_publish_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="platformType != null and platformType != ''">platform_type = #{platformType},</if>
+            <if test="version != null and version != ''">version = #{version},</if>
+            <if test="publishStatus != null and publishStatus != ''">publish_status = #{publishStatus},</if>
+            <if test="publishTime != null">publish_time = #{publishTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCorePublishConfigById" parameterType="Long">
+        delete from core_publish_config where id = #{id}
+    </delete>
+
+    <delete id="deleteCorePublishConfigByIds" parameterType="String">
+        delete from core_publish_config where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

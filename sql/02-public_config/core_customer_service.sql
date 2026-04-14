@@ -21,17 +21,3 @@ create table core_customer_service (
   primary key (id)
 ) engine=innodb auto_increment=1 comment='客服配置表';
 
--- ----------------------------
--- 客服配置 菜单及权限
--- ----------------------------
-
--- 菜单：客服配置（上级：公共配置 menu_id=30000，排序4）
-insert into sys_menu values('30004', '客服配置', '30000', '4', 'customerService', 'core/customerService/index', '', '', 1, 0, 'C', '0', '0', 'core:customerService:list', 'customer-service', 'admin', sysdate(), '', null, '客服配置菜单');
-
--- ----------------------------
--- 客服配置权限按钮
--- ----------------------------
-insert into sys_menu values('30040', '客服查询', '30004', '1', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:query', '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('30041', '客服新增', '30004', '2', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:add', '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('30042', '客服修改', '30004', '3', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:edit', '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('30043', '客服删除', '30004', '4', '', '', '', '', 1, 0, 'F', '0', '0', 'core:customerService:remove', '#', 'admin', sysdate(), '', null, '');
