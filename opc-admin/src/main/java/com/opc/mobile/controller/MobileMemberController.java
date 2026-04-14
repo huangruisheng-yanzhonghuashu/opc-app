@@ -37,6 +37,7 @@ import com.opc.mobile.dto.MemberUpdateUserNameDTO;
 import com.opc.mobile.dto.MemberUpdatePasswordDTO;
 import com.opc.mobile.dto.MemberCancelDTO;
 import com.opc.mobile.dto.MemberBindEmailDTO;
+import com.opc.mobile.dto.MemberResetPasswordByEmailDTO;
 import com.opc.mobile.dto.EmailCodeRequestDTO;
 import com.opc.mobile.dto.OrderIdDTO;
 import com.opc.mobile.dto.FeedbackSubmitDTO;
@@ -108,6 +109,9 @@ public class MobileMemberController {
 
     @Value("${spring.mail.username:}")
     private String mailFrom;
+
+    @Value("${member.register.skipEmailCode:false}")
+    private boolean skipEmailCode;
 
     /**
      * 图片上传接口（匿名访问，无需登录）
@@ -495,6 +499,140 @@ public class MobileMemberController {
                 "<p style='color: #666; font-size: 14px;'>您正在绑定邮箱，验证码为：</p>" +
                 "<div style='background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0; border-radius: 3px;'>" +
                 "<span style='font-size: 28px; font-weight: bold; color: #1890ff; letter-spacing: 5px;'>" + code + "</span>" +
+                "</div>" +
+                "<p style='color: #666; font-size: 14px;'>验证码有效期为 <strong>5分钟</strong>，请勿泄露给他人。</p>" +
+                "<p style='color: #999; font-size: 12px; margin-top: 30px; text-align: center;'>如非本人操作，请忽略此邮件。</p>" +
+                "</div>";
+    }
+
+    /**
+     * 发送重置密码验证码
+     */
+    @Operation(summary = "发送重置密码验证码", description = "向指定邮箱发送重置密码验证码，验证码有效期5分钟")
+    @PostMapping("/sendResetPasswordCode")
+    public AjaxResult sendResetPasswordCode(@RequestBody EmailCodeRequestDTO requestDTO) {
+        String email = requestDTO.getEmail();
+
+        if (StringUtils.isEmpty(email)) {
+            return AjaxResult.error("邮箱不能为空");
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            return AjaxResult.error("邮箱格式不正确");
+        }
+
+        // 检查邮箱是否已绑定会员
+        CoreMember member = memberService.selectMemberByEmail(email);
+        if (member == null) {
+            return AjaxResult.error("该邮箱未绑定任何账户");
+        }
+
+        String cacheKey = CacheConstants.EMAIL_CODE_KEY + "reset_password:" + email;
+        String existingCode = redisCache.getCacheObject(cacheKey);
+        if (existingCode != null) {
+            long expireTime = redisCache.getExpire(cacheKey);
+            if (expireTime > 240) {
+                return AjaxResult.error("验证码发送过于频繁，请稍后再试");
+            }
+        }
+
+        String code = generateCode();
+
+        String subject = "重置密码验证码";
+        String content = buildResetPasswordEmailContent(code);
+        boolean sendResult = emailService.sendHtmlEmail(createEmailDTO(mailFrom, email, subject, content));
+
+        if (sendResult) {
+            redisCache.setCacheObject(cacheKey, code, 5, TimeUnit.MINUTES);
+            log.info("重置密码验证码发送成功：email={}", email);
+            return AjaxResult.success("验证码已发送至您的邮箱，有效期5分钟");
+        } else {
+            log.error("重置密码验证码发送失败：email={}", email);
+            return AjaxResult.error("验证码发送失败，请稍后重试");
+        }
+    }
+
+    /**
+     * 通过邮箱验证码重置密码
+     */
+    @Operation(summary = "通过邮箱验证码重置密码", description = "使用邮箱验证码重置会员密码，无需登录")
+    @Log(title = "重置密码", businessType = BusinessType.UPDATE)
+    @PostMapping("/resetPasswordByEmail")
+    public AjaxResult resetPasswordByEmail(@Valid @RequestBody MemberResetPasswordByEmailDTO resetDTO) {
+        String email = resetDTO.getEmail();
+        String code = resetDTO.getCode();
+        String newPassword = resetDTO.getNewPassword();
+        String confirmPassword = resetDTO.getConfirmPassword();
+
+        if (StringUtils.isEmpty(email)) {
+            return AjaxResult.error("邮箱不能为空");
+        }
+        if (StringUtils.isEmpty(code)) {
+            return AjaxResult.error("验证码不能为空");
+        }
+        if (StringUtils.isEmpty(newPassword)) {
+            return AjaxResult.error("新密码不能为空");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            return AjaxResult.error("两次输入的密码不一致");
+        }
+
+        // 验证邮箱格式
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            return AjaxResult.error("邮箱格式不正确");
+        }
+
+        // 检查邮箱是否已绑定会员
+        CoreMember member = memberService.selectMemberByEmail(email);
+        if (member == null) {
+            return AjaxResult.error("该邮箱未绑定任何账户");
+        }
+
+        // 验证验证码（开发环境可通过配置跳过）
+        if (!skipEmailCode) {
+            // 验证验证码
+            String cacheKey = CacheConstants.EMAIL_CODE_KEY + "reset_password:" + email;
+            String cacheCode = redisCache.getCacheObject(cacheKey);
+
+            if (cacheCode == null) {
+                return AjaxResult.error("验证码已过期，请重新获取");
+            }
+            if (!code.equals(cacheCode)) {
+                return AjaxResult.error("验证码错误");
+            }
+        }
+
+
+        // 检查新密码是否与旧密码相同
+        if (SecurityUtils.matchesPassword(newPassword, member.getPassword())) {
+            return AjaxResult.error("新密码不能与旧密码相同");
+        }
+
+        // 更新密码
+        member.setPassword(SecurityUtils.encryptPassword(newPassword));
+        int result = memberService.updateMember(member);
+
+        if (result > 0) {
+            // 删除已使用的验证码（仅在非跳过模式下）
+            if (!skipEmailCode) {
+                String cacheKey = CacheConstants.EMAIL_CODE_KEY + "reset_password:" + email;
+                redisCache.deleteObject(cacheKey);
+            }
+
+            log.info("会员通过邮箱重置密码成功：memberId={}, email={}", member.getId(), email);
+            return AjaxResult.success("密码重置成功");
+        } else {
+            return AjaxResult.error("密码重置失败");
+        }
+    }
+
+    private String buildResetPasswordEmailContent(String code) {
+        return "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>" +
+                "<h2 style='color: #333; text-align: center;'>重置密码</h2>" +
+                "<p style='color: #666; font-size: 14px;'>尊敬的用户，您好！</p>" +
+                "<p style='color: #666; font-size: 14px;'>您正在重置密码，验证码为：</p>" +
+                "<div style='background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0; border-radius: 3px;'>" +
+                "<span style='font-size: 28px; font-weight: bold; color: #ff4d4f; letter-spacing: 5px;'>" + code + "</span>" +
                 "</div>" +
                 "<p style='color: #666; font-size: 14px;'>验证码有效期为 <strong>5分钟</strong>，请勿泄露给他人。</p>" +
                 "<p style='color: #999; font-size: 12px; margin-top: 30px; text-align: center;'>如非本人操作，请忽略此邮件。</p>" +
