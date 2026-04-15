@@ -3,96 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARFIELD - 一站式AI工具平台</title>
+    <title>STAREFILD - AI工具导航</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --terracotta: #D97757;
+            --terracotta-light: #E8956E;
+            --terracotta-dark: #B85C3D;
+            --cream: #FAF6F1;
+            --cream-dark: #F5EFE6;
+            --warm-gray: #F0EBE3;
+            --white: #FFFFFF;
+            --text-primary: #1A1A1A;
+            --text-secondary: #4A4A4A;
+            --text-tertiary: #6B6B6B;
+            --text-muted: #9A9A9A;
+            --border-light: #E8E2D9;
+            --border-default: #D4CDBF;
+            --border-hover: #C4BCAC;
+            --sage: #8B9D77;
+            --gold: #D4A574;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary-color: #8b5cf6;
-            --accent-color: #06b6d4;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --bg-light: #f8fafc;
-            --white: #ffffff;
-            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-dark);
-            background-color: var(--white);
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--cream);
+            color: var(--text-primary);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Header & Navigation */
+        /* Warm Glow Effect */
+        .warm-glow {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(217, 119, 87, 0.08), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
         header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 30;
+            background: rgba(250, 246, 241, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
         }
 
         nav {
-            max-width: 1200px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 1rem 2rem;
+            padding: 0 24px;
+            height: 72px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-family: 'Merriweather', 'Noto Serif SC', Georgia, serif;
+            font-size: 24px;
             font-weight: 700;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 32px;
             list-style: none;
         }
 
         .nav-links a {
             text-decoration: none;
-            color: var(--text-dark);
+            color: var(--text-secondary);
+            font-size: 15px;
             font-weight: 500;
-            transition: color 0.3s;
+            transition: color 0.2s ease;
         }
 
         .nav-links a:hover {
-            color: var(--primary-color);
+            color: var(--terracotta);
         }
 
         .nav-cta {
-            background: var(--gradient-1);
-            color: var(--white);
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
+            background: var(--terracotta);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
+            font-size: 14px;
             font-weight: 500;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.2s ease;
         }
 
         .nav-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            background: var(--terracotta-light);
+            transform: translateY(-1px);
         }
 
         /* Hero Section */
@@ -101,385 +129,501 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 120px 24px 80px;
             position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: var(--gradient-1);
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.3;
-            top: -200px;
-            right: -200px;
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: var(--gradient-2);
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.2;
-            bottom: -100px;
-            left: -100px;
+            background: linear-gradient(180deg, var(--cream) 0%, var(--cream-dark) 100%);
         }
 
         .hero-content {
             text-align: center;
-            max-width: 800px;
-            padding: 2rem;
+            max-width: 760px;
             position: relative;
             z-index: 1;
         }
 
         .hero-badge {
-            display: inline-block;
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary-color);
-            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(217, 119, 87, 0.1);
+            border: 1px solid rgba(217, 119, 87, 0.2);
+            color: var(--terracotta);
+            padding: 8px 16px;
             border-radius: 20px;
-            font-size: 0.875rem;
+            font-size: 13px;
             font-weight: 500;
-            margin-bottom: 1.5rem;
+            margin-bottom: 32px;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
+            font-family: 'Merriweather', 'Noto Serif SC', Georgia, serif;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 700;
             line-height: 1.2;
-        }
-
-        .hero h1 span {
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            letter-spacing: -0.01em;
+            margin-bottom: 24px;
+            color: var(--text-primary);
         }
 
         .hero p {
-            font-size: 1.25rem;
-            color: var(--text-light);
-            margin-bottom: 2rem;
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 560px;
+            margin: 0 auto 32px;
+            line-height: 1.7;
         }
 
         .hero-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
-        .btn-primary {
-            background: var(--gradient-1);
-            color: var(--white);
-            padding: 1rem 2rem;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
+        .btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--terracotta);
+            color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+            background: var(--terracotta-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
         }
 
         .btn-secondary {
-            background: var(--white);
-            color: var(--text-dark);
-            padding: 1rem 2rem;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 2px solid #e5e7eb;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-default);
         }
 
         .btn-secondary:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
+            border-color: var(--terracotta);
+            color: var(--terracotta);
         }
 
-        /* Tools Section */
-        .tools-section {
-            padding: 6rem 2rem;
-            background: var(--bg-light);
+        /* Stats */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 64px;
+            margin-top: 64px;
+            padding-top: 48px;
+            border-top: 1px solid var(--border-default);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--terracotta);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 96px 24px;
+            position: relative;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1140px;
             margin: 0 auto;
         }
 
         .section-header {
             text-align: center;
-            margin-bottom: 4rem;
+            max-width: 600px;
+            margin: 0 auto 64px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            background: rgba(217, 119, 87, 0.1);
+            border: 1px solid rgba(217, 119, 87, 0.2);
+            color: var(--terracotta);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
         }
 
         .section-header h2 {
-            font-size: 2.5rem;
+            font-family: 'Merriweather', 'Noto Serif SC', Georgia, serif;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+            margin-bottom: 16px;
+            color: var(--text-primary);
         }
 
         .section-header p {
-            color: var(--text-light);
-            font-size: 1.125rem;
+            color: var(--text-secondary);
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        /* Tools Grid */
+        .tools-section {
+            background: var(--white);
+            border-top: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
         }
 
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
         }
 
         .tool-card {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 2rem;
-            transition: all 0.3s;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: var(--cream);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s ease;
         }
 
         .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
         }
 
         .tool-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            color: var(--white);
-            margin-bottom: 1.5rem;
+            font-size: 18px;
+            color: white;
+            margin-bottom: 20px;
         }
 
-        .tool-icon.llm { background: var(--gradient-1); }
-        .tool-icon.tts { background: var(--gradient-2); }
-        .tool-icon.code { background: var(--gradient-3); }
-        .tool-icon.design { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .tool-icon.productivity { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
-        .tool-icon.website { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .tool-icon.llm { background: linear-gradient(135deg, #D97757, #B85C3D); }
+        .tool-icon.tts { background: linear-gradient(135deg, #E8956E, #D97757); }
+        .tool-icon.code { background: linear-gradient(135deg, #8B9D77, #6B8E5E); }
+        .tool-icon.design { background: linear-gradient(135deg, #D4A574, #C49464); }
+        .tool-icon.productivity { background: linear-gradient(135deg, #6B8E9F, #5A7D8E); }
+        .tool-icon.website { background: linear-gradient(135deg, #9B8AA6, #8A7995); }
 
         .tool-card h3 {
-            font-size: 1.25rem;
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
         }
 
         .tool-card p {
-            color: var(--text-light);
-            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 14px;
             line-height: 1.6;
+            margin-bottom: 16px;
         }
 
         .tool-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 8px;
         }
 
         .tool-tag {
-            background: var(--bg-light);
-            color: var(--text-light);
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
+            background: rgba(217, 119, 87, 0.1);
+            color: var(--terracotta);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 11px;
             font-weight: 500;
         }
 
         /* LLM Section */
         .llm-section {
-            padding: 6rem 2rem;
-            background: var(--white);
+            background: var(--cream-dark);
         }
 
         .llm-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
+            gap: 20px;
         }
 
         .llm-card {
-            background: var(--bg-light);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: all 0.3s;
-            border: 2px solid transparent;
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .llm-card:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-3px);
+            border-color: var(--terracotta);
+            box-shadow: 0 4px 16px rgba(217, 119, 87, 0.1);
         }
 
-        .llm-card-header {
+        .llm-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .llm-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: var(--gradient-1);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--white);
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 15px;
+            color: white;
         }
 
         .llm-info h4 {
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            font-size: 16px;
+            margin-bottom: 2px;
+            color: var(--text-primary);
         }
 
         .llm-info span {
-            font-size: 0.875rem;
-            color: var(--text-light);
+            font-size: 13px;
+            color: var(--text-tertiary);
         }
 
         .llm-desc {
-            color: var(--text-light);
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 14px;
         }
 
         .llm-features {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 6px;
         }
 
         .llm-feature {
-            background: var(--white);
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: var(--text-light);
+            background: var(--cream);
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+        }
+
+        .llm-rating {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 600;
         }
 
         /* Features Section */
         .features-section {
-            padding: 6rem 2rem;
-            background: var(--bg-light);
+            background: var(--white);
+            border-top: 1px solid var(--border-light);
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
         }
 
-        .feature-item {
+        .feature-card {
             text-align: center;
-            padding: 2rem;
+            padding: 36px 28px;
+            background: var(--cream);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
         }
 
         .feature-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
             background: var(--white);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 2rem;
-            color: var(--primary-color);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 20px;
+            font-size: 22px;
+            color: var(--terracotta);
+            border: 1px solid var(--border-light);
         }
 
-        .feature-item h3 {
-            font-size: 1.25rem;
+        .feature-card h3 {
+            font-size: 17px;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
         }
 
-        .feature-item p {
-            color: var(--text-light);
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         /* CTA Section */
         .cta-section {
-            padding: 6rem 2rem;
-            background: var(--gradient-1);
+            background: linear-gradient(180deg, var(--cream-dark), var(--cream));
+            border-top: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--terracotta), transparent);
+            opacity: 0.3;
+        }
+
+        .cta-content {
             text-align: center;
+            max-width: 560px;
+            margin: 0 auto;
         }
 
         .cta-section h2 {
-            font-size: 2.5rem;
+            font-family: 'Merriweather', 'Noto Serif SC', Georgia, serif;
+            font-size: 32px;
             font-weight: 700;
-            color: var(--white);
-            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+            margin-bottom: 16px;
+            color: var(--text-primary);
         }
 
         .cta-section p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.125rem;
-            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-size: 17px;
+            margin-bottom: 32px;
         }
 
         .btn-white {
-            background: var(--white);
-            color: var(--primary-color);
-            padding: 1rem 2.5rem;
-            border-radius: 30px;
+            background: var(--terracotta);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
 
         .btn-white:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            background: var(--terracotta-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(217, 119, 87, 0.3);
         }
 
         /* Footer */
         footer {
-            background: var(--text-dark);
-            color: var(--white);
-            padding: 4rem 2rem 2rem;
+            background: var(--cream-dark);
+            border-top: 1px solid var(--border-light);
+            padding: 64px 24px 32px;
         }
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
+        .footer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 48px;
+            max-width: 1140px;
+            margin: 0 auto 48px;
+        }
+
+        .footer-brand .logo {
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .footer-brand p {
+            color: var(--text-tertiary);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-links a {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-size: 14px;
+            border: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: var(--terracotta);
+            color: white;
+            border-color: var(--terracotta);
         }
 
         .footer-section h4 {
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--text-primary);
         }
 
         .footer-section ul {
@@ -487,57 +631,207 @@
         }
 
         .footer-section li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 10px;
         }
 
         .footer-section a {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-tertiary);
             text-decoration: none;
-            transition: color 0.3s;
+            font-size: 14px;
+            transition: color 0.2s ease;
+            cursor: pointer;
         }
 
         .footer-section a:hover {
-            color: var(--white);
+            color: var(--terracotta);
         }
 
         .footer-bottom {
-            max-width: 1200px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 32px;
+            border-top: 1px solid var(--border-light);
             text-align: center;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 26, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            max-width: 520px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--cream);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            border: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            padding: 28px 28px 0;
+        }
+
+        .modal-header h3 {
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 16px 28px 28px;
+        }
+
+        .modal-body p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
+
+        .modal-body p:last-child {
+            margin-bottom: 0;
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 968px) {
             .nav-links {
                 display: none;
             }
 
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stats-bar {
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 640px) {
             .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .section-header h2 {
                 font-size: 2rem;
             }
 
-            .tools-grid {
+            .section-header h2 {
+                font-size: 26px;
+            }
+
+            .tools-grid,
+            .llm-grid {
                 grid-template-columns: 1fr;
             }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+        }
+
+        /* Scroll Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
+    <!-- Warm Glow -->
+    <div class="warm-glow"></div>
+
     <!-- Header -->
-    <header>
+    <header id="header">
         <nav>
-            <div class="logo">STARFIELD</div>
+            <div class="logo">STAREFILD</div>
             <ul class="nav-links">
                 <li><a href="#home">首页</a></li>
                 <li><a href="#tools">工具分类</a></li>
@@ -551,16 +845,35 @@
     <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="hero-content">
-            <span class="hero-badge">🚀 全新升级 v2.0</span>
-            <h1>一站式 <span>AI工具平台</span></h1>
-            <p>精选大语言模型、TTS工具、代码助手等AI应用，助力个人与企业效率提升10倍</p>
+            <div class="hero-badge">
+                <i class="fas fa-sparkles" style="font-size: 11px;"></i>
+                全新升级 v2.0
+            </div>
+            <h1>STAREFILD 工具导航</h1>
+            <p>STARFIELD聚焦于打通"创意—产品—商业化"全流程，通过标准化接口与模块化能力，连接创客、开发者、设计师、企业与资本等多方资源，构建高效协同的创新网络。</p>
             <div class="hero-buttons">
-                <a href="#tools" class="btn-primary">
-                    <i class="fas fa-rocket"></i> 探索工具
+                <a href="#tools" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    探索工具
                 </a>
-                <a href="#llm" class="btn-secondary">
-                    <i class="fas fa-play"></i> 了解更多
+                <a href="#llm" class="btn btn-secondary">
+                    <i class="fas fa-play"></i>
+                    了解更多
                 </a>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value">200+</div>
+                    <div class="stat-label">精选工具</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">50K+</div>
+                    <div class="stat-label">活跃用户</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">99%</div>
+                    <div class="stat-label">好评率</div>
+                </div>
             </div>
         </div>
     </section>
@@ -568,12 +881,13 @@
     <!-- Tools Section -->
     <section class="tools-section" id="tools">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal">
+                <span class="section-tag">工具导航</span>
                 <h2>六大工具分类</h2>
                 <p>覆盖AI全场景应用，满足你的各种需求</p>
             </div>
             <div class="tools-grid">
-                <div class="tool-card">
+                <div class="tool-card reveal">
                     <div class="tool-icon llm">
                         <i class="fas fa-brain"></i>
                     </div>
@@ -585,9 +899,9 @@
                         <span class="tool-tag">文心一言</span>
                     </div>
                 </div>
-                <div class="tool-card">
+                <div class="tool-card reveal">
                     <div class="tool-icon tts">
-                        <i class="fas fa-microphone"></i>
+                        <i class="fas fa-microphone-lines"></i>
                     </div>
                     <h3>TTS工具</h3>
                     <p>高质量文本转语音服务，支持多语言、情感控制、流式播放和语音克隆</p>
@@ -597,7 +911,7 @@
                         <span class="tool-tag">语音克隆</span>
                     </div>
                 </div>
-                <div class="tool-card">
+                <div class="tool-card reveal">
                     <div class="tool-icon code">
                         <i class="fas fa-code"></i>
                     </div>
@@ -609,7 +923,7 @@
                         <span class="tool-tag">代码审查</span>
                     </div>
                 </div>
-                <div class="tool-card">
+                <div class="tool-card reveal">
                     <div class="tool-icon design">
                         <i class="fas fa-palette"></i>
                     </div>
@@ -621,7 +935,7 @@
                         <span class="tool-tag">UI设计</span>
                     </div>
                 </div>
-                <div class="tool-card">
+                <div class="tool-card reveal">
                     <div class="tool-icon productivity">
                         <i class="fas fa-bolt"></i>
                     </div>
@@ -633,7 +947,7 @@
                         <span class="tool-tag">自动化</span>
                     </div>
                 </div>
-                <div class="tool-card">
+                <div class="tool-card reveal">
                     <div class="tool-icon website">
                         <i class="fas fa-globe"></i>
                     </div>
@@ -652,14 +966,18 @@
     <!-- LLM Section -->
     <section class="llm-section" id="llm">
         <div class="container">
-            <div class="section-header">
-                <h2>推荐大语言模型</h2>
+            <div class="section-header reveal">
+                <span class="section-tag">大语言模型</span>
+                <h2>推荐 AI 模型</h2>
                 <p>精选国内外顶尖AI模型，满足多样化应用场景</p>
             </div>
             <div class="llm-grid">
-                <div class="llm-card">
-                    <div class="llm-card-header">
-                        <div class="llm-avatar">G</div>
+                <div class="llm-card reveal">
+                    <div class="llm-rating">
+                        <i class="fas fa-star"></i> 4.9
+                    </div>
+                    <div class="llm-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #10a37f, #0d8c6d)">G</div>
                         <div class="llm-info">
                             <h4>GPT-4</h4>
                             <span>OpenAI</span>
@@ -672,11 +990,14 @@
                         <span class="llm-feature">代码生成</span>
                     </div>
                 </div>
-                <div class="llm-card">
-                    <div class="llm-card-header">
-                        <div class="llm-avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">C</div>
+                <div class="llm-card reveal">
+                    <div class="llm-rating">
+                        <i class="fas fa-star"></i> 4.8
+                    </div>
+                    <div class="llm-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #cc785c, #b5654f)">C</div>
                         <div class="llm-info">
-                            <h4>Claude 3</h4>
+                            <h4>Claude 3.5</h4>
                             <span>Anthropic</span>
                         </div>
                     </div>
@@ -687,24 +1008,30 @@
                         <span class="llm-feature">文档分析</span>
                     </div>
                 </div>
-                <div class="llm-card">
-                    <div class="llm-card-header">
-                        <div class="llm-avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">文</div>
+                <div class="llm-card reveal">
+                    <div class="llm-rating">
+                        <i class="fas fa-star"></i> 4.7
+                    </div>
+                    <div class="llm-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #4a90e2, #357abd)">文</div>
                         <div class="llm-info">
                             <h4>文心一言</h4>
                             <span>百度</span>
                         </div>
                     </div>
-                    <p class="llm-desc">百度自研大语言模型，中文理解能力强，集成搜索能力</p>
+                    <p class="llm-desc">百度自研大语言模型，中文理解能力强，集成百度搜索能力</p>
                     <div class="llm-features">
                         <span class="llm-feature">中文优化</span>
                         <span class="llm-feature">搜索集成</span>
                         <span class="llm-feature">插件生态</span>
                     </div>
                 </div>
-                <div class="llm-card">
-                    <div class="llm-card-header">
-                        <div class="llm-avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)">通</div>
+                <div class="llm-card reveal">
+                    <div class="llm-rating">
+                        <i class="fas fa-star"></i> 4.6
+                    </div>
+                    <div class="llm-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #ff6a00, #ff8533)">通</div>
                         <div class="llm-info">
                             <h4>通义千问</h4>
                             <span>阿里云</span>
@@ -717,9 +1044,12 @@
                         <span class="llm-feature">多模态</span>
                     </div>
                 </div>
-                <div class="llm-card">
-                    <div class="llm-card-header">
-                        <div class="llm-avatar" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%)">K</div>
+                <div class="llm-card reveal">
+                    <div class="llm-rating">
+                        <i class="fas fa-star"></i> 4.7
+                    </div>
+                    <div class="llm-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #1a1a1a, #333)">K</div>
                         <div class="llm-info">
                             <h4>Kimi</h4>
                             <span>月之暗面</span>
@@ -732,9 +1062,12 @@
                         <span class="llm-feature">文件处理</span>
                     </div>
                 </div>
-                <div class="llm-card">
-                    <div class="llm-card-header">
-                        <div class="llm-avatar" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333">智</div>
+                <div class="llm-card reveal">
+                    <div class="llm-rating">
+                        <i class="fas fa-star"></i> 4.5
+                    </div>
+                    <div class="llm-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #4158d0, #c850c0)">智</div>
                         <div class="llm-info">
                             <h4>智谱清言</h4>
                             <span>智谱AI</span>
@@ -754,38 +1087,39 @@
     <!-- Features Section -->
     <section class="features-section" id="features">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal">
+                <span class="section-tag">我们的优势</span>
                 <h2>为什么选择我们</h2>
-                <p>我们为你精心筛选和整理最优质的AI工具</p>
+                <p>精心筛选和整理最优质的AI工具，让工具发现变得简单高效</p>
             </div>
             <div class="features-grid">
-                <div class="feature-item">
+                <div class="feature-card reveal">
                     <div class="feature-icon">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-check-double"></i>
                     </div>
                     <h3>严格筛选</h3>
-                    <p>每个工具都经过实测验证，确保质量可靠</p>
+                    <p>每个工具都经过实测验证，确保质量可靠，只推荐真正好用的AI产品</p>
                 </div>
-                <div class="feature-item">
+                <div class="feature-card reveal">
                     <div class="feature-icon">
                         <i class="fas fa-sync-alt"></i>
                     </div>
                     <h3>持续更新</h3>
-                    <p>紧跟AI发展趋势，每日更新最新工具</p>
+                    <p>紧跟AI发展趋势，每日更新最新工具和资讯，让你始终走在前沿</p>
                 </div>
-                <div class="feature-item">
+                <div class="feature-card reveal">
                     <div class="feature-icon">
-                        <i class="fas fa-star"></i>
+                        <i class="fas fa-medal"></i>
                     </div>
                     <h3>专业评测</h3>
-                    <p>多维度评测体系，帮你找到最适合的工具</p>
+                    <p>多维度评测体系，从功能、价格、易用性等角度帮你找到最适合的工具</p>
                 </div>
-                <div class="feature-item">
+                <div class="feature-card reveal">
                     <div class="feature-icon">
                         <i class="fas fa-users"></i>
                     </div>
                     <h3>社区驱动</h3>
-                    <p>活跃的用户社区，真实的使用反馈</p>
+                    <p>活跃的用户社区，真实的使用反馈和推荐，让选择更有依据</p>
                 </div>
             </div>
         </div>
@@ -794,15 +1128,30 @@
     <!-- CTA Section -->
     <section class="cta-section" id="cta">
         <div class="container">
-            <h2>开始你的AI之旅</h2>
-            <p>立即探索数百款精选AI工具，提升工作效率</p>
-            <a href="#tools" class="btn-white">免费开始使用</a>
+            <div class="cta-content reveal">
+                <h2>开启你的OPC之旅</h2>
+                <p>立即探索数百款精选AI工具，发现适合你的效率神器</p>
+                <a href="#tools" class="btn-white">
+                    <i class="fas fa-rocket"></i>
+                    免费开始使用
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="footer-content">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="logo">STAREFILD</div>
+                <p>一站式AI工具导航平台，精选全球优质AI应用，助力个人与企业数字化转型</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-weixin"></i></a>
+                    <a href="#"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
             <div class="footer-section">
                 <h4>产品</h4>
                 <ul>
@@ -824,28 +1173,73 @@
             <div class="footer-section">
                 <h4>关于</h4>
                 <ul>
-                    <li><a href="#">关于我们</a></li>
+                    <li><a onclick="openAboutModal(); return false;">关于我们</a></li>
                     <li><a href="#">联系我们</a></li>
                     <li><a href="#">提交工具</a></li>
                     <li><a href="#">广告合作</a></li>
                 </ul>
             </div>
-            <div class="footer-section">
-                <h4>关注我们</h4>
-                <ul>
-                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
-                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="#"><i class="fab fa-weixin"></i> 微信公众号</a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> 邮箱联系</a></li>
-                </ul>
-            </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 OPC - 一站式AI工具平台. 保留所有权利.</p>
+            <p>&copy; 2024 STAREFILD - 一站式AI工具平台. 保留所有权利.</p>
         </div>
     </footer>
 
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-overlay" onclick="closeAboutModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAboutModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <h3>关于我们</h3>
+            </div>
+            <div class="modal-body">
+                <p>浙江省创客服务协会成立于2016年1月21日，是一家专注于推动创新创业生态建设的专业服务组织。协会以"服务创客、赋能创新、促进转化"为核心使命，长期致力于为个人创客、创业团队及中小企业提供全方位支持。</p>
+                <p>在此基础上，协会打造了自有的OPC（开放平台协作 / Open Platform Collaboration）体系，并推出核心平台——STARFIELD。作为源自协会创新实践的开放协同平台，STARFIELD聚焦于打通"创意—产品—商业化"全流程，通过标准化接口与模块化能力，连接创客、开发者、设计师、企业与资本等多方资源，构建高效协同的创新网络。</p>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Modal Functions
+        function openAboutModal() {
+            document.getElementById('aboutModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAboutModal() {
+            document.getElementById('aboutModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAboutModal();
+            }
+        });
+
+        // Scroll Reveal Animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('active');
+                    }, index * 50);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -858,16 +1252,6 @@
                     });
                 }
             });
-        });
-
-        // Header scroll effect
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            if (window.scrollY > 50) {
-                header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-            } else {
-                header.style.boxShadow = 'none';
-            }
         });
     </script>
 </body>
