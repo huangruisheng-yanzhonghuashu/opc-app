@@ -77,16 +77,6 @@ public class MobileRegisterController extends MobileBaseController {
     public AjaxResult sendEmailCode(@Validated @RequestBody EmailCodeRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
 
-        // 参数校验
-        if (StringUtils.isEmpty(email)) {
-            return AjaxResult.error("邮箱不能为空");
-        }
-
-        // 校验邮箱格式
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            return AjaxResult.error("邮箱格式不正确");
-        }
-
         // 检查邮箱是否已存在（从会员表判断）
         CoreMember member = new CoreMember();
         member.setEmail(email);
@@ -134,19 +124,6 @@ public class MobileRegisterController extends MobileBaseController {
         String code = registerDTO.getCode();
         String inviteCode = registerDTO.getInviteCode();
 
-        // 参数校验
-        if (StringUtils.isEmpty(username)) {
-            return AjaxResult.error("用户名不能为空");
-        }
-        if (StringUtils.isEmpty(password)) {
-            return AjaxResult.error("密码不能为空");
-        }
-        if (StringUtils.isEmpty(email)) {
-            return AjaxResult.error("邮箱不能为空");
-        }
-        if (StringUtils.isEmpty(code)) {
-            return AjaxResult.error("验证码不能为空");
-        }
         // 查询iOS发布状态
         CorePublishConfig query = new CorePublishConfig();
         query.setPlatformType("ios");
@@ -159,23 +136,6 @@ public class MobileRegisterController extends MobileBaseController {
         // 当iOS发布状态为1（发布完成）时，激活码必填
         if ("1".equals(iosPublishStatus) && StringUtils.isEmpty(inviteCode)) {
             return AjaxResult.error("激活码（邀请码）不能为空");
-        }
-
-        // 校验用户名长度
-        if (username.length() < UserConstants.USERNAME_MIN_LENGTH
-                || username.length() > UserConstants.USERNAME_MAX_LENGTH) {
-            return AjaxResult.error("账户长度必须在2到20个字符之间");
-        }
-
-        // 校验密码长度
-        if (password.length() < UserConstants.PASSWORD_MIN_LENGTH
-                || password.length() > UserConstants.PASSWORD_MAX_LENGTH) {
-            return AjaxResult.error("密码长度必须在5到20个字符之间");
-        }
-
-        // 校验邮箱格式
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            return AjaxResult.error("邮箱格式不正确");
         }
 
         // 验证验证码（开发环境可通过配置跳过）

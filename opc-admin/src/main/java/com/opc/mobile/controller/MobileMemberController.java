@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.opc.common.annotation.Log;
@@ -213,9 +214,6 @@ public class MobileMemberController {
 
         try {
             String username = updateDTO.getUsername();
-            if (username == null || username.trim().isEmpty()) {
-                return AjaxResult.error("用户名不能为空");
-            }
 
             // 获取当前会员信息
             CoreMember member = memberService.selectMemberById(memberLoginVO.getMemberId());
@@ -272,15 +270,7 @@ public class MobileMemberController {
             String newPassword = updateDTO.getNewPassword();
             String confirmPassword = updateDTO.getConfirmPassword();
 
-            if (oldPassword == null || oldPassword.trim().isEmpty()) {
-                return AjaxResult.error("原密码不能为空");
-            }
-            if (newPassword == null || newPassword.trim().isEmpty()) {
-                return AjaxResult.error("新密码不能为空");
-            }
-            if (newPassword.length() < 6 || newPassword.length() > 20) {
-                return AjaxResult.error("新密码长度必须在6-20位之间");
-            }
+            // 校验两次输入的密码是否一致
             if (!newPassword.equals(confirmPassword)) {
                 return AjaxResult.error("两次输入的密码不一致");
             }
@@ -327,30 +317,19 @@ public class MobileMemberController {
     /**
      * 会员注销接口
      */
-    @Operation(summary = "会员注销", description = "验证密码后注销当前登录会员账户（账户将被禁用）")
+    @Operation(summary = "会员注销", description = "注销当前登录会员账户（账户将被禁用）")
     @Log(title = "会员注销", businessType = BusinessType.DELETE)
     @PostMapping("/cancel")
-    public AjaxResult cancelMember(@Valid @RequestBody MemberCancelDTO cancelDTO, HttpServletRequest request) {
+    public AjaxResult cancelMember(HttpServletRequest request) {
         MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(request);
         if (memberLoginVO == null) {
             return AjaxResult.error("请先登录");
         }
 
         try {
-            String password = cancelDTO.getPassword();
-
-            if (password == null || password.trim().isEmpty()) {
-                return AjaxResult.error("密码不能为空");
-            }
-
             CoreMember member = memberService.selectMemberById(memberLoginVO.getMemberId());
             if (member == null) {
                 return AjaxResult.error("会员不存在");
-            }
-
-            // 验证密码
-            if (!SecurityUtils.matchesPassword(password, member.getPassword())) {
-                return AjaxResult.error("密码错误");
             }
 
             // 检查账户是否已注销
@@ -365,7 +344,7 @@ public class MobileMemberController {
                 // 清除登录状态
                 memberTokenService.delLoginUser(memberLoginVO.getToken());
 
-                log.info("会员注销成功：memberId={}, reason={}", memberLoginVO.getMemberId(), cancelDTO.getReason());
+                log.info("会员注销成功：memberId={}", memberLoginVO.getMemberId());
                 return AjaxResult.success("账户注销成功");
             } else {
                 return AjaxResult.error("账户注销失败");
@@ -378,21 +357,13 @@ public class MobileMemberController {
 
     @Operation(summary = "发送绑定邮箱验证码", description = "向指定邮箱发送绑定验证码，验证码有效期5分钟")
     @PostMapping("/sendBindEmailCode")
-    public AjaxResult sendBindEmailCode(@RequestBody EmailCodeRequestDTO requestDTO, HttpServletRequest httpRequest) {
+    public AjaxResult sendBindEmailCode(@Validated @RequestBody EmailCodeRequestDTO requestDTO, HttpServletRequest httpRequest) {
         MemberLoginVO memberLoginVO = memberTokenService.getLoginUser(httpRequest);
         if (memberLoginVO == null) {
             return AjaxResult.error("请先登录");
         }
 
         String email = requestDTO.getEmail();
-
-        if (StringUtils.isEmpty(email)) {
-            return AjaxResult.error("邮箱不能为空");
-        }
-
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            return AjaxResult.error("邮箱格式不正确");
-        }
 
         CoreMember checkMember = new CoreMember();
         checkMember.setEmail(email);
@@ -436,17 +407,6 @@ public class MobileMemberController {
 
         String email = bindDTO.getEmail();
         String code = bindDTO.getCode();
-
-        if (StringUtils.isEmpty(email)) {
-            return AjaxResult.error("邮箱不能为空");
-        }
-        if (StringUtils.isEmpty(code)) {
-            return AjaxResult.error("验证码不能为空");
-        }
-
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            return AjaxResult.error("邮箱格式不正确");
-        }
 
         CoreMember currentMember = memberService.selectMemberById(memberLoginVO.getMemberId());
         if (currentMember == null) {
@@ -511,16 +471,8 @@ public class MobileMemberController {
     @Operation(summary = "发送重置密码验证码", description = "向指定邮箱发送重置密码验证码，验证码有效期5分钟")
     @PostMapping("/sendResetPasswordCode")
     @MemberAnonymous
-    public AjaxResult sendResetPasswordCode(@RequestBody EmailCodeRequestDTO requestDTO) {
+    public AjaxResult sendResetPasswordCode(@Validated @RequestBody EmailCodeRequestDTO requestDTO) {
         String email = requestDTO.getEmail();
-
-        if (StringUtils.isEmpty(email)) {
-            return AjaxResult.error("邮箱不能为空");
-        }
-
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            return AjaxResult.error("邮箱格式不正确");
-        }
 
         // 检查邮箱是否已绑定会员
         CoreMember member = memberService.selectMemberByEmail(email);
@@ -566,22 +518,9 @@ public class MobileMemberController {
         String newPassword = resetDTO.getNewPassword();
         String confirmPassword = resetDTO.getConfirmPassword();
 
-        if (StringUtils.isEmpty(email)) {
-            return AjaxResult.error("邮箱不能为空");
-        }
-        if (StringUtils.isEmpty(code)) {
-            return AjaxResult.error("验证码不能为空");
-        }
-        if (StringUtils.isEmpty(newPassword)) {
-            return AjaxResult.error("新密码不能为空");
-        }
+        // 校验两次输入的密码是否一致
         if (!newPassword.equals(confirmPassword)) {
             return AjaxResult.error("两次输入的密码不一致");
-        }
-
-        // 验证邮箱格式
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            return AjaxResult.error("邮箱格式不正确");
         }
 
         // 检查邮箱是否已绑定会员
