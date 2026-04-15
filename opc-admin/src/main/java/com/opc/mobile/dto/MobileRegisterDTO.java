@@ -35,8 +35,7 @@ public class MobileRegisterDTO {
     @NotBlank(message = "验证码不能为空")
     private String code;
 
-    @Schema(description = "激活码（邀请码）", required = true, example = "ACQPZFHJP9A3MIGVFM")
-    @NotBlank(message = "激活码（邀请码）不能为空")
+    @Schema(description = "激活码（邀请码）", required = false, example = "ACQPZFHJP9A3MIGVFM")
     private String inviteCode;
 
     public String getUsername() {

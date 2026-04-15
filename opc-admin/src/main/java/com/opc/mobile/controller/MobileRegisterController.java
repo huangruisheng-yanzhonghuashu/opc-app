@@ -11,8 +11,10 @@ import com.opc.common.utils.SecurityUtils;
 import com.opc.common.utils.StringUtils;
 import com.opc.core.domain.CoreActivationCode;
 import com.opc.core.domain.CoreMember;
+import com.opc.core.domain.CorePublishConfig;
 import com.opc.core.service.ICoreActivationCodeService;
 import com.opc.core.service.ICoreMemberService;
+import com.opc.core.service.ICorePublishConfigService;
 import com.opc.framework.manager.AsyncManager;
 import com.opc.framework.manager.factory.AsyncFactory;
 import com.opc.system.service.ISysConfigService;
@@ -60,6 +62,9 @@ public class MobileRegisterController extends MobileBaseController {
 
     @Autowired
     private ICoreActivationCodeService activationCodeService;
+
+    @Autowired
+    private ICorePublishConfigService publishConfigService;
 
     @Value("${spring.mail.username:}")
     private String mailFrom;
@@ -142,8 +147,17 @@ public class MobileRegisterController extends MobileBaseController {
         if (StringUtils.isEmpty(code)) {
             return AjaxResult.error("验证码不能为空");
         }
-        // 激活码（邀请码）必填校验
-        if (StringUtils.isEmpty(inviteCode)) {
+        // 查询iOS发布状态
+        CorePublishConfig query = new CorePublishConfig();
+        query.setPlatformType("ios");
+        java.util.List<CorePublishConfig> publishConfigs = publishConfigService.selectCorePublishConfigList(query);
+        String iosPublishStatus = "0"; // 默认发布中
+        if (publishConfigs != null && !publishConfigs.isEmpty()) {
+            iosPublishStatus = publishConfigs.get(0).getPublishStatus();
+        }
+
+        // 当iOS发布状态为1（发布完成）时，激活码必填
+        if ("1".equals(iosPublishStatus) && StringUtils.isEmpty(inviteCode)) {
             return AjaxResult.error("激活码（邀请码）不能为空");
         }
 
@@ -189,26 +203,30 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("邮箱已被注册");
         }
 
-        // 验证激活码（邀请码）
-        CoreActivationCode activationCode = activationCodeService.selectCoreActivationCodeByCode(inviteCode);
-        if (activationCode == null) {
-            return AjaxResult.error("激活码不存在");
-        }
-        // 检查激活码状态：0-未使用, 1-已发送-未使用 可以使用；2-已使用, 3-已注销, 4-已过期 不可用
-        String status = activationCode.getStatus();
-        if ("2".equals(status)) {
-            return AjaxResult.error("激活码已被使用");
-        }
-        if ("3".equals(status)) {
-            return AjaxResult.error("激活码已注销");
-        }
-        if ("4".equals(status)) {
-            return AjaxResult.error("激活码已过期");
-        }
-        // 检查激活码是否过期
-        if (activationCode.getExpireTime() != null &&
-                activationCode.getExpireTime().before(DateUtils.getNowDate())) {
-            return AjaxResult.error("激活码已过期");
+        CoreActivationCode activationCode = null;
+        // 当iOS发布状态为1（发布完成）或填写了激活码时，需要验证激活码
+        if ("1".equals(iosPublishStatus) || StringUtils.isNotEmpty(inviteCode)) {
+            // 验证激活码（邀请码）
+            activationCode = activationCodeService.selectCoreActivationCodeByCode(inviteCode);
+            if (activationCode == null) {
+                return AjaxResult.error("激活码不存在");
+            }
+            // 检查激活码状态：0-未使用, 1-已发送-未使用 可以使用；2-已使用, 3-已注销, 4-已过期 不可用
+            String status = activationCode.getStatus();
+            if ("2".equals(status)) {
+                return AjaxResult.error("激活码已被使用");
+            }
+            if ("3".equals(status)) {
+                return AjaxResult.error("激活码已注销");
+            }
+            if ("4".equals(status)) {
+                return AjaxResult.error("激活码已过期");
+            }
+            // 检查激活码是否过期
+            if (activationCode.getExpireTime() != null &&
+                    activationCode.getExpireTime().before(DateUtils.getNowDate())) {
+                return AjaxResult.error("激活码已过期");
+            }
         }
 
         // 创建会员
@@ -224,9 +242,11 @@ public class MobileRegisterController extends MobileBaseController {
             return AjaxResult.error("注册失败，请联系系统管理人员");
         }
 
-        // 更新激活码使用状态
-        Long memberId = member.getId();
-        activationCodeService.useActivationCode(inviteCode, memberId);
+        // 更新激活码使用状态（仅在填写了有效激活码时）
+        if (activationCode != null) {
+            Long memberId = member.getId();
+            activationCodeService.useActivationCode(inviteCode, memberId);
+        }
 
         // 删除已使用的验证码（仅在非跳过模式下）
         if (!skipEmailCode) {
