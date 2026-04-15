@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARFIELD - 一站式AI工具平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #8b5cf6;
+            --accent-color: #06b6d4;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--white);
+        }
+
+        /* Header & Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-cta {
+            background: var(--gradient-1);
+            color: var(--white);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            top: -200px;
+            right: -200px;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--gradient-2);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.2;
+            bottom: -100px;
+            left: -100px;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--text-dark);
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Tools Section */
+        .tools-section {
+            padding: 6rem 2rem;
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.125rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .tool-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-icon.llm { background: var(--gradient-1); }
+        .tool-icon.tts { background: var(--gradient-2); }
+        .tool-icon.code { background: var(--gradient-3); }
+        .tool-icon.design { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .tool-icon.productivity { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .tool-icon.website { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+        .tool-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .tool-card p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tool-tag {
+            background: var(--bg-light);
+            color: var(--text-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* LLM Section */
+        .llm-section {
+            padding: 6rem 2rem;
+            background: var(--white);
+        }
+
+        .llm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .llm-card {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .llm-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .llm-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .llm-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .llm-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .llm-info span {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .llm-desc {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .llm-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .llm-feature {
+            background: var(--white);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 6rem 2rem;
+            background: var(--bg-light);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-item h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-item p {
+            color: var(--text-light);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 2rem;
+            background: var(--gradient-1);
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-white {
+            background: var(--white);
+            color: var(--primary-color);
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-white:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--text-dark);
+            color: var(--white);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h4 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">STARFIELD</div>
+            <ul class="nav-links">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#tools">工具分类</a></li>
+                <li><a href="#llm">大语言模型</a></li>
+                <li><a href="#features">功能特点</a></li>
+            </ul>
+            <a href="#cta" class="nav-cta">开始使用</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <span class="hero-badge">🚀 全新升级 v2.0</span>
+            <h1>一站式 <span>AI工具平台</span></h1>
+            <p>精选大语言模型、TTS工具、代码助手等AI应用，助力个人与企业效率提升10倍</p>
+            <div class="hero-buttons">
+                <a href="#tools" class="btn-primary">
+                    <i class="fas fa-rocket"></i> 探索工具
+                </a>
+                <a href="#llm" class="btn-secondary">
+                    <i class="fas fa-play"></i> 了解更多
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section class="tools-section" id="tools">
+        <div class="container">
+            <div class="section-header">
+                <h2>六大工具分类</h2>
+                <p>覆盖AI全场景应用，满足你的各种需求</p>
+            </div>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-icon llm">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>大语言模型</h3>
+                    <p>领先的AI对话与内容生成模型，支持多模态交互、编程助手与自然语言处理</p>
+                    <div class="tool-tags">
+                        <span class="tool-tag">GPT-4</span>
+                        <span class="tool-tag">Claude</span>
+                        <span class="tool-tag">文心一言</span>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon tts">
+                        <i class="fas fa-microphone"></i>
+                    </div>
+                    <h3>TTS工具</h3>
+                    <p>高质量文本转语音服务，支持多语言、情感控制、流式播放和语音克隆</p>
+                    <div class="tool-tags">
+                        <span class="tool-tag">语音合成</span>
+                        <span class="tool-tag">多语言</span>
+                        <span class="tool-tag">语音克隆</span>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon code">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>代码工具</h3>
+                    <p>提升开发效率的IDE插件和命令行工具，AI辅助编程与代码审查</p>
+                    <div class="tool-tags">
+                        <span class="tool-tag">代码补全</span>
+                        <span class="tool-tag">Bug修复</span>
+                        <span class="tool-tag">代码审查</span>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon design">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3>设计工具</h3>
+                    <p>AI辅助设计工具，让非设计师也能创作专业级别的视觉内容</p>
+                    <div class="tool-tags">
+                        <span class="tool-tag">AI绘画</span>
+                        <span class="tool-tag">Logo设计</span>
+                        <span class="tool-tag">UI设计</span>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon productivity">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>生产力工具</h3>
+                    <p>提升日常工作效率的必备工具，自动化处理重复性任务</p>
+                    <div class="tool-tags">
+                        <span class="tool-tag">文档处理</span>
+                        <span class="tool-tag">数据分析</span>
+                        <span class="tool-tag">自动化</span>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-icon website">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>网站生成</h3>
+                    <p>快速创建专业网站的AI工具，无需编程基础即可搭建精美站点</p>
+                    <div class="tool-tags">
+                        <span class="tool-tag">一键建站</span>
+                        <span class="tool-tag">SEO优化</span>
+                        <span class="tool-tag">响应式</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LLM Section -->
+    <section class="llm-section" id="llm">
+        <div class="container">
+            <div class="section-header">
+                <h2>推荐大语言模型</h2>
+                <p>精选国内外顶尖AI模型，满足多样化应用场景</p>
+            </div>
+            <div class="llm-grid">
+                <div class="llm-card">
+                    <div class="llm-card-header">
+                        <div class="llm-avatar">G</div>
+                        <div class="llm-info">
+                            <h4>GPT-4</h4>
+                            <span>OpenAI</span>
+                        </div>
+                    </div>
+                    <p class="llm-desc">目前最强大的多模态大语言模型，支持文本、图像理解，代码能力出众</p>
+                    <div class="llm-features">
+                        <span class="llm-feature">多模态</span>
+                        <span class="llm-feature">128K上下文</span>
+                        <span class="llm-feature">代码生成</span>
+                    </div>
+                </div>
+                <div class="llm-card">
+                    <div class="llm-card-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">C</div>
+                        <div class="llm-info">
+                            <h4>Claude 3</h4>
+                            <span>Anthropic</span>
+                        </div>
+                    </div>
+                    <p class="llm-desc">以安全性和可靠性著称，长文本处理能力卓越，适合文档分析</p>
+                    <div class="llm-features">
+                        <span class="llm-feature">200K上下文</span>
+                        <span class="llm-feature">安全可靠</span>
+                        <span class="llm-feature">文档分析</span>
+                    </div>
+                </div>
+                <div class="llm-card">
+                    <div class="llm-card-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">文</div>
+                        <div class="llm-info">
+                            <h4>文心一言</h4>
+                            <span>百度</span>
+                        </div>
+                    </div>
+                    <p class="llm-desc">百度自研大语言模型，中文理解能力强，集成搜索能力</p>
+                    <div class="llm-features">
+                        <span class="llm-feature">中文优化</span>
+                        <span class="llm-feature">搜索集成</span>
+                        <span class="llm-feature">插件生态</span>
+                    </div>
+                </div>
+                <div class="llm-card">
+                    <div class="llm-card-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)">通</div>
+                        <div class="llm-info">
+                            <h4>通义千问</h4>
+                            <span>阿里云</span>
+                        </div>
+                    </div>
+                    <p class="llm-desc">阿里云推出的大模型，在电商、办公等场景有深度优化</p>
+                    <div class="llm-features">
+                        <span class="llm-feature">开源版本</span>
+                        <span class="llm-feature">电商优化</span>
+                        <span class="llm-feature">多模态</span>
+                    </div>
+                </div>
+                <div class="llm-card">
+                    <div class="llm-card-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%)">K</div>
+                        <div class="llm-info">
+                            <h4>Kimi</h4>
+                            <span>月之暗面</span>
+                        </div>
+                    </div>
+                    <p class="llm-desc">超长上下文窗口支持，可处理整本书籍或长文档</p>
+                    <div class="llm-features">
+                        <span class="llm-feature">200K上下文</span>
+                        <span class="llm-feature">长文档</span>
+                        <span class="llm-feature">文件处理</span>
+                    </div>
+                </div>
+                <div class="llm-card">
+                    <div class="llm-card-header">
+                        <div class="llm-avatar" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333">智</div>
+                        <div class="llm-info">
+                            <h4>智谱清言</h4>
+                            <span>智谱AI</span>
+                        </div>
+                    </div>
+                    <p class="llm-desc">清华系AI公司出品，ChatGLM开源模型在学术圈广受好评</p>
+                    <div class="llm-features">
+                        <span class="llm-feature">开源生态</span>
+                        <span class="llm-feature">学术友好</span>
+                        <span class="llm-feature">代码能力</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>为什么选择我们</h2>
+                <p>我们为你精心筛选和整理最优质的AI工具</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>严格筛选</h3>
+                    <p>每个工具都经过实测验证，确保质量可靠</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3>持续更新</h3>
+                    <p>紧跟AI发展趋势，每日更新最新工具</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>专业评测</h3>
+                    <p>多维度评测体系，帮你找到最适合的工具</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>社区驱动</h3>
+                    <p>活跃的用户社区，真实的使用反馈</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="cta">
+        <div class="container">
+            <h2>开始你的AI之旅</h2>
+            <p>立即探索数百款精选AI工具，提升工作效率</p>
+            <a href="#tools" class="btn-white">免费开始使用</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>产品</h4>
+                <ul>
+                    <li><a href="#">工具导航</a></li>
+                    <li><a href="#">分类浏览</a></li>
+                    <li><a href="#">最新上线</a></li>
+                    <li><a href="#">热门排行</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>资源</h4>
+                <ul>
+                    <li><a href="#">使用指南</a></li>
+                    <li><a href="#">AI教程</a></li>
+                    <li><a href="#">行业报告</a></li>
+                    <li><a href="#">博客文章</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>关于</h4>
+                <ul>
+                    <li><a href="#">关于我们</a></li>
+                    <li><a href="#">联系我们</a></li>
+                    <li><a href="#">提交工具</a></li>
+                    <li><a href="#">广告合作</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>关注我们</h4>
+                <ul>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-weixin"></i> 微信公众号</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> 邮箱联系</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 OPC - 一站式AI工具平台. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
