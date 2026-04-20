@@ -17,6 +17,10 @@ public class PublishConfigQueryDTO
     @Schema(description = "平台类型：ios或android", required = true)
     private String platformType;
 
+    /** 版本号 */
+    @Schema(description = "版本号", required = false)
+    private String version;
+
     public String getPlatformType()
     {
         return platformType;
@@ -25,5 +29,15 @@ public class PublishConfigQueryDTO
     public void setPlatformType(String platformType)
     {
         this.platformType = platformType;
+    }
+
+    public String getVersion()
+    {
+        return version;
+    }
+
+    public void setVersion(String version)
+    {
+        this.version = version;
     }
 }

@@ -35,7 +35,7 @@
                 AND platform_type = #{platformType}
             </if>
             <if test="version != null and version != ''">
-                AND version like concat('%', #{version}, '%')
+                AND version = #{version}
             </if>
             <if test="publishStatus != null and publishStatus != ''">
                 AND publish_status = #{publishStatus}

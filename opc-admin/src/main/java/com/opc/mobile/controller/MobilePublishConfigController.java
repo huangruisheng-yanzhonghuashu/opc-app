@@ -52,6 +52,7 @@ public class MobilePublishConfigController extends BaseController
     {
         CorePublishConfig query = new CorePublishConfig();
         query.setPlatformType(dto.getPlatformType());
+        query.setVersion(dto.getVersion());
         List<CorePublishConfig> list = publishConfigService.selectCorePublishConfigList(query);
         
         if (list == null || list.isEmpty())
