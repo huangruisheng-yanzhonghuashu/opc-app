@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.opc.common.annotation.Anonymous;
 import com.opc.common.annotation.MemberLogin;
 import com.opc.common.core.controller.BaseController;
 import com.opc.common.core.domain.AjaxResult;
@@ -49,7 +50,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @Tag(name = "APP首页", description = "移动端首页相关接口")
 @RestController
 @RequestMapping("/mobile/home")
-@MemberLogin
 public class MobileHomeController extends BaseController
 {
     @Autowired

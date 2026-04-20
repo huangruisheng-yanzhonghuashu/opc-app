@@ -39,7 +39,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "会员活动", description = "移动端活动相关接口")
 @RestController
 @RequestMapping("/mobile/activity")
-@MemberLogin
 public class MobileActivityController extends BaseController
 {
     @Autowired
