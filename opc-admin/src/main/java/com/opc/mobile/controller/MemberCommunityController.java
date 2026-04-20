@@ -40,7 +40,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @Tag(name = "会员社区", description = "移动端会员社区相关接口")
 @RestController
 @RequestMapping("/mobile/community")
-@MemberLogin
 public class MemberCommunityController extends BaseController
 {
     @Autowired
@@ -60,7 +59,6 @@ public class MemberCommunityController extends BaseController
 
     @Operation(summary = "社区列表", description = "查询全部社区列表，按省份分组，需要会员登录")
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreCommunityVO.class)))
-    @MemberLogin
     @PostMapping("/list")
     public AjaxResult list(HttpServletRequest request)
     {
@@ -69,15 +67,15 @@ public class MemberCommunityController extends BaseController
         List<CoreCommunity> list = communityService.selectCommunityList(community);
 
         // 获取当前登录会员
-        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        Long memberId = loginUser.getMemberId();
+/*        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
+        Long memberId = loginUser.getMemberId();*/
 
         // 批量查询会员的关联状态（性能优化）
         List<Long> communityIds = list.stream()
                 .map(CoreCommunity::getId)
                 .collect(Collectors.toList());
 
-        // 查询想去记录
+/*        // 查询想去记录
         List<CoreCommunityWantToGo> wantToGoList = wantToGoService.selectByMemberAndCommunityIds(memberId, communityIds);
         Map<Long, CoreCommunityWantToGo> wantToGoMap = wantToGoList.stream()
                 .collect(Collectors.toMap(CoreCommunityWantToGo::getCommunityId, w -> w, (w1, w2) -> w1));
@@ -90,7 +88,7 @@ public class MemberCommunityController extends BaseController
         // 查询评价记录
         List<CoreCommunityReview> reviewList = reviewService.selectByMemberAndCommunityIds(memberId, communityIds);
         Map<Long, CoreCommunityReview> reviewMap = reviewList.stream()
-                .collect(Collectors.toMap(CoreCommunityReview::getCommunityId, r -> r, (r1, r2) -> r1));
+                .collect(Collectors.toMap(CoreCommunityReview::getCommunityId, r -> r, (r1, r2) -> r1));*/
 
         // 按省份分组并转换为VO
         Map<String, List<CoreCommunityVO>> groupedByProvince = list.stream()
@@ -99,7 +97,7 @@ public class MemberCommunityController extends BaseController
                         Collectors.mapping(c -> {
                             CoreCommunityVO vo = new CoreCommunityVO();
                             BeanUtils.copyProperties(c, vo);
-                            Long communityId = c.getId();
+/*                            Long communityId = c.getId();
 
                             // 设置会员关联状态
                             vo.setWantToGo(wantToGoMap.containsKey(communityId));
@@ -118,7 +116,10 @@ public class MemberCommunityController extends BaseController
                             CoreCommunityVisited visitedRecord = visitedMap.get(communityId);
                             if (visitedRecord != null) {
                                 vo.setVisitTime(visitedRecord.getVisitTime());
-                            }
+                            }*/
+                            vo.setReviewed(false);
+                            vo.setMyRating(null);
+
 
                             return vo;
                         }, Collectors.toList())
@@ -129,7 +130,6 @@ public class MemberCommunityController extends BaseController
 
     @Operation(summary = "社区详情", description = "根据社区ID获取详细信息，需要会员登录")
     @ApiResponse(responseCode = "200", description = "成功", content = @Content(schema = @Schema(implementation = CoreCommunityVO.class)))
-    @MemberLogin
     @PostMapping("/detail")
     public AjaxResult getInfo(@RequestBody CommunityIdDTO dto, HttpServletRequest request)
     {
@@ -147,14 +147,14 @@ public class MemberCommunityController extends BaseController
         }
 
         // 获取当前登录会员
-        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        Long memberId = loginUser.getMemberId();
+/*        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
+        Long memberId = loginUser.getMemberId();*/
 
         // 构建VO对象
         CoreCommunityVO vo = new CoreCommunityVO();
         BeanUtils.copyProperties(community, vo);
 
-        // 设置会员关联状态（需要判断状态是否为0）
+/*        // 设置会员关联状态（需要判断状态是否为0）
         CoreCommunityWantToGo wantToGoRecord = wantToGoService.selectByCommunityAndMember(id, memberId);
         vo.setWantToGo(wantToGoRecord != null && "0".equals(wantToGoRecord.getStatus()));
 
@@ -177,7 +177,10 @@ public class MemberCommunityController extends BaseController
         // 设置去过时间
         if (visitedRecord != null) {
             vo.setVisitTime(visitedRecord.getVisitTime());
-        }
+        }*/
+
+        vo.setReviewed(false);
+        vo.setMyRating(null);
 
         return AjaxResult.success(vo);
     }
