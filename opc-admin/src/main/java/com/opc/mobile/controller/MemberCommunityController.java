@@ -67,59 +67,75 @@ public class MemberCommunityController extends BaseController
         List<CoreCommunity> list = communityService.selectCommunityList(community);
 
         // 获取当前登录会员
-/*        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        Long memberId = loginUser.getMemberId();*/
+        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
 
         // 批量查询会员的关联状态（性能优化）
         List<Long> communityIds = list.stream()
                 .map(CoreCommunity::getId)
                 .collect(Collectors.toList());
 
-/*        // 查询想去记录
-        List<CoreCommunityWantToGo> wantToGoList = wantToGoService.selectByMemberAndCommunityIds(memberId, communityIds);
-        Map<Long, CoreCommunityWantToGo> wantToGoMap = wantToGoList.stream()
-                .collect(Collectors.toMap(CoreCommunityWantToGo::getCommunityId, w -> w, (w1, w2) -> w1));
+        // 初始化空Map
+        Map<Long, CoreCommunityWantToGo> wantToGoMap = java.util.Collections.emptyMap();
+        Map<Long, CoreCommunityVisited> visitedMap = java.util.Collections.emptyMap();
+        Map<Long, CoreCommunityReview> reviewMap = java.util.Collections.emptyMap();
 
-        // 查询去过记录
-        List<CoreCommunityVisited> visitedList = visitedService.selectByMemberAndCommunityIds(memberId, communityIds);
-        Map<Long, CoreCommunityVisited> visitedMap = visitedList.stream()
-                .collect(Collectors.toMap(CoreCommunityVisited::getCommunityId, v -> v, (v1, v2) -> v1));
+        // loginUser不为空时，查询想去记录、去过记录、评价记录
+        if (loginUser != null) {
+            Long memberId = loginUser.getMemberId();
 
-        // 查询评价记录
-        List<CoreCommunityReview> reviewList = reviewService.selectByMemberAndCommunityIds(memberId, communityIds);
-        Map<Long, CoreCommunityReview> reviewMap = reviewList.stream()
-                .collect(Collectors.toMap(CoreCommunityReview::getCommunityId, r -> r, (r1, r2) -> r1));*/
+            // 查询想去记录
+            List<CoreCommunityWantToGo> wantToGoList = wantToGoService.selectByMemberAndCommunityIds(memberId, communityIds);
+            wantToGoMap = wantToGoList.stream()
+                    .collect(Collectors.toMap(CoreCommunityWantToGo::getCommunityId, w -> w, (w1, w2) -> w1));
+
+            // 查询去过记录
+            List<CoreCommunityVisited> visitedList = visitedService.selectByMemberAndCommunityIds(memberId, communityIds);
+            visitedMap = visitedList.stream()
+                    .collect(Collectors.toMap(CoreCommunityVisited::getCommunityId, v -> v, (v1, v2) -> v1));
+
+            // 查询评价记录
+            List<CoreCommunityReview> reviewList = reviewService.selectByMemberAndCommunityIds(memberId, communityIds);
+            reviewMap = reviewList.stream()
+                    .collect(Collectors.toMap(CoreCommunityReview::getCommunityId, r -> r, (r1, r2) -> r1));
+        }
 
         // 按省份分组并转换为VO
+        final Map<Long, CoreCommunityWantToGo> finalWantToGoMap = wantToGoMap;
+        final Map<Long, CoreCommunityVisited> finalVisitedMap = visitedMap;
+        final Map<Long, CoreCommunityReview> finalReviewMap = reviewMap;
+
         Map<String, List<CoreCommunityVO>> groupedByProvince = list.stream()
                 .collect(Collectors.groupingBy(
                         c -> c.getProvince() != null ? c.getProvince() : "其他",
                         Collectors.mapping(c -> {
                             CoreCommunityVO vo = new CoreCommunityVO();
                             BeanUtils.copyProperties(c, vo);
-/*                            Long communityId = c.getId();
 
-                            // 设置会员关联状态
-                            vo.setWantToGo(wantToGoMap.containsKey(communityId));
-                            vo.setVisited(visitedMap.containsKey(communityId));
+                            if (loginUser != null) {
+                                Long communityId = c.getId();
 
-                            CoreCommunityReview review = reviewMap.get(communityId);
-                            if (review != null) {
-                                vo.setReviewed(true);
-                                vo.setMyRating(review.getRating());
+                                // 设置会员关联状态
+                                vo.setWantToGo(finalWantToGoMap.containsKey(communityId));
+                                vo.setVisited(finalVisitedMap.containsKey(communityId));
+
+                                CoreCommunityReview review = finalReviewMap.get(communityId);
+                                if (review != null) {
+                                    vo.setReviewed(true);
+                                    vo.setMyRating(review.getRating());
+                                } else {
+                                    vo.setReviewed(false);
+                                    vo.setMyRating(null);
+                                }
+
+                                // 设置去过时间
+                                CoreCommunityVisited visitedRecord = finalVisitedMap.get(communityId);
+                                if (visitedRecord != null) {
+                                    vo.setVisitTime(visitedRecord.getVisitTime());
+                                }
                             } else {
                                 vo.setReviewed(false);
                                 vo.setMyRating(null);
                             }
-
-                            // 设置去过时间
-                            CoreCommunityVisited visitedRecord = visitedMap.get(communityId);
-                            if (visitedRecord != null) {
-                                vo.setVisitTime(visitedRecord.getVisitTime());
-                            }*/
-                            vo.setReviewed(false);
-                            vo.setMyRating(null);
-
 
                             return vo;
                         }, Collectors.toList())
@@ -147,40 +163,44 @@ public class MemberCommunityController extends BaseController
         }
 
         // 获取当前登录会员
-/*        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
-        Long memberId = loginUser.getMemberId();*/
+        MemberLoginVO loginUser = memberTokenService.getLoginUser(request);
 
         // 构建VO对象
         CoreCommunityVO vo = new CoreCommunityVO();
         BeanUtils.copyProperties(community, vo);
 
-/*        // 设置会员关联状态（需要判断状态是否为0）
-        CoreCommunityWantToGo wantToGoRecord = wantToGoService.selectByCommunityAndMember(id, memberId);
-        vo.setWantToGo(wantToGoRecord != null && "0".equals(wantToGoRecord.getStatus()));
+        // loginUser不为空时，查询想去记录、去过记录、评价记录
+        if (loginUser != null) {
+            Long memberId = loginUser.getMemberId();
 
-        CoreCommunityVisited visitedRecord = visitedService.selectByCommunityAndMember(id, memberId);
-        vo.setVisited(visitedRecord != null && "0".equals(visitedRecord.getStatus()));
+            // 设置会员关联状态（需要判断状态是否为0）
+            CoreCommunityWantToGo wantToGoRecord = wantToGoService.selectByCommunityAndMember(id, memberId);
+            vo.setWantToGo(wantToGoRecord != null && "0".equals(wantToGoRecord.getStatus()));
 
-        // 查询会员评价
-        CoreCommunityReview reviewParam = new CoreCommunityReview();
-        reviewParam.setCommunityId(id);
-        reviewParam.setMemberId(memberId);
-        List<CoreCommunityReview> reviews = reviewService.selectReviewList(reviewParam);
-        if (reviews != null && !reviews.isEmpty()) {
-            vo.setReviewed(true);
-            vo.setMyRating(reviews.get(0).getRating());
+            CoreCommunityVisited visitedRecord = visitedService.selectByCommunityAndMember(id, memberId);
+            vo.setVisited(visitedRecord != null && "0".equals(visitedRecord.getStatus()));
+
+            // 查询会员评价
+            CoreCommunityReview reviewParam = new CoreCommunityReview();
+            reviewParam.setCommunityId(id);
+            reviewParam.setMemberId(memberId);
+            List<CoreCommunityReview> reviews = reviewService.selectReviewList(reviewParam);
+            if (reviews != null && !reviews.isEmpty()) {
+                vo.setReviewed(true);
+                vo.setMyRating(reviews.get(0).getRating());
+            } else {
+                vo.setReviewed(false);
+                vo.setMyRating(null);
+            }
+
+            // 设置去过时间
+            if (visitedRecord != null) {
+                vo.setVisitTime(visitedRecord.getVisitTime());
+            }
         } else {
             vo.setReviewed(false);
             vo.setMyRating(null);
         }
-
-        // 设置去过时间
-        if (visitedRecord != null) {
-            vo.setVisitTime(visitedRecord.getVisitTime());
-        }*/
-
-        vo.setReviewed(false);
-        vo.setMyRating(null);
 
         return AjaxResult.success(vo);
     }
