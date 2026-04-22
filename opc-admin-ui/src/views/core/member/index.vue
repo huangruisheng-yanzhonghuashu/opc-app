@@ -48,12 +48,9 @@
          </el-form-item>
          <el-form-item label="状态" prop="status">
             <el-select v-model="queryParams.status" placeholder="会员状态" clearable style="width: 200px">
-               <el-option
-                  v-for="dict in sys_normal_disable"
-                  :key="dict.value"
-                  :label="dict.label"
-                  :value="dict.value"
-               />
+               <el-option label="正常" value="0" />
+               <el-option label="已拉黑" value="1" />
+               <el-option label="已注销" value="2" />
             </el-select>
          </el-form-item>
          <el-form-item>
@@ -127,9 +124,12 @@
                <span>{{ parseTime(scope.row.lastActiveTime) }}</span>
             </template>
          </el-table-column>
-         <el-table-column label="状态" align="center" prop="status" width="80">
+         <el-table-column label="状态" align="center" prop="status" width="100">
             <template #default="scope">
-               <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
+               <el-tag v-if="scope.row.status === '0'" type="success">正常</el-tag>
+               <el-tag v-else-if="scope.row.status === '1'" type="danger">已拉黑</el-tag>
+               <el-tag v-else-if="scope.row.status === '2'" type="info">已注销</el-tag>
+               <el-tag v-else type="warning">{{ scope.row.status }}</el-tag>
             </template>
          </el-table-column>
          <el-table-column label="注册时间" align="center" prop="registerTime" width="160">
@@ -142,6 +142,7 @@
                <el-button link type="primary" icon="View" @click="handleView(scope.row)" v-hasPermi="['core:member:query']">详情</el-button>
                <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['core:member:edit']">修改</el-button>
                <el-button
+                  v-if="scope.row.status !== '2'"
                   link
                   :type="scope.row.status === '0' ? 'danger' : 'success'"
                   :icon="scope.row.status === '0' ? 'CircleClose' : 'CircleCheck'"
@@ -287,9 +288,10 @@
             <el-descriptions-item label="会员名" :span="1">{{ detailData.username }}</el-descriptions-item>
             <el-descriptions-item label="会员昵称" :span="1">{{ detailData.nickname || '-' }}</el-descriptions-item>
             <el-descriptions-item label="状态" :span="1">
-               <el-tag :type="detailData.status === '0' ? 'success' : 'danger'">
-                  {{ detailData.status === '0' ? '正常' : '已拉黑' }}
-               </el-tag>
+               <el-tag v-if="detailData.status === '0'" type="success">正常</el-tag>
+               <el-tag v-else-if="detailData.status === '1'" type="danger">已拉黑</el-tag>
+               <el-tag v-else-if="detailData.status === '2'" type="info">已注销</el-tag>
+               <el-tag v-else type="warning">{{ detailData.status }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="头像" :span="2">
                <el-avatar :size="60" :src="getAvatarUrl(detailData.avatar)" v-if="detailData.avatar" />
