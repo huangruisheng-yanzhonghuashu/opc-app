@@ -49,6 +49,11 @@ public class MemberLoginServiceImpl implements IMemberLoginService
             throw new ServiceException("会员已被禁用");
         }
 
+        if ("2".equals(member.getStatus()))
+        {
+            throw new ServiceException("会员已被注销");
+        }
+
         MemberLoginVO memberLoginVO = new MemberLoginVO();
         memberLoginVO.setMemberId(member.getId());
         memberLoginVO.setEmail(member.getEmail());
