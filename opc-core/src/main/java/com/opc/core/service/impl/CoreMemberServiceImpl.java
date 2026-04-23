@@ -1,15 +1,19 @@
 package com.opc.core.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.opc.common.constant.UserConstants;
 import com.opc.common.utils.StringUtils;
 import com.opc.core.domain.CoreMember;
+import com.opc.core.domain.CoreMemberCancel;
 import com.opc.core.mapper.CoreMemberMapper;
+import com.opc.core.mapper.CoreMemberCancelMapper;
 import com.opc.core.service.ICoreMemberService;
 
 @Service
@@ -17,6 +21,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService
 {
     @Autowired
     private CoreMemberMapper memberMapper;
+
+    @Autowired
+    private CoreMemberCancelMapper memberCancelMapper;
 
     @Override
     public List<CoreMember> selectMemberList(CoreMember member)
@@ -129,9 +136,44 @@ public class CoreMemberServiceImpl implements ICoreMemberService
     }
 
     @Override
+    @Transactional
     public int cancelMember(Long id)
     {
-        return memberMapper.cancelMember(id);
+        CoreMember member = memberMapper.selectMemberById(id);
+        if (member == null)
+        {
+            return 0;
+        }
+
+        // 将会员数据复制到注销表
+        CoreMemberCancel cancel = new CoreMemberCancel();
+        cancel.setId(member.getId());
+        cancel.setUsername(member.getUsername());
+        cancel.setPassword(member.getPassword());
+        cancel.setNickname(member.getNickname());
+        cancel.setPhoneNumber(member.getPhoneNumber());
+        cancel.setEmail(member.getEmail());
+        cancel.setAvatar(member.getAvatar());
+        cancel.setLastActiveTime(member.getLastActiveTime());
+        cancel.setCurrentPackage(member.getCurrentPackage());
+        cancel.setPackageType(member.getPackageType());
+        cancel.setSource(member.getSource());
+        cancel.setSourceId(member.getSourceId());
+        cancel.setToken(member.getToken());
+        cancel.setStatus("2");
+        cancel.setRegisterTime(member.getRegisterTime());
+        cancel.setInviteCode(member.getInviteCode());
+        cancel.setCancelTime(LocalDateTime.now());
+        cancel.setCreateBy(member.getCreateBy());
+        cancel.setCreateTime(member.getCreateTime());
+        cancel.setUpdateBy(member.getUpdateBy());
+        cancel.setUpdateTime(member.getUpdateTime());
+        cancel.setRemark(member.getRemark());
+
+        memberCancelMapper.insertMemberCancel(cancel);
+
+        // 删除原会员表数据
+        return memberMapper.deleteMemberById(id);
     }
 
     @Override

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.opc.core.mapper.CoreMemberCancelMapper">
+
+	<resultMap type="CoreMemberCancel" id="CoreMemberCancelResult">
+		<id     property="id"              column="id"                />
+		<result property="username"        column="username"          />
+		<result property="password"        column="password"          />
+		<result property="nickname"        column="nickname"          />
+		<result property="phoneNumber"     column="phone_number"      />
+		<result property="email"           column="email"             />
+		<result property="avatar"          column="avatar"            />
+		<result property="lastActiveTime"  column="last_active_time"  />
+		<result property="currentPackage"  column="current_package"   />
+		<result property="packageType"     column="package_type"      />
+		<result property="source"          column="source"            />
+		<result property="sourceId"        column="source_id"         />
+		<result property="token"           column="token"             />
+		<result property="status"          column="status"            />
+		<result property="registerTime"    column="register_time"     />
+		<result property="inviteCode"      column="invite_code"       />
+		<result property="cancelTime"      column="cancel_time"       />
+		<result property="createBy"        column="create_by"         />
+		<result property="createTime"      column="create_time"       />
+		<result property="updateBy"        column="update_by"         />
+		<result property="updateTime"      column="update_time"       />
+		<result property="remark"          column="remark"            />
+	</resultMap>
+
+	<sql id="selectMemberCancelVo">
+        select id, username, password, nickname, phone_number, email, avatar, last_active_time,
+               current_package, package_type, source, source_id, token, status, register_time,
+               invite_code, cancel_time, create_by, create_time, update_by, update_time, remark
+		from core_member_cancel
+    </sql>
+
+	<select id="selectMemberCancelList" parameterType="CoreMemberCancel" resultMap="CoreMemberCancelResult">
+		<include refid="selectMemberCancelVo"/>
+		<where>
+			<if test="username != null and username != ''">
+				AND username like concat('%', #{username}, '%')
+			</if>
+			<if test="nickname != null and nickname != ''">
+				AND nickname like concat('%', #{nickname}, '%')
+			</if>
+			<if test="phoneNumber != null and phoneNumber != ''">
+				AND phone_number like concat('%', #{phoneNumber}, '%')
+			</if>
+			<if test="email != null and email != ''">
+				AND email like concat('%', #{email}, '%')
+			</if>
+			<if test="source != null and source != ''">
+				AND source = #{source}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectMemberCancelById" parameterType="Long" resultMap="CoreMemberCancelResult">
+		<include refid="selectMemberCancelVo"/>
+		where id = #{id}
+	</select>
+
+	<insert id="insertMemberCancel" parameterType="CoreMemberCancel">
+		insert into core_member_cancel(
+			id,
+			username,
+			password,
+			nickname,
+			phone_number,
+			email,
+			avatar,
+			last_active_time,
+			current_package,
+			package_type,
+			source,
+			source_id,
+			token,
+			status,
+			register_time,
+			invite_code,
+			cancel_time,
+			create_by,
+			create_time,
+			update_by,
+			update_time,
+			remark
+		) values (
+			#{id},
+			#{username},
+			#{password},
+			#{nickname},
+			#{phoneNumber},
+			#{email},
+			#{avatar},
+			#{lastActiveTime},
+			#{currentPackage},
+			#{packageType},
+			#{source},
+			#{sourceId},
+			#{token},
+			#{status},
+			#{registerTime},
+			#{inviteCode},
+			#{cancelTime},
+			#{createBy},
+			#{createTime},
+			#{updateBy},
+			#{updateTime},
+			#{remark}
+		)
+	</insert>
+
+</mapper>

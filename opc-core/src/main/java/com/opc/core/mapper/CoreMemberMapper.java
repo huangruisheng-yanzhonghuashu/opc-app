@@ -35,6 +35,13 @@ public interface CoreMemberMapper
      */
     public int cancelMember(Long id);
 
+    /**
+     * 删除会员
+     * @param id 会员ID
+     * @return 结果
+     */
+    public int deleteMemberById(Long id);
+
     public int updateLoginInfo(Long id, String ipaddr);
 
     public List<Map<String, Object>> selectMemberOverview(Map<String, Object> params);

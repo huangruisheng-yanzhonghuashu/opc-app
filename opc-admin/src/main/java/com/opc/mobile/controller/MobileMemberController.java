@@ -277,7 +277,7 @@ public class MobileMemberController {
 
             CoreMember member = memberService.selectMemberById(memberLoginVO.getMemberId());
             if (member == null) {
-                return AjaxResult.error("会员不存在");
+                return AjaxResult.error("会员不存在或已注销");
             }
 
             if (!SecurityUtils.matchesPassword(oldPassword, member.getPassword())) {
@@ -330,11 +330,6 @@ public class MobileMemberController {
             CoreMember member = memberService.selectMemberById(memberLoginVO.getMemberId());
             if (member == null) {
                 return AjaxResult.error("会员不存在");
-            }
-
-            // 检查账户是否已注销
-            if ("2".equals(member.getStatus())) {
-                return AjaxResult.error("账户已注销，无需重复操作");
             }
 
             // 注销会员账户（状态改为已注销）
