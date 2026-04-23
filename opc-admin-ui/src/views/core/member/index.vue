@@ -50,7 +50,6 @@
             <el-select v-model="queryParams.status" placeholder="会员状态" clearable style="width: 200px">
                <el-option label="正常" value="0" />
                <el-option label="已拉黑" value="1" />
-               <el-option label="已注销" value="2" />
             </el-select>
          </el-form-item>
          <el-form-item>
